@@ -773,7 +773,6 @@ app.post("/upload", async (req, res) => {
                 logger.info(`[${corId}] - Завантаження PDF по документу (webCode: ${webCode}).`);
                 try {
                     const docPdfPath = await downloadPartnerPdf(webCode, downloadUrl, corId);
-                    await addBackgroundToPdf(docPdfPath, path.join(__dirname, 'assets', 'zdorovyaBlank.jpg'));
                     pdfsToMerge.push(docPdfPath);
                 } catch (pdfError) {
                     logger.error(`[${corId}] - Помилка завантаження PDF по документу: ${pdfError.message}`);
@@ -785,7 +784,6 @@ app.post("/upload", async (req, res) => {
                 logger.info(`[${corId}] - Завантаження PDF партнера (webCode: ${partnerWebCode}).`);
                 try {
                     const partnerPdfPath = await downloadPartnerPdf(partnerWebCode, branch.partnerLabResultUrl, corId);
-                    await addBackgroundToPdf(partnerPdfPath, path.join(__dirname, 'assets', 'zdorovyaBlank.jpg'));
                     pdfsToMerge.push(partnerPdfPath);
                 } catch (pdfError) {
                     logger.error(`[${corId}] - Помилка завантаження PDF партнера: ${pdfError.message}`);

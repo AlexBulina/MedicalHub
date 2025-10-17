@@ -62,60 +62,6 @@ export async function removePdfMetadata(pdfPath) {
 }
 
 
-
-
-export async function addBackgroundToPdf(
-  pdfPath,
-  imagePath = path.join(__dirname, 'assets', 'Blank_HM_Stamp.png')
-) {
-  try {
-    // читаємо оригінал
-    const srcBytes = await fs.readFile(pdfPath);
-    const srcDoc = await PDFDocument.load(srcBytes);
-
-    // створюємо новий PDF
-    const destDoc = await PDFDocument.create();
-
-    // читаємо фон
-    const imgBytes = await fs.readFile(imagePath);
-    const lowerCaseImagePath = imagePath.toLowerCase();
-    const bgImg = lowerCaseImagePath.endsWith('.jpg') || lowerCaseImagePath.endsWith('.jpeg')
-      ? await destDoc.embedJpg(imgBytes)
-      : await destDoc.embedPng(imgBytes);
-
-    // копіюємо сторінки з оригінального PDF
-    const totalPages = srcDoc.getPageCount();
-    for (let i = 0; i < totalPages; i++) {
-      const [embeddedPage] = await destDoc.embedPages([srcDoc.getPage(i)]);
-      const { width, height } = embeddedPage;
-
-      // додаємо нову сторінку у результат
-      const newPage = destDoc.addPage([width, height]);
-
-      // 1. Малюємо новий фон на всю сторінку
-      newPage.drawImage(bgImg, {
-        x: 0,
-        y: 0,
-        width,
-        height,
-      });
-
-      // 2. Поверх фону малюємо контент старої сторінки,
-      // вказавши, що її власний фон має бути прозорим
-      newPage.drawPage(embeddedPage, { x: 0, y: 0, width, height, blendMode: 'Normal' });
-    }
-
-    // зберігаємо у той самий файл (перезаписуємо старий PDF)
-    const modifiedBytes = await destDoc.save();
-    await fs.writeFile(pdfPath, modifiedBytes);
-
-    console.log(`✅ Фон додано і збережено у файл: ${pdfPath}`);
-  } catch (error) {
-    console.error(`Помилка при додаванні фону:`, error);
-  }
-}
-
-
 // Зміна розширення файлу на .pdf
 export function changeExtensionToPdf(filePath) {
     if (!filePath.endsWith('.docx')) {
@@ -149,10 +95,6 @@ export async function processLocalFiles(directoryId, DepartmentId = null) {
 
                     // очищаємо метадані
                     await removePdfMetadata(outputPdfPath);
-						if (DepartmentId === null){
-                    // додаємо фон (звичайний)
-						// await addBackgroundToPdf(outputPdfPath, 'C:\\data\\Blank_HM_Stamp.png');
-						}
 
                     // видаляємо оригінал DOCX
                     await fs.unlink(inputPath).catch(err => {
@@ -162,10 +104,6 @@ export async function processLocalFiles(directoryId, DepartmentId = null) {
                 } else if (localFile.toLowerCase().endsWith('.pdf') && DepartmentId === null) {
                     // PDF → очищення метаданих
                     await removePdfMetadata(inputPath);
-
-                    // додаємо фон для PDF з іншим зображенням
-                  //  await addBackgroundToPdf(inputPath, 'C:\\data\\Blank_HM_Stamp_Prisca.png');
-                   // console.log(`✅ Фон (Prisca) додано у файл: ${localFile}`);
                 } else {
                     console.warn(`⚠ Файл ${localFile} має непідтримуване розширення`);
                 }
