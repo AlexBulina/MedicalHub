@@ -1,0 +1,441 @@
+body {
+    font-family: Arial, sans-serif;
+
+
+    background-color: #66779a;
+    margin: 0;
+    padding: 0;
+
+
+}
+.green-circle {
+   display: inline-block;
+    /* display: none; */
+    width: 10px;
+    height: 10px;
+    background-color: #04328e;
+    border-radius: 50%;
+    margin-right: 10px;
+    cursor: pointer;
+}
+.price-input {
+    width: 100%;
+    font-size: 14px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    box-sizing: border-box;
+}
+/* Стиль для індикатора підключення */
+.connection-indicator {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: grey; /* Початковий колір (нейтральний) */
+    position: fixed;
+    top: 20px;
+    right: 50px;
+    z-index: 1100; /* Піднімаємо вище за інші елементи */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+/* Стилі для випадаючого списку */
+.panel-dropdown {
+    box-sizing: border-box;
+    padding: 8px;
+    width: 200px;
+    font-size: 16px;
+    border-radius: 3px;
+    border: 1px solid #ddd;
+    margin-left: 10px; /* Відступ від поля пошуку */
+}
+/* Контейнер для логотипу */
+.logo-container {
+    position: fixed; /* Фіксуємо контейнер на екрані */
+    top: 0;           /* Відстань від верхнього краю екрану */
+    left: 50%;        /* Відстань від лівого краю екрану */
+    transform: translateX(-50%); /* Центруємо контейнер по горизонталі */
+    padding: 25px 0;
+    background-color: #ffffff;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.1);
+    z-index: 1000;    /* Перекриває інші елементи, якщо це необхідно */
+    width: 65%;      /* Ширина контейнера на всю ширину екрану */
+    text-align: center;
+    height: 10px;
+    border-bottom-left-radius: 60px;  /* Скруглює нижній лівий кут */
+    border-bottom-right-radius: 60px; /* Скруглює нижній правий кут */
+    opacity: 0.8; /* Прозорість контейнера */
+}
+.logo-container::after {
+    content: ''; /* Створюємо порожній псевдоелемент */
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0; /* Покриває весь контейнер */
+    background: inherit; /* Копіює фон контейнера */
+    filter: blur(10px); /* Розмиває фон */
+    z-index: -1; /* Розміщує під основним елементом */
+    border-bottom-left-radius: 60px;  /* Скруглює нижній лівий кут */
+    border-bottom-right-radius: 60px; /* Скруглює нижній правий кут */
+    opacity: 1; /* Прозорість псевдоелемента */
+}
+.logo-container img {
+    max-width: 55%; /* Встановлюємо максимальну ширину для логотипу */
+    height: 40px;
+    transform: translateY(-45%); /* Центруємо логотип по вертикалі */
+}
+/* Контейнер для основного контенту */
+.container {
+    width: 80%;
+    max-width: 100vw;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 60px;
+    /* Додаємо відступ зверху, щоб контент не перекривався з логотипом */
+    margin: 100px auto 20px;
+    overflow-x: hidden;
+}
+@keyframes fadeInBlur {
+    0% {
+        opacity: 0;
+        filter: blur(10px);
+    }
+    100% {
+        opacity: 1;
+        filter: blur(0);
+    }
+}
+
+h1 {
+    text-align: center;
+    color: rgba(5, 4, 4, 0.76);
+    font-size: 24px;
+    font-family: Georgia, serif;
+    animation: fadeInBlur 2s ease-out forwards;
+}
+ .item-checkbox{
+
+     left: 50%;
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+
+
+
+
+  }
+/* Стилі для поля пошуку */
+.search-container {
+    position: relative;
+
+      width: 100%;
+    display: flex; /* Використовуємо flexbox для розміщення елементів в один рядок */
+   /* justify-content: space-between; /* Якщо хочете рівномірно розподіляти простір */
+    align-items: center; /* Вирівнюємо елементи по вертикалі */
+    gap: 3px; /* Додаємо відстань між елементами */
+    top: 5px   ;
+}  .search-container select
+    {
+       padding: 8px 12px;
+       font-size: 14px;
+       border: 1px solid #ccc;
+       border-radius: 4px;
+       box-sizing: border-box; /* Враховуємо padding у загальному розмірі */
+       width: fit-content; /* Дозволяємо елементам змінювати розмір при зміні екрану */
+   }
+#searchInput {
+    padding-left: 30px;  /* Залишаємо місце для іконки зліва */
+    /* Можна залишити місце для кнопки, якщо потрібно */
+    width: 50%;
+    height: 35px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.icon {
+    position: absolute;
+    left: 10px;  /* Розташовуємо іконку ліворуч всередині поля */
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: #aaa;  /* Колір іконки */
+    pointer-events: none;  /* Іконка не буде взаємодіяти з подіями користувача */
+}
+
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    overflow-x: auto; /* Додає горизонтальну прокрутку на маленьких екранах */
+}
+table th, table td {
+
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    text-align: left;
+    font-size: 14px;
+}
+table th {
+    background-color: #71747a;
+    color: white;
+    font-weight: bold;
+}
+table tr:nth-child(even) {
+    background-color: #f2f2f2;
+}
+table tr:hover {
+    background-color: #e0e0e0;
+}
+.loading {
+    text-align: center;
+    font-size: 18px;
+    color: #71747a;
+}
+.error {
+    position: relative;
+    margin: 10px;
+    text-align: center;
+    font-size: 18px;
+    color: red;
+}
+/* Стилі для кнопки прокручування вгору */
+.scroll-to-top {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background-color: #b6b9bf;
+    color: #ffffff;
+    font-size: 38px;
+    border: none;
+    display: none;
+    padding: 0px;
+    cursor: pointer;
+    height: 0px;
+
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s, transform 0.5s;
+
+}
+
+.search-container select {
+    min-width: 150px; /* Мінімальна ширина для select, щоб вони не були надто вузькими */
+}
+.search-container input {
+    min-width: 268px; /* Мінімальна ширина для select, щоб вони не були надто вузькими */
+}
+.scroll-to-top:hover {
+    background-color: #808387;
+    transform: translateY(-5px);
+}
+
+.scroll-to-top:focus {
+    outline: none;
+}
+
+/* Медіа-запити для адаптивності */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 18px;
+    }
+    .container {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .group-row td {
+        font-size: 10px;
+    }
+    table th, table td {
+        font-size: 12px;
+        padding: 8px 10px;
+    }
+    table {
+        font-size: 12px;
+    }
+}
+/* Стиль для рядка з назвою групи */
+.group-row td {
+    background-color: #f0f8ff; /* Світло-блакитний фон, змініть на потрібний колір */
+    text-align: center;         /* Вирівнювання тексту по центру */
+    font-weight: bold;          /* Виділення тексту жирним */
+    color: #333333;             /* Колір тексту */
+    padding: 10px;              /* Відступи в клітинці */
+    font-size: 16px;
+    transition: opacity 0.5s ease;
+    opacity: 1; /* Початкова видимість */
+    visibility: visible; /* Спочатку елемент видимий *//* Розмір шрифту */
+    border-right: none;
+    border-left: none;
+}
+/* Клас для зміненої прозорості */
+.visible {
+    opacity: 1; /* Кінець анімації - повна видимість */
+}
+
+
+
+/* Клас для прихованих елементів */
+.hidden {
+    opacity: 0; /* Зменшуємо прозорість */
+    visibility: hidden; /* Вимикаємо видимість */
+}
+
+/* Стиль для кнопки показу/сховування */
+.toggle-button {
+    padding: 5px 10px;
+    background-color: #c2d2df; /* Зелений фон */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+.toggle-button:hover {
+    background-color: #5b7bc1; /* Темніший зелений при наведенні */
+}
+
+/* Стиль для анімації, коли кнопка повинна "мерехтіти" */
+.blinking {
+    animation: blink 3s infinite alternate;
+}
+
+/* Анімація, яка змінює колір кнопки */
+@keyframes blink {
+    0% {
+        background-color: #c2d2df; /* Базовий колір */
+    }
+    100% {
+        background-color: #5b7bc1; /* Насичений колір */
+    }
+}
+
+/* Медіа-запит для дуже малих екранів (мобільні телефони) */
+@media (max-width: 480px) {
+body {
+
+}
+    h1 {
+        font-size: 13px;
+    }
+    .search-container input {
+        width: 30vw;
+        min-width: 100px;
+    }
+
+
+    .search-container select {
+        width: 30vw ;
+        min-width: 100px;
+    }
+    .scroll-to-top {
+        color: #0631a6;}
+    .container {
+
+
+
+        padding: 20px;
+    }
+
+    .group-row td {
+        width: fit-content;
+        font-size: 12px;
+        padding: 3px;
+    }
+    table th, table td {
+
+        font-size: 10px;
+
+    }
+    table {
+
+        font-size: 8px;
+    }
+}
+
+/* Текстовий блок для відображення вибраної дати */
+.selected-date-text {
+    font-size: 14px; /* Трохи менший шрифт для тексту */
+    color: #555; /* Темно-сірий колір тексту */
+    padding: 5px;
+    background-color: #f7f7f7; /* Світло-сірий фон */
+    border: 1px solid #ddd; /* Легкий сірий контур */
+    border-radius: 5px;
+    min-width: 200px; /* Така ж ширина, як у поля вводу */
+    text-align: center; /* Вирівнювання тексту по центру */
+    margin-top: 10px; /* Відступ між полем вводу та текстом */
+    user-select: none; /* Забороняє виділення тексту */
+}
+.code-text {
+    text-align: center;
+    font-size: 12px;
+    color: #050404;
+    position: relative;
+    top: 9px;
+}
+.warning-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-color: yellow;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%); /* Створення трикутної форми */
+    transform: translateY(-30%);
+    position: absolute;
+    margin-left: 15px;  /* Відстань від ціни */
+
+}
+
+.warning-icon::before {
+    content: '!';
+    position: absolute;
+    top: 4px;
+    left: 8px;
+    font-weight: bold;
+    color: black;
+    font-size: 14px;
+}
+
+.calendar-container {
+
+    display: flex;
+    flex-direction: column;/* Використовуємо flexbox для вирівнювання в рядок */
+    align-items: normal; /* Вирівнювання елементів по вертикалі по центру */
+    gap: 2px; /* Відступ між елементами */
+
+    margin-bottom: 10px;
+
+}
+/* Якщо ви хочете, щоб календар не виходив за межі контейнера */
+.flatpickr-calendar {
+
+}
+
+.calendar-input {
+    border: 1px solid #ddd; /* Легкий сірий контур */
+    background-color: #f7f7f7; /* Світло-сірий фон */
+    text-align: center;
+    padding: 5px;
+    font-size: 14px;
+    width: 150px; /* Встановлюємо фіксовану ширину */
+    max-width: 100%; /* Або максимальна ширина, щоб не перевищувати доступний простір */
+}
+/* Зменшуємо жирність рамки при фокусуванні */
+.calendar-input:focus {
+    border: 1px solid #aaa; /* Тонша рамка при фокусуванні */
+    outline: none; /* Прибираємо стандартне оточення браузера */
+}
+
+
+/* Стиль для кнопки + в колонці "Назва" */
+.add-to-cart {
+    background-color: #448aca;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+
+

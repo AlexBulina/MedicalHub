@@ -1,0 +1,1671 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.png" type="image/x-icon">
+    <title>Керування пацієнтами та завантаження - HEMO MEDIKA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .file-drop-area {
+            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+        }
+        .file-drop-area.dragover {
+            background-color: #e0e7ff;
+            border-color: #4f46e5;
+        }
+        #spinner, #search-spinner, #create-spinner {
+            border-top-color: #4f46e5;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .modal-backdrop {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); display: flex;
+            justify-content: center; align-items: center; z-index: 50;
+        }
+        .modal-content {
+            background-color: white; padding: 2rem; border-radius: 0.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 90%; width: 500px; text-align: center;
+        }
+        .tab-button {
+            border-color: transparent;
+        }
+        .tab-button.active {
+            border-color: #4f46e5;
+            color: #4f46e5;
+        }
+        .blinking-border {
+            animation: blink-border 2s infinite alternate;
+        }
+        @keyframes blink-border {
+            from { border-left-color: #ef4444; } /* red-500 */
+            to { border-left-color: #fca5a5; } /* red-300 */
+        }
+        #resultsBody tr:nth-child(even) {
+            background-color: #f9fafb; /* Tailwind's gray-50 */
+        }
+        .selected-row {
+            background-color: #e0e7ff !important; /* Tailwind's indigo-100, !important to override even/odd styling */
+        }
+        #resultsBody tr:hover {
+            background-color: #f0f9ff; /* Tailwind's sky-100 */
+        }
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        .tooltip-text {
+            visibility: hidden;
+            width: 240px;
+            background-color: #f9fafb; /* Tailwind's gray-50 */
+            color: #1f2937; /* Tailwind's gray-800 */
+            text-align: center;
+            font-size: 0.8rem; /* Зменшуємо розмір шрифту */
+            border-radius: 0.5rem; /* rounded-lg */
+            padding: 0.5rem 0.75rem; /* py-2 px-3 */
+            position: absolute;
+            z-index: 1;
+            top: 100%; /* Позиціонуємо підказку під іконкою */
+            right: 0; /* Вирівнюємо правий край підказки по правому краю іконки */
+            margin-top: 8px; /* Невеликий відступ знизу */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        .lang-btn {
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .lang-btn.active-lang {
+            background-color: white;
+            color: #4f46e5; /* indigo-600 */
+            font-weight: 600;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
+    <div class="fixed top-4 right-4 z-50 flex items-center space-x-4">
+        <!-- Channel Icon with Tooltip -->
+        <div id="channel-icon-container" class="tooltip-container hidden">
+            <img id="channel-icon" src="" alt="Канал відправки" class="w-6 h-6">
+            <span id="channel-tooltip-text" class="tooltip-text"></span>
+        </div>
+
+        <!-- SMS Status Indicator -->
+        <div class="tooltip-container">
+            <svg id="sms-status-indicator" class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <span id="sms-tooltip-text" class="tooltip-text" data-translate="smsServiceStatusChecking">сервіс ТурбоСМС: перевірка...</span>
+        </div>
+    </div>
+    <div id="language-selector-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-in-out">
+        <div id="language-selector" class="flex space-x-1 bg-gray-200 p-1 rounded-lg shadow-sm">
+            <!-- Кнопки мов будуть згенеровані динамічно -->
+        </div>
+    </div>
+    
+    <!-- Journal Toggle Button -->
+    <button id="toggle-journal-btn" class="fixed top-1/2 left-0 -translate-y-1/2 bg-indigo-600 text-white p-3 rounded-r-lg shadow-lg z-50 hover:bg-indigo-700 transition-all duration-500 ease-in-out">
+        <!-- Icon for opening/closing -->
+        <svg id="journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        <svg id="journal-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    </button>
+
+    <!-- Journal Slide-out Form (Left) -->
+    <div id="journal-form" class="fixed top-10 bottom-0 left-0 w-80 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col rounded-tr-xl">
+        <div class="p-6 border-b border-gray-200 flex-shrink-0">
+            <h3 class="text-xl font-bold text-gray-800 mb-4" data-translate="journalTitle">Журнал відправлень</h3>
+            <div>
+                <label for="journal-date-picker" class="block text-sm font-medium text-gray-700" data-translate="journalDateLabel">Відобразити за дату</label>
+                <input type="date" id="journal-date-picker" name="journal-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+            </div>
+        </div>
+        <div id="journal-content" class="flex-grow p-6 overflow-y-auto">
+            <div id="journal-list" class="space-y-3"></div>
+        </div>
+        <div class="p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50">
+            <h4 id="journal-summary" class="text-xl font-bold text-gray-800 flex justify-between items-center">
+                <span data-translate="journalTotal">Загалом:</span>
+                <span id="journal-count" class="bg-gray-800 text-white text-lg font-semibold px-2 py-1 rounded-md">0</span>
+            </h4>
+        </div>
+    </div>
+
+    <!-- Search Journal Toggle Button (Right) -->
+    <button id="toggle-search-journal-btn" class="fixed top-1/2 right-0 -translate-y-1/2 bg-teal-600 text-white p-3 rounded-l-lg shadow-lg z-50 hover:bg-teal-700 transition-colors duration-300">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+    </button>
+
+    <!-- Search Journal Slide-out Form (Right) -->
+    <div id="search-journal-form" class="fixed top-10 bottom-0 right-0 w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col rounded-tl-xl">
+        <div class="p-6 border-b border-gray-200 flex-shrink-0">
+            <h3 class="text-xl font-bold text-gray-800 mb-4" data-translate="searchInJournal">Пошук по журналу</h3>
+            <form id="journal-search-form">
+                <label for="journal-search-input" class="block text-sm font-medium text-gray-700" data-translate="searchByPibPhoneWebcode">Пошук по ПІБ, телефону або вебкоду</label>
+                <input type="search" id="journal-search-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2" data-translate-placeholder="searchPlaceholder">
+                <div class="mt-4">
+                    <label class="inline-flex items-center">
+                        <input type="checkbox" id="filter-sent-sms-checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <span class="ml-2 text-sm text-gray-600" data-translate="onlySuccessfullySent">Лише успішно надіслані (Код SMS: 801)</span>
+                    </label>
+                </div>
+            </form>
+        </div>
+        <div id="search-journal-content" class="flex-grow p-6 overflow-y-auto">
+            <div id="search-journal-list" class="space-y-3"></div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-[57rem] mx-auto space-y-8 p-4">
+        <!-- Patient Management Card -->
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-1" data-translate="patientManagement">Керування пацієнтами</h2>
+            <p class="text-gray-500 mb-6" data-translate="findOrCreatePatient">Знайдіть існуючого пацієнта або створіть нового.</p>
+            
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                    <button id="search-tab-button" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-translate="searchPatient">
+                        Пошук пацієнта
+                    </button>
+                    <button id="create-tab-button" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-translate="createNewPatient">
+                        Створити нового пацієнта
+                    </button>
+                    <button id="doc-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-translate="searchByDocument">
+                        Пошук по документу
+                    </button>
+                    <button id="partner-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-translate="searchByPartner">
+                        Пошук по партнеру
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Search Patient Tab -->
+            <div id="search-tab-content" class="mt-6">
+                <form id="searchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-1">
+                        <label for="searchLastName" class="block text-sm font-medium text-gray-700" data-translate="lastName">Прізвище</label>
+                        <input type="text" id="searchLastName" name="lastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                    </div>
+                    <div class="md:col-span-1">
+                        <label for="searchFirstName" class="block text-sm font-medium text-gray-700" data-translate="firstName">Ім'я</label>
+                        <input type="text" id="searchFirstName" name="firstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                    </div>
+                    <div class="md:col-span-2 flex gap-4">
+                        <button type="submit" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <span id="search-button-text" data-translate="search">Пошук</span>
+                            <div id="search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                        </button>
+                        <button type="button" id="clearSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-translate="clear">Очистити</button>
+                    </div>
+                </form>
+                <div id="searchResults" class="hidden mt-6">
+                    <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
+                    <p id="no-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не знайдено.</p>
+                    <div class="overflow-x-auto mt-4 border rounded-lg">
+                        <table id="resultsTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderDob">Дата народження</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderPhone">Телефон</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderAction"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                    <!-- Pagination Controls -->
+                    <div id="pagination-controls" class="hidden mt-4 flex justify-between items-center text-sm text-gray-600">
+                        <button id="prev-page-btn" class="px-4 py-2 font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Попередні</button>
+                        <span id="page-info"></span>
+                        <button id="next-page-btn" class="px-4 py-2 font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Наступні</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Create Patient Tab -->
+            <div id="create-tab-content" class="hidden mt-6">
+                <form id="createForm" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="createFirstName" class="block text-sm font-medium text-gray-700" data-translate="firstName">Ім'я</label>
+                            <input type="text" id="createFirstName" name="firstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label for="createLastName" class="block text-sm font-medium text-gray-700" data-translate="lastName">Прізвище</label>
+                            <input type="text" id="createLastName" name="lastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label for="createDob" class="block text-sm font-medium text-gray-700" data-translate="dob">Дата народження</label>
+                            <input type="date" id="createDob" name="dob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                        </div>
+                        <div>
+                            <label for="createPhone" class="block text-sm font-medium text-gray-700" data-translate="phone">Телефон</label>
+                            <input type="tel" id="createPhone" name="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567" required>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700" data-translate="gender">Стать</label>
+                        <div class="mt-2 flex items-center space-x-4">
+                           <label class="inline-flex items-center"><input type="radio" name="gender" value="male" class="form-radio" checked> <span class="ml-2" data-translate="male">Чоловік</span></label>
+                           <label class="inline-flex items-center"><input type="radio" name="gender" value="female" class="form-radio"> <span class="ml-2" data-translate="female">Жінка</span></label>
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full md:w-auto flex justify-center items-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                         <span id="create-button-text" data-translate="createPatientBtn">Створити пацієнта</span>
+                         <div id="create-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Document Search Tab -->
+            <div id="doc-search-tab-content" class="hidden mt-6">
+                <form id="docSearchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-2 relative">
+                        <label for="docNumber" class="block text-sm font-medium text-gray-700" data-translate="documentNumber">Номер документа</label>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="docNumber" name="docNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 pr-10">
+                        <button type="button" id="clearDocNumberBtn" class="absolute inset-y-0 right-0 top-6 flex items-center pr-3 hidden">
+                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        </button>
+                    </div>
+                    <div class="md:col-span-2 flex gap-4">
+                        <button type="submit" id="docSearchSubmitBtn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <span id="doc-search-button-text" data-translate="search">Пошук</span>
+                            <div id="doc-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                        </button>
+                        <button type="button" id="clearDocSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-translate="clear">Очистити</button>
+                    </div>
+                </form>
+                <!-- Результати пошуку по документу -->
+                <div id="docSearchResults" class="hidden mt-6">
+                    <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
+                    <p id="no-doc-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не знайдено.</p>
+                    <div class="overflow-x-auto mt-4 border rounded-lg">
+                        <table id="docResultsTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderPhone">Телефон</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="webCode">Веб-код</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="status">Статус</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="confirmationDateTime">Дата підтвердження</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderAction"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="docResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partner Search Tab -->
+            <div id="partner-search-tab-content" class="hidden mt-6">
+                <form id="partnerSearchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+                    <div class="md:col-span-2 relative">
+                        <label for="partnerDocNumber" class="block text-sm font-medium text-gray-700" data-translate="documentNumber">Номер документа</label>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="partnerDocNumber" name="docNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 pr-10">
+                        <button type="button" id="clearPartnerDocNumberBtn" class="absolute inset-y-0 right-0 top-6 flex items-center pr-3 hidden">
+                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        </button>
+                    </div>
+                    <div class="md:col-span-2 flex gap-4">
+                        <button type="submit" id="partnerSearchSubmitBtn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <span id="partner-search-button-text" data-translate="search">Пошук</span>
+                            <div id="partner-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                        </button>
+                        <button type="button" id="clearPartnerSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-translate="clear">Очистити</button>
+                    </div>
+                </form>
+                <!-- Результати пошуку по партнеру -->
+                <div id="partnerSearchResults" class="hidden mt-6">
+                    <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
+                    <p id="no-partner-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не знайдено.</p>
+                    <div class="overflow-x-auto mt-4 border rounded-lg">
+                        <table id="partnerResultsTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderPhone">Телефон</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="webCode">Веб-код</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="status">Статус</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="confirmationDateTime">Дата підтвердження</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderAction"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="partnerResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- File Upload Card -->
+        <div class="w-full mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+            <div class="text-center mb-8">
+                <img id="clinic-logo" src="" alt="Логотип клініки" class="mx-auto mb-4">
+                <h1 id="page-title" class="text-2xl md:text-3xl font-bold text-gray-800" data-translate="uploadResults">Завантаження результатів</h1>
+                <p id="selected-patient-info" class="text-indigo-600 font-semibold mt-2 h-6"></p>
+            </div>
+
+            <form id="uploadForm">
+                <input type="hidden" id="depId" name="depId">
+                <input type="hidden" id="smsText" name="smsText">
+                <input type="hidden" id="patientName" name="patientName">
+                <!-- Поля для пошуку по документу -->
+                <input type="hidden" id="isDocSearchChecked" name="isDocSearchChecked" value="false">
+                <input type="hidden" id="webCode" name="webCode">
+                <!-- Поля для пошуку по партнеру -->
+                <input type="hidden" id="isPartnerSearchChecked" name="isPartnerSearchChecked" value="false">
+                <input type="hidden" id="partnerWebCode" name="partnerWebCode">
+                <div class="mb-6">
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2" data-translate="researchFileDocx">Файл дослідження (.docx)</label>
+                    <div id="file-drop-area" class="file-drop-area relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-600">
+                        <input type="file" id="file" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".docx,.pdf" multiple>
+                        <div class="flex flex-col items-center justify-center text-gray-500">
+                            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V6a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16v-4a4 4 0 00-4-4H8a4 4 0 00-4 4v4m16 0l--3-3m-13 3l3-3"></path></svg>
+                            <p class="font-semibold"><span data-translate="dragOrClick">Перетягніть файл сюди або</span> <span class="text-indigo-600" data-translate="browse">натисніть для вибору</span></p>
+                            <p id="file-name" class="mt-2 text-sm text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="phoneNumber" class="block text-sm font-medium text-gray-700" data-translate="patientPhoneNumber">Номер телефону пацієнта</label>
+                    <div class="flex items-center gap-2 mt-2">
+                        <div class="relative flex-grow">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><span class="text-gray-500 sm:text-sm">+38</span></div>
+                            <input type="tel" id="phoneNumber" name="phoneNumber" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm pl-12 p-3" placeholder="0501234567" required>
+                        </div>
+                        <button type="button" id="open-custom-sms-modal-btn" class="p-3 bg-gray-200 text-gray-400 rounded-md cursor-not-allowed" disabled data-translate-title="selectPatientAndEnterPhone">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
+                        </button>
+                    </div>
+                    <p id="sms-status-text" class="mt-2 text-sm text-red-600 hidden" data-translate="smsServiceUnavailable">
+                        Увага! Сервіс відправки SMS тимчасово недоступний. Завантаження файлу дослідження неможливе.
+                    </p>
+                    <p id="phone-hint" class="mt-2 text-sm text-gray-500 hidden" data-translate="phoneHint">
+                        Для активації відправки довільного SMS оберіть пацієнта та введіть 10-значний номер телефону.
+                    </p>
+                </div>
+
+                <div>
+                    <button id="upload-button" type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                        <span id="button-text" data-translate="uploadAndSendSms">Завантажити та надіслати SMS</span>
+                        <div id="spinner" class="hidden w-5 h-5 border-4 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for status messages -->
+    <div id="statusModal" class="modal-backdrop hidden">
+        <div class="modal-content">
+            <h3 id="modalTitle" class="text-xl font-bold mb-4"></h3>
+            <p id="modalMessage" class="text-gray-600 mb-6"></p>
+            <button id="closeModal" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none" data-translate="close">Закрити</button>
+        </div>
+    </div>
+
+    <!-- Custom SMS Modal -->
+    <div id="customSmsModal" class="modal-backdrop hidden">
+        <div class="modal-content !text-left">
+            <h3 class="text-xl font-bold mb-4 text-gray-800" data-translate="sendCustomMessage">Надіслати довільне повідомлення</h3>
+            <form id="customSmsForm">
+                <div class="mb-4">
+                    <label for="customSmsText" class="block text-sm font-medium text-gray-700" data-translate="messageText">Текст повідомлення</label>
+                    <textarea id="customSmsText" name="customSmsText" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" required></textarea>
+                    <p id="char-counter" class="mt-1 text-sm text-gray-500 text-right">0 / 160</p>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="closeCustomSmsModal" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" data-translate="cancel">Скасувати</button>
+                    <button type="submit" id="sendCustomSmsBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700" data-translate="sendSms">Надіслати SMS</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Глобальні змінні для конфігурації та перекладів
+            let config = {};
+            let translations = {};
+
+            const languageSelectorContainer = document.getElementById('language-selector');
+
+            /**
+             * @description Повертає значення для HTTP-заголовка Accept-Language на основі внутрішнього коду мови.
+             * @param {string} lang - Внутрішній код мови ('uk', 'en', 'geo').
+             * @returns {string} - Код для HTTP-заголовка ('uk', 'en', 'ka').
+             */
+            function getLangHeader(lang) {
+                return lang === 'geo' ? 'ka' : lang;
+            }
+
+            /**
+             * @description Генерує кнопки вибору мови на основі конфігурації.
+             * @param {object} languages - Об'єкт з мовами {uk: 'Українська', ...}.
+             */
+            function populateLanguageSelector(languages) {
+                // Створює кнопки для вибору мови на основі конфігурації з бекенду.
+                const container = document.getElementById('language-selector');
+                container.innerHTML = ''; // Очищуємо контейнер
+                for (const [langCode, langName] of Object.entries(languages)) {
+                    const button = document.createElement('button');
+                    button.dataset.lang = langCode;
+                    button.className = 'lang-btn px-3 py-1 text-sm text-gray-600 rounded-md';
+                    button.textContent = langName;
+                    container.appendChild(button);
+                }
+            }
+
+            /**
+             * @description Асинхронно завантажує файл перекладу для вказаної мови.
+             * @param {string} lang - Код мови ('uk', 'en', 'geo').
+             * @returns {Promise<object>} - Об'єкт з перекладами.
+             */
+            async function fetchTranslations(lang) {
+                try {
+                    const response = await fetch(`/locales/${lang}.json`);
+                    if (!response.ok) {
+                        console.error(`Could not load ${lang}.json`);
+                        return {};
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error(`Error fetching translations for ${lang}:`, error);
+                    return {};
+                }
+            }
+
+            /**
+             * @description Застосовує переклади до всіх елементів на сторінці, що мають атрибут `data-translate`.
+             */
+            function translatePage() {
+                // Проходить по всіх елементах з атрибутами data-translate, data-translate-placeholder, data-translate-title і замінює їх текст на переклад.
+                document.querySelectorAll('[data-translate]').forEach(element => {
+                    const key = element.getAttribute('data-translate');
+                    if (translations[key]) {
+                        element.textContent = translations[key];
+                    }
+                });
+                document.querySelectorAll('[data-translate-placeholder]').forEach(element => {
+                    const key = element.getAttribute('data-translate-placeholder');
+                    if (translations[key]) {
+                        element.placeholder = translations[key];
+                    }
+                });
+                 document.querySelectorAll('[data-translate-title]').forEach(element => {
+                    const key = element.getAttribute('data-translate-title');
+                    if (translations[key]) {
+                        element.title = translations[key];
+                    }
+                });
+                document.title = translations.pageTitle || document.title;
+            }
+
+            /**
+             * @description Встановлює активну мову, завантажує переклади, оновлює UI та зберігає вибір у localStorage.
+             * @param {string} lang - Код мови для встановлення.
+             * @param {boolean} [isInitialLoad=false] - Прапорець, що вказує, чи це початкове завантаження сторінки.
+             */
+            async function setLanguage(lang, isInitialLoad = false) {
+                // Завантажує переклади для обраної мови.
+                translations = await fetchTranslations(lang);
+                translatePage();
+                localStorage.setItem('language', lang);
+
+                // Оновлюємо активний стан кнопок
+                document.querySelectorAll('.lang-btn').forEach(btn => {
+                    if (btn.dataset.lang === lang) {
+                        btn.classList.add('active-lang');
+                    } else {
+                        btn.classList.remove('active-lang');
+                    }
+                });
+
+                // Якщо це не початкове завантаження, оновлюємо конфігурацію
+                if (!isInitialLoad) {
+                    await initializePage(true);
+                }
+
+                // Примусово оновлюємо дані журналу, щоб застосувати нову мову
+                loadJournal(journalDatePicker.value);
+
+                // Примусово оновлюємо дані пошуку по журналу, якщо є активний пошук
+                const journalSearchTerm = document.getElementById('journal-search-input').value;
+                if (journalSearchTerm && journalSearchTerm.length >= 3) {
+                    searchJournal(journalSearchTerm);
+                }
+            }
+
+            // Обробник кліків на кнопки вибору мови.
+            languageSelectorContainer.addEventListener('click', (e) => {
+                const langButton = e.target.closest('.lang-btn');
+                if (langButton) {
+                    setLanguage(langButton.dataset.lang);
+                }
+            });
+
+            // Логіка: приховує/показує селектор мов при прокручуванні сторінки.
+            const langSelectorContainer = document.getElementById('language-selector-container');
+            let lastScrollY = window.scrollY;
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    langSelectorContainer.classList.add('opacity-0', '-translate-y-20');
+                } else {
+                    langSelectorContainer.classList.remove('opacity-0', '-translate-y-20');
+                }
+            });
+
+            /**
+             * @description Завантажує основну конфігурацію з бекенду (назви, ключі, URL-и).
+             */
+            async function fetchConfig() {
+                const lang = localStorage.getItem('language') || 'uk';
+                const langHeader = getLangHeader(lang);
+                const response = await fetch('/config', {
+                    headers: { 'Accept-Language': langHeader }
+                });
+                config = await response.json();
+            }
+
+            // Елементи для лівої висувної панелі "Журнал".
+            const journalForm = document.getElementById('journal-form');
+            const toggleJournalBtn = document.getElementById('toggle-journal-btn');
+            const journalIconOpen = document.getElementById('journal-icon-open');
+            const journalIconClose = document.getElementById('journal-icon-close');
+
+            // Елементи для правої висувної панелі "Пошук по журналу".
+            const searchJournalForm = document.getElementById('search-journal-form');
+            const toggleSearchJournalBtn = document.getElementById('toggle-search-journal-btn');
+            const journalSearchInput = document.getElementById('journal-search-input');
+            const searchJournalList = document.getElementById('search-journal-list');
+            const filterSentSmsCheckbox = document.getElementById('filter-sent-sms-checkbox');
+
+            filterSentSmsCheckbox.addEventListener('change', () => {
+                const searchTerm = journalSearchInput.value;
+                if (searchTerm.length >= 3) searchJournal(searchTerm);
+            });
+
+            let opacityTimeout = null;
+
+            /**
+             * @description Керує прозорістю кнопки відкриття/закриття журналу, щоб вона не заважала.
+             */
+            function handleButtonOpacity() {
+                const isJournalOpen = !journalForm.classList.contains('-translate-x-full');
+
+                // Якщо журнал закритий, кнопка завжди непрозора
+                if (!isJournalOpen) {
+                    clearTimeout(opacityTimeout); 
+                    toggleJournalBtn.classList.remove('opacity-50');
+                    return;
+                }
+
+                // Обробники для відкритого журналу
+                toggleJournalBtn.onmouseleave = () => {
+                    clearTimeout(opacityTimeout); // Скидаємо попередній таймер
+                    opacityTimeout = setTimeout(() => {
+                        toggleJournalBtn.classList.add('opacity-50');
+                    }, 5000); // 5 секунд
+                };
+
+                toggleJournalBtn.onmouseenter = () => {
+                    clearTimeout(opacityTimeout);
+                    toggleJournalBtn.classList.remove('opacity-30');
+                };
+            }
+
+            const journalDatePicker = document.getElementById('journal-date-picker');
+            const journalList = document.getElementById('journal-list');
+
+            /**
+             * @description Перекладає статус доставки SMS з англійської на мову інтерфейсу.
+             * @param {string} status - Статус доставки (напр., "Delivered").
+             * @returns {string} - Перекладений статус.
+             */
+            function translateDeliveryStatus(status) {
+                if (!status) return translations.unknown || 'Невідомо';
+                const key = `deliveryStatus_${status.replace(/\s+/g, '')}`; // e.g., "deliveryStatus_Delivered"
+                return translations[key] || status;
+            }
+
+            /**
+             * @description Додає новий запис до списку в журналі відправлень.
+             */
+            function addJournalEntry(patientName, phone, status, isSuccess, entryDate, deliveryStatus) {
+                const date = entryDate ? new Date(entryDate) : new Date();
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'p-3 bg-gray-50 rounded-md text-sm border-l-4';
+                entryDiv.classList.add(isSuccess ? 'border-green-500' : 'border-red-500');
+                if (!isSuccess) entryDiv.classList.add('blinking-border');
+
+                const translatedPatientName = patientName || (translations.patientNotSelected || 'Пацієнта не обрано');
+                const translatedStatusLabel = translations.statusLabel || 'Статус:';
+                const translatedSmsLabel = translations.smsLabel || 'SMS:';
+
+                entryDiv.innerHTML = `
+                    <p class="font-semibold text-gray-800">${translatedPatientName}</p>
+                    <p class="text-gray-600">${phone}</p>
+                    <p class="text-gray-500 text-xs">${date.toLocaleString(localStorage.getItem('language') || 'uk-UA')}
+                        <span class="block mt-1 font-medium ${isSuccess ? 'text-green-600' : 'text-red-600'}">
+                            ${translatedStatusLabel} ${status}
+                        </span>
+                       
+                        <span class="block mt-1 font-medium text-blue-600" title="${deliveryStatus || ''}">
+                            ${translatedSmsLabel} ${translateDeliveryStatus(deliveryStatus)}
+                        </span>
+                    </p>
+                `;
+
+                // Додаємо новий запис на початок списку
+                journalList.prepend(entryDiv);
+            }
+
+            /**
+             * @description Завантажує дані журналу відправлень за обрану дату з бекенду.
+             * @param {string} date - Дата у форматі YYYY-MM-DD.
+             */
+            async function loadJournal(date) {
+                try {
+                    document.getElementById('journal-count').textContent = '...';
+                    journalList.innerHTML = `<p class="text-gray-500">${translations.journalLoading || 'Завантаження...'}</p>`; // Show loading state
+                    const lang = localStorage.getItem('language') || 'uk';
+                    const langHeader = getLangHeader(lang);
+                    const response = await fetch(`/journal?date=${date}&depId=${config.depId}`, {
+                         headers: { 'Accept-Language': langHeader }
+                    });
+                    const entries = await response.json();
+                    const allowedStatusCodes = [0, 1, 800, 801, 802, 803, 103, 104, 105, 106, 200, 201, 202, 203, 300, 301, 302, 303, 304, 305, 400, 401, 404, 405, 406, 412, 413, 415, 427, 503, 999];
+
+                    journalList.innerHTML = ''; // Очищуємо поточний список
+                    entries.forEach(entry => {
+                        const isSuccess = entry.isSuccess;
+                        addJournalEntry(entry.patientName, entry.phoneNumber, entry.smsStatus, isSuccess, entry.createdAt, entry.deliveryStatus);
+                    });
+                    const countedEntries = entries.filter(entry => allowedStatusCodes.includes(entry.smsStatusCode));
+                    document.getElementById('journal-count').textContent = countedEntries.length;
+                    if (entries.length === 0) {
+                        journalList.innerHTML = `<p class="text-gray-500">${translations.journalNoRecords || 'Записів за обрану дату не знайдено.'}</p>`;
+                    }
+                } catch (error) {
+                    console.error("Не вдалося завантажити журнал:", error);
+                    journalList.innerHTML = `<p class="text-red-500">${translations.journalError || 'Помилка завантаження журналу.'}</p>`;
+                    document.getElementById('journal-count').textContent = '0';
+                }
+            }
+
+            /**
+             * @description Додає запис до списку результатів пошуку по журналу.
+             */
+            function addSearchJournalEntry(patientName, phone, status, isSuccess, entryDate, webcode, department, deliveryStatus) {
+                const date = entryDate ? new Date(entryDate) : null;
+                const entryDiv = document.createElement('div');
+                entryDiv.className = 'p-3 bg-gray-50 rounded-md text-sm border-l-4';
+                entryDiv.classList.add(isSuccess ? 'border-green-500' : 'border-red-500');
+                if (!isSuccess) {
+                    entryDiv.classList.add('blinking-border');
+                }
+
+                const translatedPatientName = patientName || (translations.patientNotSelected || 'Пацієнта не обрано');
+                const translatedStatusLabel = translations.statusLabel || 'Статус:';
+                const translatedSmsLabel = translations.smsLabel || 'SMS:';
+                const translatedDocumentLabel = translations.document || 'Документ:';
+
+                entryDiv.innerHTML = `
+                    <p class="font-semibold text-gray-800">${translatedPatientName}</p>
+                    <p class="text-gray-600">${phone}</p>
+                    <p class="text-gray-500 text-xs">${date ? date.toLocaleString(localStorage.getItem('language') || 'uk-UA') : ''}
+                        <span class="block mt-1 font-medium ${isSuccess ? 'text-green-600' : 'text-red-600'}">
+                            ${translatedStatusLabel} ${status}
+                        </span>
+                        
+                        <span class="block mt-1 font-medium text-blue-600">
+                            ${translatedSmsLabel} ${translateDeliveryStatus(deliveryStatus)}
+                        </span>
+                    </p>
+                    <p class="mt-1 text-xs text-gray-500 font-mono">
+                        ${translatedDocumentLabel} <a href="http://localhost:1026/${department}?${webcode}" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${webcode}</a>
+                    </p>
+                    ${webcode && config.publicUrl ? `
+                        <p class="mt-1 text-xs text-gray-500 font-mono">
+                            ${translatedDocumentLabel} <a href="${config.publicUrl}?${webcode}" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${webcode}</a>
+                        </p>
+                    ` : ''}
+                `;
+                searchJournalList.appendChild(entryDiv);
+            }
+
+            /**
+             * @description Виконує пошук у журналі за введеним терміном.
+             * @param {string} searchTerm - Термін для пошуку (ПІБ, телефон, веб-код).
+             */
+            async function searchJournal(searchTerm) {
+                const filterSentSmsCheckbox = document.getElementById('filter-sent-sms-checkbox');
+                try {
+                    searchJournalList.innerHTML = `<p class="text-gray-500">${translations.journalSearchLoading || 'Пошук...'}</p>`;
+                    const lang = localStorage.getItem('language') || 'uk';
+                    const langHeader = getLangHeader(lang);
+                    const response = await fetch(`/journal/search?term=${encodeURIComponent(searchTerm)}&depId=${config.depId}&onlySuccessful=${filterSentSmsCheckbox.checked}`, {
+                        headers: { 'Accept-Language': langHeader }
+                    });
+                    const entries = await response.json();
+                    searchJournalList.innerHTML = '';
+
+                    if (entries.length > 0) {
+                        entries.forEach(entry => {
+                            const isSuccess = entry.isSuccess;
+                            addSearchJournalEntry(entry.patientName, entry.phoneNumber, entry.smsStatus, isSuccess, entry.createdAt, entry.webcode, entry.department, entry.deliveryStatus);
+                        });
+                    } else {
+                        searchJournalList.innerHTML = `<p class="text-gray-500">${translations.journalSearchNoResults || 'Нічого не знайдено.'}</p>`;
+                    }
+                } catch (error) {
+                    console.error("Помилка пошуку в журналі:", error);
+                    searchJournalList.innerHTML = `<p class="text-red-500">${translations.journalSearchError || 'Помилка пошуку.'}</p>`;
+                }
+            }
+
+            // Обробники подій для відкриття/закриття бічних панелей.
+            toggleJournalBtn.addEventListener('click', () => {
+                journalForm.classList.toggle('-translate-x-full');
+                journalIconOpen.classList.toggle('hidden');
+                journalIconClose.classList.toggle('hidden');
+                handleButtonOpacity(); // Перевіряємо стан кнопки після кожного кліку
+                if (!journalForm.classList.contains('-translate-x-full')) toggleJournalBtn.onmouseleave(); // Запускаємо таймер, якщо відкрили
+            });
+
+            toggleSearchJournalBtn.addEventListener('click', () => {
+                searchJournalForm.classList.toggle('translate-x-full');
+            });
+
+            // Затримка перед виконанням пошуку, щоб не надсилати запит на кожну введену літеру.
+            let searchTimeout;
+            journalSearchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => searchJournal(journalSearchInput.value), 500); // Пошук через 500мс після зупинки вводу
+            });
+
+
+            // Встановлює сьогоднішню дату за замовчуванням для календаря журналу та додає обробник на зміну дати.
+            journalDatePicker.value = new Date().toISOString().split('T')[0];
+            journalDatePicker.addEventListener('change', () => {
+                loadJournal(journalDatePicker.value);
+            });
+
+            /**
+             * @description Основна функція ініціалізації сторінки. Завантажує конфіг, мови та налаштовує UI.
+             * @param {boolean} [isLanguageChange=false] - Прапорець, що вказує, чи функція викликана через зміну мови.
+             */
+            async function initializePage(isLanguageChange = false) {
+                if (!isLanguageChange) {
+                    // При першому завантаженні спочатку отримуємо конфіг, щоб створити кнопки
+                    await fetchConfig();
+                    if (config.supportedLanguages) {
+                        populateLanguageSelector(config.supportedLanguages);
+                    }
+                    // А вже потім встановлюємо мову, щоб підсвітити потрібну кнопку
+                    const savedLang = localStorage.getItem('language') || 'uk'; // 'uk' as default
+                    await setLanguage(savedLang, true); // true - це початкове завантаження
+                } else {
+                    // При зміні мови просто оновлюємо конфіг
+                    await fetchConfig();
+                }
+
+                // Застосування конфігурації до елементів сторінки.
+                if (config) {
+                    document.getElementById('page-title').textContent = config.title;
+                    document.getElementById('depId').value = config.depId;
+                    document.getElementById('smsText').value = config.smsText;
+
+                    const logoImg = document.getElementById('clinic-logo');
+                    if (logoImg && config.clinicName) {
+                        logoImg.src = `https://placehold.co/250x50/4f46e5/ffffff?text=${encodeURIComponent(config.clinicName)}`;
+                        logoImg.alt = `Логотип ${config.clinicName}`;
+                    }
+
+                    const channelIconContainer = document.getElementById('channel-icon-container');
+                    const channelIcon = document.getElementById('channel-icon');
+                    const channelTooltip = document.getElementById('channel-tooltip-text');
+
+                    if (config.channel === 'viber') {
+                        channelIcon.src = '/viber.png';
+                        channelTooltip.setAttribute('data-translate', 'channelTooltipViber');
+                        channelIconContainer.classList.remove('hidden');
+                    } else if (config.channel === 'sms') {
+                        channelIcon.src = '/sms.png';
+                        channelTooltip.setAttribute('data-translate', 'channelTooltipSms');
+                        channelIconContainer.classList.remove('hidden');
+                    }
+
+                    // Оновлюємо текст кнопки завантаження залежно від каналу
+                    const uploadButtonText = document.getElementById('button-text');
+                    if (config.channel === 'viber') {
+                        uploadButtonText.setAttribute('data-translate', 'uploadAndSendViber');
+                    } else {
+                        uploadButtonText.setAttribute('data-translate', 'uploadAndSendSms');
+                    }
+
+                    // Показуємо вкладку "Пошук по документу" тільки для Oracle
+                    const docSearchTabButton = document.getElementById('doc-search-tab-button');
+                    if (config.dbType === 'oracle') {
+                        docSearchTabButton.classList.remove('hidden');
+                    } else {
+                        docSearchTabButton.classList.add('hidden');
+                    }
+
+                    // Показуємо вкладку "Пошук по партнеру" тільки якщо є партнерська лабораторія
+                    const partnerSearchTabButton = document.getElementById('partner-search-tab-button');
+                    if (config.hasPartnerLab) {
+                        partnerSearchTabButton.classList.remove('hidden');
+                    } else {
+                        partnerSearchTabButton.classList.add('hidden');
+                    }
+
+
+                    // Примусово оновлюємо текст кнопки після зміни атрибута
+                    translatePage();
+                }
+                // Завантажуємо журнал після отримання конфігурації, якщо це не зміна мови
+                if (!isLanguageChange) {
+                    loadJournal(journalDatePicker.value);
+                }
+
+                // Примусово запускаємо оновлення статусів SMS на бекенді
+                try {
+                    await fetch('/trigger-sms-update', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ depId: config.depId })
+                    });
+                    console.log(`Запущено цільове оновлення статусів SMS для філіалу '${config.depId}'.`);
+                } catch (error) {
+                    console.error('Не вдалося запустити оновлення статусів SMS:', error);
+                }
+            }
+
+            /**
+             * @description Перевіряє стан сервісу SMS (TurboSMS) через бекенд і оновлює іконку статусу.
+             */
+            async function checkSmsServiceStatus() {
+                const indicator = document.getElementById('sms-status-indicator');
+                const statusText = document.getElementById('sms-status-text');
+                const tooltipText = document.getElementById('sms-tooltip-text');
+                const uploadButton = document.getElementById('upload-button');
+                let isOk = false;
+
+                try {
+                    const lang = localStorage.getItem('language') || 'uk';
+                    const langHeader = getLangHeader(lang);
+                    const response = await fetch('/sms-health-check', {
+                        headers: { 'Accept-Language': langHeader }
+                    });
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        indicator.classList.remove('text-red-500', 'text-gray-400');
+                        indicator.classList.add('text-green-500');
+                        tooltipText.textContent = (translations.smsServiceActive || 'сервіс ТурбоСМС: активний. Баланс: {{balance}}').replace('{{balance}}', result.data.balance);
+                        statusText.classList.add('hidden');
+                        uploadButton.disabled = false;
+                        isOk = true;
+                    } else {
+                        throw new Error(result.message || 'Service unavailable');
+                    }
+                } catch (error) {
+                    indicator.classList.remove('text-green-500', 'text-gray-400');
+                    indicator.classList.add('text-red-500');
+                    tooltipText.textContent = translations.smsServiceDown || 'сервіс ТурбоСМС: тимчасово не доступний або помилка авторизації';
+                    statusText.classList.remove('hidden');
+                    uploadButton.disabled = true;
+                    isOk = false;
+                }
+                return isOk;
+            }
+
+            // Періодична перевірка статусу SMS кожні 2 хвилини.
+            setInterval(checkSmsServiceStatus, 120000); // Перевіряти кожні 2 хвилини
+
+            /**
+             * @description Налаштовує періодичне фонове оновлення журналу (кожної хвилини), якщо обрана сьогоднішня дата.
+             */
+            function setupJournalPolling() {
+                setInterval(async () => {
+                    const today = new Date().toISOString().split('T')[0];
+                    if (journalDatePicker.value === today) {
+                        await loadJournal(today, true); // Викликаємо з прапором фонового оновлення
+                    }
+                }, 60000); // 60000 мс = 1 хвилина
+            }
+
+            // Елементи для модального вікна сповіщень.
+            const statusModal = document.getElementById('statusModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const closeModal = document.getElementById('closeModal');
+            
+            /**
+             * @description Показує модальне вікно з повідомленням.
+             * @param {string} title - Заголовок вікна.
+             * @param {string} message - Текст повідомлення.
+             * @param {boolean} isSuccess - Визначає колір заголовка (зелений для успіху, червоний для помилки).
+             */
+            function showModal(title, message, isSuccess) {
+                if (statusModal.classList.contains('hidden') === false) return; // Не показувати нове вікно, якщо одне вже відкрите
+                modalTitle.textContent = title;
+                modalMessage.textContent = message;
+                modalTitle.className = `text-xl font-bold mb-4 ${isSuccess ? 'text-green-600' : 'text-red-600'}`;
+                statusModal.classList.remove('hidden');
+            }
+            closeModal.addEventListener('click', () => statusModal.classList.add('hidden'));
+
+            // Логіка перемикання вкладок (табів) для пошуку, створення пацієнта і т.д.
+            const searchTabButton = document.getElementById('search-tab-button');
+            const createTabButton = document.getElementById('create-tab-button');
+            const searchTabContent = document.getElementById('search-tab-content');
+            const createTabContent = document.getElementById('create-tab-content');
+            const docSearchTabButton = document.getElementById('doc-search-tab-button');
+            const docSearchTabContent = document.getElementById('doc-search-tab-content');
+            const partnerSearchTabButton = document.getElementById('partner-search-tab-button');
+            const partnerSearchTabContent = document.getElementById('partner-search-tab-content');
+
+            searchTabButton.addEventListener('click', () => {
+                searchTabButton.classList.add('active');
+                createTabButton.classList.remove('active');
+                docSearchTabButton.classList.remove('active');
+                partnerSearchTabButton.classList.remove('active');
+                searchTabContent.classList.remove('hidden');
+                createTabContent.classList.add('hidden');
+                docSearchTabContent.classList.add('hidden');
+                partnerSearchTabContent.classList.add('hidden');
+            });
+            createTabButton.addEventListener('click', () => {
+                createTabButton.classList.add('active');
+                searchTabButton.classList.remove('active');
+                docSearchTabButton.classList.remove('active');
+                partnerSearchTabButton.classList.remove('active');
+                createTabContent.classList.remove('hidden');
+                searchTabContent.classList.add('hidden');
+                docSearchTabContent.classList.add('hidden');
+                partnerSearchTabContent.classList.add('hidden');
+            });
+            docSearchTabButton.addEventListener('click', () => {
+                docSearchTabButton.classList.add('active');
+                searchTabButton.classList.remove('active');
+                createTabButton.classList.remove('active');
+                partnerSearchTabButton.classList.remove('active');
+                docSearchTabContent.classList.remove('hidden');
+                searchTabContent.classList.add('hidden');
+                createTabContent.classList.add('hidden');
+                partnerSearchTabContent.classList.add('hidden');
+            });
+            partnerSearchTabButton.addEventListener('click', () => {
+                partnerSearchTabButton.classList.add('active');
+                searchTabButton.classList.remove('active');
+                createTabButton.classList.remove('active');
+                docSearchTabButton.classList.remove('active');
+                partnerSearchTabContent.classList.remove('hidden');
+                searchTabContent.classList.add('hidden');
+                createTabContent.classList.add('hidden');
+                docSearchTabContent.classList.add('hidden');
+            });
+
+            // Елементи форми пошуку пацієнта.
+            const searchForm = document.getElementById('searchForm');
+            const searchResultsDiv = document.getElementById('searchResults');
+            const resultsBody = document.getElementById('resultsBody');
+            const noResultsP = document.getElementById('no-results');
+            const searchBtnText = document.getElementById('search-button-text');
+            const searchSpinner = document.getElementById('search-spinner');
+            const clearSearchBtn = document.getElementById('clearSearchBtn');
+
+            // Елементи форми пошуку по документу.
+            const docSearchForm = document.getElementById('docSearchForm');
+            const docSearchSpinner = document.getElementById('doc-search-spinner');
+            const docSearchBtnText = document.getElementById('doc-search-button-text');
+            const clearDocSearchBtn = document.getElementById('clearDocSearchBtn');
+            const docSearchResultsDiv = document.getElementById('docSearchResults');
+            const docResultsBody = document.getElementById('docResultsBody');
+            const noDocResultsP = document.getElementById('no-doc-results');
+
+            // Елементи форми пошуку по партнеру.
+            const partnerSearchForm = document.getElementById('partnerSearchForm');
+            const partnerSearchSpinner = document.getElementById('partner-search-spinner');
+            const partnerSearchBtnText = document.getElementById('partner-search-button-text');
+            const clearPartnerSearchBtn = document.getElementById('clearPartnerSearchBtn');
+            const partnerSearchResultsDiv = document.getElementById('partnerSearchResults');
+            const partnerResultsBody = document.getElementById('partnerResultsBody');
+
+            // Елементи керування пагінацією (перемикання сторінок).
+            const paginationControls = document.getElementById('pagination-controls');
+            const prevPageBtn = document.getElementById('prev-page-btn');
+            const nextPageBtn = document.getElementById('next-page-btn');
+            const pageInfo = document.getElementById('page-info');
+            let currentPage = 1;
+            const limit = 10; // Кількість результатів на сторінці
+
+            // Обробник для кнопки "Очистити" у формі пошуку пацієнта.
+            clearSearchBtn.addEventListener('click', () => {
+                searchForm.reset(); // Очищаємо поля форми
+                resultsBody.innerHTML = ''; // Очищаємо тіло таблиці
+                searchResultsDiv.classList.add('hidden'); // Ховаємо блок результатів
+                noResultsP.classList.add('hidden'); // Ховаємо повідомлення "не знайдено"
+                document.getElementById('selected-patient-info').textContent = ''; // Очищаємо видиму інформацію про пацієнта
+                document.getElementById('patientName').value = ''; // Очищаємо приховане поле з іменем пацієнта
+                document.getElementById('phoneNumber').value = ''; // Очищаємо поле номеру телефону
+                const currentlySelected = resultsBody.querySelector('.selected-row');
+                document.getElementById('isDocSearchChecked').value = 'false';
+                document.getElementById('webCode').value = '';
+                document.getElementById('docSearchSource').value = '';
+                paginationControls.classList.add('hidden');
+                if (currentlySelected) {currentlySelected.classList.remove('selected-row');}
+                updateSmsButtonState(); // Оновлюємо стан кнопки-конверта
+
+            });
+
+            // Обробник відправки форми пошуку по документу.
+            docSearchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const docNumberInput = document.getElementById('docNumber');
+                const docNumber = docNumberInput.value.trim();
+
+                if (!docNumber) {
+                    showModal(translations.searchError || 'Помилка пошуку', translations.documentNumberRequired || 'Номер документа є обов\'язковим.', false);
+                    return;
+                }
+
+                docSearchBtnText.textContent = translations.searching || 'Пошук...';
+                docSearchSpinner.classList.remove('hidden');
+                document.getElementById('docSearchSubmitBtn').disabled = true;
+
+                try {
+                    const response = await fetch('/doc-search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ docNumber })
+                    });
+                    const results = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(results.message || 'Помилка сервера');
+                    }
+
+                    docResultsBody.innerHTML = '';
+                    if (results && results.length > 0) {
+                        results.forEach(p => {
+                            const row = document.createElement('tr');
+                            row.className = 'hover:bg-indigo-50';
+                            const patientFullName = `${p.priezvisko || ''} ${p.meno || ''}`;
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${patientFullName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    ${p.webCode && config.labResultUrl ?
+                                        `<a href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=false" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` :
+                                        (p.webCode || '')}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.status || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.confirmationDatetime || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <input type="checkbox" class="doc-select-patient-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                </td>
+                            `;
+                            const checkbox = row.querySelector('.doc-select-patient-cb');
+                            checkbox.addEventListener('change', (e) => {
+                                // Знімаємо позначки з усіх інших чекбоксів
+                                docResultsBody.querySelectorAll('.doc-select-patient-cb').forEach(cb => {
+                                    if (cb !== e.target) cb.checked = false;
+                                });
+
+                                // Заповнюємо форму, якщо чекбокс обрано
+                                if (e.target.checked) {
+                                    document.getElementById('phoneNumber').value = p.tel || '';
+                                    document.getElementById('selected-patient-info').textContent = `${translations.patientSelected || 'Пацієнта обрано'}: ${patientFullName}`;
+                                    document.getElementById('patientName').value = patientFullName;
+                                    document.getElementById('isDocSearchChecked').value = 'true';
+                                    document.getElementById('webCode').value = p.webCode;
+                                    updateSmsButtonState();
+                                } else {
+                                    // Очищуємо лише відповідні поля
+                                    document.getElementById('isDocSearchChecked').value = 'false';
+                                    document.getElementById('webCode').value = '';
+                                    // Якщо інший чекбокс не обраний, очищуємо основні поля
+                                    if (document.getElementById('isPartnerSearchChecked').value === 'false') clearSearchBtn.click();
+                                }
+                            });
+                            docResultsBody.appendChild(row);
+                        });
+                        docSearchResultsDiv.classList.remove('hidden');
+                    } else {
+                        docSearchResultsDiv.classList.add('hidden');
+                    showModal(translations.searchResults || 'Результати пошуку', translations.documentNotFound || 'Документ не знайдено.', true);
+                    }
+                } catch (error) {
+                    showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
+                } finally {
+                    docSearchBtnText.textContent = translations.search || 'Пошук';
+                    docSearchSpinner.classList.add('hidden');
+                    document.getElementById('docSearchSubmitBtn').disabled = false;
+                }
+            });
+
+            // Обробник для кнопки "Очистити" у формі пошуку по документу.
+            clearDocSearchBtn.addEventListener('click', () => {
+                docSearchForm.reset();
+                docResultsBody.innerHTML = '';
+                docSearchResultsDiv.classList.add('hidden');
+                noDocResultsP.classList.add('hidden');
+            });
+
+            // Обробник відправки форми пошуку по партнеру.
+            partnerSearchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const docNumberInput = document.getElementById('partnerDocNumber');
+                const docNumber = docNumberInput.value.trim();
+
+                if (!docNumber) {
+                    showModal(translations.searchError || 'Помилка пошуку', translations.documentNumberRequired || 'Номер документа є обов\'язковим.', false);
+                    return;
+                }
+
+                partnerSearchBtnText.textContent = translations.searching || 'Пошук...';
+                partnerSearchSpinner.classList.remove('hidden');
+                document.getElementById('partnerSearchSubmitBtn').disabled = true;
+
+                try {
+                    // Використовуємо той самий ендпоінт, що і для звичайного пошуку по документу
+                    const response = await fetch('/doc-search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ docNumber, isPartnerSearch: true })
+                    });
+                    const results = await response.json();
+
+                    if (!response.ok) {
+                        throw new Error(results.message || 'Помилка сервера');
+                    }
+
+                    partnerResultsBody.innerHTML = '';
+                    if (results && results.length > 0) {
+                        results.forEach(p => {
+                            const row = document.createElement('tr');
+                            row.className = 'hover:bg-indigo-50';
+                            const patientFullName = `${p.priezvisko || ''} ${p.meno || ''}`;
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${patientFullName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    ${p.webCode && config.partnerLabResultUrl ?
+                                        `<a href="${config.partnerLabResultUrl}?oid=${p.webCode}" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` :
+                                        (p.webCode || '')}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.status || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.confirmationDatetime || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <input type="checkbox" class="partner-select-patient-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                </td>
+                            `;
+                            const checkbox = row.querySelector('.partner-select-patient-cb');
+                            checkbox.addEventListener('change', (e) => {
+                                partnerResultsBody.querySelectorAll('.partner-select-patient-cb').forEach(cb => {
+                                    if (cb !== e.target) cb.checked = false;
+                                });
+
+                                if (e.target.checked) {
+                                    document.getElementById('phoneNumber').value = p.tel || '';
+                                    document.getElementById('selected-patient-info').textContent = `${translations.patientSelected || 'Пацієнта обрано'}: ${patientFullName}`;
+                                    document.getElementById('patientName').value = patientFullName;
+                                    // Встановлюємо прапорець та веб-код для завантаження PDF з бекенду
+                                    document.getElementById('isPartnerSearchChecked').value = 'true';
+                                    document.getElementById('partnerWebCode').value = p.webCode;
+                                    updateSmsButtonState();
+                                } else {
+                                    // Очищуємо лише відповідні поля
+                                    document.getElementById('isPartnerSearchChecked').value = 'false';
+                                    document.getElementById('partnerWebCode').value = '';
+                                    // Якщо інший чекбокс не обраний, очищуємо основні поля
+                                    if (document.getElementById('isDocSearchChecked').value === 'false') clearSearchBtn.click();
+                                }
+                            });
+                            partnerResultsBody.appendChild(row);
+                        });
+                        partnerSearchResultsDiv.classList.remove('hidden');
+                    } else {
+                        partnerSearchResultsDiv.classList.add('hidden');
+                        showModal(translations.searchResults || 'Результати пошуку', translations.documentNotFound || 'Документ не знайдено.', true);
+                    }
+                } catch (error) {
+                    showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
+                } finally {
+                    partnerSearchBtnText.textContent = translations.search || 'Пошук';
+                    partnerSearchSpinner.classList.add('hidden');
+                    document.getElementById('partnerSearchSubmitBtn').disabled = false;
+                }
+            });
+
+            // Обробник для кнопки "Очистити" у формі пошуку по партнеру.
+            clearPartnerSearchBtn.addEventListener('click', () => {
+                partnerSearchForm.reset();
+                partnerResultsBody.innerHTML = '';
+                partnerSearchResultsDiv.classList.add('hidden');
+            });
+            
+            // Логіка для кнопки "х" (очищення) всередині поля вводу "Номер документа".
+            const docNumberInput = document.getElementById('docNumber');
+            const clearDocNumberBtn = document.getElementById('clearDocNumberBtn');
+
+            docNumberInput.addEventListener('input', () => {
+                // Валідація: дозволяємо вводити тільки цифри
+                docNumberInput.value = docNumberInput.value.replace(/\D/g, '');
+                clearDocNumberBtn.classList.toggle('hidden', !docNumberInput.value);
+            });
+
+            clearDocNumberBtn.addEventListener('click', () => {
+                docNumberInput.value = '';
+                clearDocNumberBtn.classList.add('hidden');
+                docNumberInput.focus();
+            });
+
+            const partnerDocNumberInput = document.getElementById('partnerDocNumber');
+            const clearPartnerDocNumberBtn = document.getElementById('clearPartnerDocNumberBtn');
+
+            partnerDocNumberInput.addEventListener('input', () => {
+                partnerDocNumberInput.value = partnerDocNumberInput.value.replace(/\D/g, '');
+                clearPartnerDocNumberBtn.classList.toggle('hidden', !partnerDocNumberInput.value);
+            });
+
+            clearPartnerDocNumberBtn.addEventListener('click', () => {
+                partnerDocNumberInput.value = '';
+                clearPartnerDocNumberBtn.classList.add('hidden');
+                partnerDocNumberInput.focus();
+            });
+
+            // Обробник відправки основної форми пошуку пацієнта.
+            searchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                currentPage = 1; // Завжди скидаємо на першу сторінку при новому пошуку
+                await executeSearch();
+            });
+
+            // Обробники кнопок пагінації.
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    executeSearch();
+                }
+            });
+
+            nextPageBtn.addEventListener('click', () => {
+                currentPage++;
+                executeSearch();
+            });
+
+            /**
+             * @description Виконує основний пошук пацієнта з пагінацією.
+             */
+            async function executeSearch() {
+                if (!document.getElementById('searchLastName').value.trim()) {
+                    showModal(translations.searchError || 'Помилка пошуку', translations.lastNameRequired || "Поле 'Прізвище' є обов'язковим для пошуку.", false);
+                    return;
+                }
+
+                searchBtnText.textContent = translations.searching || 'Пошук...';
+                searchSpinner.classList.remove('hidden');
+                searchForm.querySelector('button[type="submit"]').disabled = true;
+                prevPageBtn.disabled = true;
+                nextPageBtn.disabled = true;
+
+                const formData = new FormData(searchForm);
+                const data = Object.fromEntries(formData.entries());
+                data.page = currentPage;
+                data.limit = limit;
+
+                try {
+                    const response = await fetch('/search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.message || 'Помилка сервера');
+
+                    const { results, total } = result;
+                    const totalPages = Math.ceil(total / limit);
+
+                    // Заповнення таблиці результатами.
+                    resultsBody.innerHTML = '';
+                    if (results.length > 0) {
+                        noResultsP.classList.add('hidden');
+                        results.forEach(p => {
+                            const row = document.createElement('tr');
+                            row.className = 'cursor-pointer hover:bg-indigo-50';
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap">${p.priezvisko} ${p.meno}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${new Date(p.datumnarod).toLocaleDateString()}</td>
+                                <td class="px-6 py-4 whitespace-nowrap">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="select-patient-btn text-indigo-600 hover:text-indigo-900" type="button">${translations.choose || 'Обрати'}</button>
+                                </td>
+                            `;
+                            row.addEventListener('click', () => {
+                                const currentlySelected = resultsBody.querySelector('.selected-row');
+                                if (currentlySelected) currentlySelected.classList.remove('selected-row');
+                                row.classList.add('selected-row');
+
+                                document.getElementById('phoneNumber').value = p.tel;
+                                document.getElementById('selected-patient-info').textContent = `${p.priezvisko} ${p.meno}`;
+                                document.getElementById('patientName').value = `${p.priezvisko} ${p.meno}`;
+                                updateSmsButtonState();
+                            });
+                            resultsBody.appendChild(row);
+                        });
+                    } else {
+                        noResultsP.classList.remove('hidden');
+                    }
+
+                    // Оновлення елементів керування пагінацією.
+                    if (total > 0) {
+                        pageInfo.textContent = `Сторінка ${currentPage} з ${totalPages}`;
+                        prevPageBtn.disabled = currentPage === 1;
+                        nextPageBtn.disabled = currentPage >= totalPages;
+                        paginationControls.classList.remove('hidden');
+                    } else {
+                        paginationControls.classList.add('hidden');
+                    }
+
+                    searchResultsDiv.classList.remove('hidden');
+                } catch (error) {
+                    showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
+                    paginationControls.classList.add('hidden');
+                } finally {
+                    searchBtnText.textContent = translations.search || 'Пошук';
+                    searchSpinner.classList.add('hidden');
+                    searchForm.querySelector('button[type="submit"]').disabled = false;
+                }
+            }
+
+            // Логіка створення нового пацієнта.
+            const createForm = document.getElementById('createForm');
+            const createBtnText = document.getElementById('create-button-text');
+            const createSpinner = document.getElementById('create-spinner');
+            createForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                createBtnText.textContent = translations.creating || 'Створення...';
+                createSpinner.classList.remove('hidden');
+                createForm.querySelector('button[type="submit"]').disabled = true;
+
+                const formData = new FormData(createForm);
+                const data = Object.fromEntries(formData.entries());
+                
+                try {
+                    const response = await fetch('/pacientcreate', {
+                         method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+                    
+                    if(response.ok && (!result.length || !result[0]['Помилка'])) {
+                        const fullName = `${data.lastName} ${data.firstName}`;
+                        document.getElementById('phoneNumber').value = data.phone;
+                        document.getElementById('selected-patient-info').textContent = fullName;
+                        document.getElementById('patientName').value = fullName;
+
+                        showModal(translations.success || 'Успіх!', (translations.patientCreatedAndSelected || 'Нового пацієнта створено та автоматично обрано для завантаження.').replace('{{fullName}}', fullName), true);
+                        updateSmsButtonState();
+                        createForm.reset();
+                    } else {
+                        throw new Error(result[0]['Помилка'] || 'Невідома помилка');
+                    }
+                } catch(error) {
+                    showModal(translations.creationError || 'Помилка створення', error.message, false);
+                } finally {
+                    createBtnText.textContent = translations.createPatientBtn || 'Створити пацієнта';
+                    createSpinner.classList.add('hidden');
+                    createForm.querySelector('button[type="submit"]').disabled = false;
+                }
+            });
+
+            // Логіка завантаження файлів.
+            const uploadForm = document.getElementById('uploadForm');
+            const fileInput = document.getElementById('file');
+            const fileNameDisplay = document.getElementById('file-name');
+            const dropArea = document.getElementById('file-drop-area');
+            const buttonText = document.getElementById('button-text');
+            const spinner = document.getElementById('spinner');
+
+            // Обробники для drag-and-drop зони.
+            dropArea.addEventListener('dragover', (e) => { e.preventDefault(); dropArea.classList.add('dragover'); });
+            dropArea.addEventListener('dragleave', () => dropArea.classList.remove('dragover'));
+            dropArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropArea.classList.remove('dragover');
+                const droppedFiles = e.dataTransfer.files;
+                if (droppedFiles.length > 0) {
+                    const allowedExtensions = ['.docx', '.pdf'];
+                    const validFiles = Array.from(droppedFiles).filter(file => {
+                        const fileName = file.name.toLowerCase();
+                        return allowedExtensions.some(ext => fileName.endsWith(ext));
+                    });
+
+                    if (validFiles.length < droppedFiles.length) {
+                        showModal(translations.invalidFileTypeTitle || 'Неприпустимий тип файлу', translations.invalidFileTypeMessage || 'Були проігноровані файли з розширенням, відмінним від .docx та .pdf.', false);
+                    }
+
+                    const dataTransfer = new DataTransfer();
+                    validFiles.forEach(file => dataTransfer.items.add(file));
+                    fileInput.files = dataTransfer.files;
+                    updateFileNameDisplay(fileInput.files);
+                }
+            });
+            fileInput.addEventListener('change', () => {
+                updateFileNameDisplay(fileInput.files);
+            });
+
+            /**
+             * @description Оновлює текстовий дисплей, показуючи кількість або ім'я вибраних файлів.
+             * @param {FileList} files - Список вибраних файлів.
+             */
+            function updateFileNameDisplay(files) {
+                if (files.length > 0) {
+                    if (files.length === 1) {
+                        // Якщо вибрано один файл, показуємо його ім'я.
+                        fileNameDisplay.textContent = `${translations.selectedFile || 'Вибраний файл:'} ${files[0].name}`;
+                    } else {
+                        // Якщо вибрано кілька файлів, показуємо їх кількість.
+                        fileNameDisplay.textContent = `${translations.selectedFiles || 'Вибрано файлів:'} ${files.length}`;
+                    }
+                } else {
+                    fileNameDisplay.textContent = '';
+                }
+            }
+
+            // Обробник відправки форми завантаження.
+            uploadForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const isDocChecked = document.getElementById('isDocSearchChecked').value === 'true';
+                const isPartnerChecked = document.getElementById('isPartnerSearchChecked').value === 'true';
+                const hasFiles = fileInput.files.length > 0;
+
+                // Перевірка: файл обов'язковий, якщо не обрано жодного результату з пошуку по документу/партнеру
+                if (!hasFiles && !isDocChecked && !isPartnerChecked) {
+                    showModal(translations.error || 'Помилка!', translations.fileIsRequired || 'Будь ласка, виберіть файл для завантаження.', false);
+                    return;
+                }
+
+                // Додаткова перевірка статусу перед відправкою
+                const isServiceOk = await checkSmsServiceStatus();
+                if (!isServiceOk) {
+                    showModal(translations.serviceUnavailable || 'Сервіс недоступний', translations.smsServiceNotResponding || 'На жаль, сервіс відправки SMS тимчасово не відповідає...', false);
+                    // Функція checkSmsServiceStatus вже заблокувала кнопку, тому тут нічого більше не робимо.
+                    return; // Зупиняємо виконання
+                }
+
+                buttonText.textContent = translations.uploading || 'Завантаження...';
+                spinner.classList.remove('hidden');
+                uploadForm.querySelector('button[type="submit"]').disabled = true;
+
+                const formData = new FormData(uploadForm);
+                try {
+                    const patientInfo = document.getElementById('selected-patient-info').textContent.replace('Обраний пацієнт: ', '');
+                    const phoneNumber = formData.get('phoneNumber');
+
+                    const lang = localStorage.getItem('language') || 'uk'; 
+                    const langHeader = getLangHeader(lang);
+                    const response = await fetch('/upload', { method: 'POST', body: formData, headers: { 'Accept-Language': langHeader } });
+
+                    const result = await response.json();
+                    if (response.ok) {
+                        showModal(result.isSuccess ? (translations.success || 'Успіх!') : (translations.attention || 'Увага!'), `${translations.fileUploadedSmsStatus || 'Файл успішно завантажено. Статус SMS:'} ${result.smsStatus}`, result.isSuccess);
+                        addJournalEntry(patientInfo, phoneNumber, result.smsStatus, result.isSuccess, new Date());
+                        uploadForm.reset();
+                        fileNameDisplay.textContent = '';
+                        document.getElementById('selected-patient-info').textContent = '';
+                        document.getElementById('patientName').value = '';
+                        if (config && config.smsText) {
+                             document.getElementById('smsText').value = config.smsText;
+                        }
+                    } else {
+                        throw new Error(result.message || 'Сталася помилка на сервері.');
+                    }
+                } catch (error) {
+                    showModal(translations.error || 'Помилка!', `${translations.fileUploadFailed || 'Не вдалося завантажити файл.'} ${error.message}`, false);
+                    addJournalEntry(patientInfo, formData.get('phoneNumber'), `Помилка: ${error.message}`, false, new Date());
+                } finally {
+                    buttonText.textContent = translations.uploadAndSendSms || 'Завантажити та надіслати SMS';
+                    spinner.classList.add('hidden');
+                    uploadForm.querySelector('button[type="submit"]').disabled = false;
+                }
+            });
+
+            // --- Логіка модального вікна для відправки довільного SMS ---
+            const customSmsModal = document.getElementById('customSmsModal');
+            const openCustomSmsModalBtn = document.getElementById('open-custom-sms-modal-btn');
+            const closeCustomSmsModalBtn = document.getElementById('closeCustomSmsModal');
+            const customSmsForm = document.getElementById('customSmsForm');
+            const customSmsText = document.getElementById('customSmsText');
+            const charCounter = document.getElementById('char-counter');
+            const phoneNumberInput = document.getElementById('phoneNumber');
+            const phoneHint = document.getElementById('phone-hint');
+ 
+            /**
+             * @description Оновлює стан кнопки відправки довільного SMS (іконка конверта) залежно від валідності номера телефону.
+             */
+            function updateSmsButtonState() {
+                const isPhoneValid = phoneNumberInput.value.replace(/\D/g, '').length >= 9;
+
+                if (isPhoneValid) {
+                    openCustomSmsModalBtn.disabled = false;
+                    openCustomSmsModalBtn.classList.remove('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+                    openCustomSmsModalBtn.classList.add('bg-green-100', 'text-green-600', 'hover:bg-green-200');
+                    openCustomSmsModalBtn.title = translations.sendCustomMessage || 'Надіслати довільне повідомлення';
+                    phoneHint.classList.add('hidden');
+                } else {
+                    openCustomSmsModalBtn.disabled = true;
+                    openCustomSmsModalBtn.classList.add('bg-gray-200', 'text-gray-400', 'cursor-not-allowed');
+                    openCustomSmsModalBtn.classList.remove('bg-green-100', 'text-green-600', 'hover:bg-green-200');
+                    openCustomSmsModalBtn.title = translations.selectPatientAndEnterPhone || 'Введіть 10-значний номер для відправки довільного SMS';
+                    phoneHint.classList.remove('hidden');
+                }
+            }
+
+            // Обробник вводу номера телефону для динамічної валідації та оновлення кнопки.
+            phoneNumberInput.addEventListener('input', () => {
+                // Дозволяємо вводити тільки цифри і обмежуємо довжину до 10 символів (для 0501234567)
+                phoneNumberInput.value = phoneNumberInput.value.replace(/\D/g, '').substring(0, 9);
+                updateSmsButtonState();
+            });
+
+            openCustomSmsModalBtn.addEventListener('click', () => {
+                customSmsModal.classList.remove('hidden');
+            });
+
+            closeCustomSmsModalBtn.addEventListener('click', () => {
+                customSmsModal.classList.add('hidden');
+                customSmsForm.reset();
+                charCounter.textContent = '0 / 160';
+            });
+
+            // Лічильник символів у тексті SMS, враховує кирилицю (ліміт 70) та латиницю (ліміт 160).
+            customSmsText.addEventListener('input', () => {
+                const text = customSmsText.value;
+                const hasCyrillic = /[а-яА-ЯіІїЇєЄ]/.test(text);
+                const limit = hasCyrillic ? 70 : 160;
+                const length = text.length;
+
+                charCounter.textContent = `${length} / ${limit}`;
+
+                if (length > limit) {
+                    charCounter.classList.add('text-red-500');
+                    customSmsText.value = text.substring(0, limit);
+                    charCounter.textContent = `${limit} / ${limit}`;
+                } else {
+                    charCounter.classList.remove('text-red-500');
+                }
+            });
+
+            // Обробник відправки форми довільного SMS.
+            customSmsForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const sendBtn = document.getElementById('sendCustomSmsBtn');
+                sendBtn.disabled = true;
+                sendBtn.textContent = translations.sending || 'Надсилання...';
+
+                const data = {
+                    phoneNumber: phoneNumberInput.value,
+                    patientName: document.getElementById('patientName').value,
+                    messageText: customSmsText.value
+                };
+
+                try {
+                    const lang = localStorage.getItem('language') || 'uk';
+                    const langHeader = getLangHeader(lang);
+                    const response = await fetch('/send-custom-sms', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept-Language': langHeader },
+                        body: JSON.stringify(data)
+                    });
+                    const result = await response.json();
+
+                    customSmsModal.classList.add('hidden');
+                    showModal(result.isSuccess ? (translations.success || 'Успіх!') : (translations.error || 'Помилка'), result.message || result.smsStatus, result.isSuccess);
+
+                } catch (error) {
+                    customSmsModal.classList.add('hidden');
+                    showModal(translations.error || 'Помилка!', `${translations.smsSendFailed || 'Не вдалося надіслати SMS.'} ${error.message}`, false);
+                } finally {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = translations.sendSms || 'Надіслати SMS';
+                    customSmsForm.reset();
+                    charCounter.textContent = '0 / 160';
+                }
+            });
+            // --- Кінець логіки модального вікна для SMS ---
+
+            // Запуск основних функцій при завантаженні сторінки.
+            initializePage();
+            checkSmsServiceStatus(); // Перша перевірка при завантаженні
+            setupJournalPolling(); // Запускаємо фонове оновлення
+
+            updateSmsButtonState();
+        });
+    </script>
+</body>
+</html>
