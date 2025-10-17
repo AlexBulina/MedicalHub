@@ -1,7 +1,6 @@
 import { exec } from 'child_process';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import ftpClient from './ftpconnect.js';
 import fs from 'fs/promises';
 import { PDFDocument } from 'pdf-lib'; // Імпорт pdf-lib
 
