@@ -105,6 +105,11 @@
     "deliveryStatus_Undelivered": "არ არის მიწოდებული",
     "deliveryStatus_Rejected": "უარყოფილია",
     "deliveryStatus_Expired": "ვადაგასული",
+    
+    "documentNumber": "დოკუმენტის ნომერი",
+
+
+
     "sms_status": {
         "-1": "SMS არ გაიგზავნა",
         "0": "მოთხოვნა წარმატებით დამუშავდა",

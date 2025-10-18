@@ -109,6 +109,7 @@
     "deliveryStatus_Undelivered": "Undelivered",
     "deliveryStatus_Rejected": "Rejected",
     "deliveryStatus_Expired": "Expired",
+    "documentNumber": "Document number",
     "sms_status": {
         "-1": "SMS was not sent",
         "0": "Request processed successfully",
