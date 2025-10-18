@@ -118,6 +118,25 @@ const BRANCHES = {
             }
         }
     },
+    // --- Приклад конфігурації для філіалу з MongoDB ---
+    // mongo_branch: {
+    //     path: '/mongobranch',
+    //     depId: 'mongo',
+    //     publicUrl: 'http://localhost:1026/mongo',
+    //     titleKey: "branchTitle_mongo",
+    //     clinicNameKey: "branchClinicName_mongo",
+    //     smsTextKey: "branchSmsText_mongo",
+    //     channel: 'sms',
+    //     messagingEnabled: true,
+    //     auth: { user: process.env.AUTH_USER_MONGO, pass: process.env.AUTH_PASS_MONGO },
+    //     sms: { token: process.env.SMS_TOKEN_MONGO, sender: process.env.SMS_SENDER_MONGO },
+    //     db: {
+    //         type: 'mongodb',
+    //         uri: process.env.DB_MONGO_URI, // Напр., "mongodb://localhost:27017"
+    //         dbName: process.env.DB_MONGO_NAME // Напр., "medicalhub"
+    //     },
+    //     storage: { type: 'ftp', config: { host: process.env.FTP_HOST, user: process.env.FTP_USER, password: process.env.FTP_PASS } }
+    // },
     // Конфігурація за замовчуванням для Sybase
     defaultSybase: {
         db: { dsn: process.env.DB_DSN_SYBASE, type: 'sybase' }
