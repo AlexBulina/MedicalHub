@@ -64,6 +64,7 @@
     "searchError": "ძებნის შეცდომა",
     "lastNameRequired": "ძებნისთვის აუცილებელია ველის 'გვარი' შევსება.",
     "searching": "ძებნა...",
+    "SearchByPartner": "ძიება პარტნიორით",
     "creating": "შექმნა...",
     "success": "წარმატებით!",
     "patientCreatedAndSelected": "ახალი პაციენტი შეიქმნა და ავტომატურად არჩეულია ასატვირთად.",

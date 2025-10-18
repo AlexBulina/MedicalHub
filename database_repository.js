@@ -13,12 +13,12 @@ import { runSybaseQuery } from './sybase_connection.js';
  * @param {object} dbConfig - Об'єкт конфігурації БД з `BRANCHES`.
  * @returns {Promise<Array<object>|undefined>}
  */
-export async function executeQuery(query, dbConfig) {
+export async function executeQuery(query, dbConfig, binds = []) {
     const dbType = dbConfig.type || 'sybase';
 
     if (dbType === 'oracle') {
         // Для Oracle потрібен об'єкт конфігурації, а не DSN
-        return runOracleQuery(dbConfig, query);
+        return runOracleQuery(dbConfig, query, binds);
     }
     // Для Sybase передаємо DSN
     return runSybaseQuery(dbConfig.dsn, query);
@@ -380,12 +380,15 @@ export async function getPendingSmsRecords(dbConfig) {
  */
 export async function updateSmsDeliveryStatus(messageId, newStatus, dbConfig) {
     const dbType = dbConfig.type || 'sybase';
-    let query;
+    let query, binds;
 
     if (dbType === 'oracle') {
-        query = `UPDATE C_MESSAGES_JOURNAL SET turbo_sms_delivery_status = '${newStatus}' WHERE turbo_sms_message_Id = '${messageId}'`;
+        // Використовуємо параметризований запит для безпеки та надійності
+        query = `UPDATE C_MESSAGES_JOURNAL SET turbo_sms_delivery_status = :newStatus WHERE turbo_sms_message_Id = :messageId`;
+        binds = { newStatus, messageId };
     } else { // Sybase
         query = `UPDATE UniqueRandomNumbers SET deliveryStatus = '${newStatus}' WHERE messageId = '${messageId}'`;
+        binds = []; // Sybase-драйвер не використовує binds у поточній реалізації
     }
-    return executeQuery(query, dbConfig);
+    return executeQuery(query, dbConfig, binds);
 }

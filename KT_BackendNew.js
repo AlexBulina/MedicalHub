@@ -67,6 +67,12 @@ const SUPPORTED_LANGUAGES = {
 // КОНФІГУРАЦІЯ API ТА СЕРВІСІВ
 // ===================================================================
 const API_SEND_URL = 'https://api.turbosms.ua/message/send';
+
+// ===================================================================
+// КЕРУВАННЯ СТАНОМ ПІДКЛЮЧЕННЯ ДО БД
+// ===================================================================
+const dbConnectionState = {}; // Об'єкт для відстеження стану підключення до БД
+
 const API_STATUS_URL = 'https://api.turbosms.ua/message/status';
 const API_BALANCE_URL = 'https://api.turbosms.ua/user/balance.json';
 const FTP_CONFIG = {
@@ -367,6 +373,33 @@ function sendErrorPage(res, title, message, statusCode = 500) {
     res.status(statusCode).send(htmlContent);
 }
 
+/**
+ * @description Періодично шукає та видаляє "осиротілі" тимчасові папки.
+ * Функція шукає в кореневій директорії проєкту папки, імена яких складаються з 12 цифр,
+ * і видаляє їх разом з усім вмістом. Це допомагає очищати дані, які могли залишитися
+ * після збоїв або незавершених запитів.
+ */
+async function cleanupOrphanedDirectories() {
+    logger.info('Запуск періодичного очищення тимчасових директорій...');
+    try {
+        const entries = await fs.readdir(__dirname, { withFileTypes: true });
+        const orphanDirRegex = /^\d{12}$/; // Регулярний вираз для папок з 12 цифр
+
+        for (const entry of entries) {
+            if (entry.isDirectory() && orphanDirRegex.test(entry.name)) {
+                const dirPath = path.join(__dirname, entry.name);
+                try {
+                    await fs.rm(dirPath, { recursive: true, force: true });
+                    logger.info(`Видалено "осиротілу" директорію: ${dirPath}`);
+                } catch (rmError) {
+                    logger.error(`Не вдалося видалити директорію ${dirPath}: ${rmError.message}`);
+                }
+            }
+        }
+    } catch (error) {
+        logger.error(`Помилка під час очищення "осиротілих" директорій: ${error.message}`);
+    }
+}
 // ===================================================================
 // МАРШРУТИ (API ENDPOINTS)
 // ===================================================================
@@ -403,6 +436,7 @@ app.get('/config', async (req, res) => {
                 labResultUrl: branch.labResultUrl, // Додаємо URL для результатів лабораторії
                 hasPartnerLab: branch.hasPartnerLab, // Додаємо прапорець наявності лабораторії
                 partnerLabResultUrl: branch.partnerLabResultUrl, // Додаємо URL для результатів партнерської лабораторії
+                publicUrl: branch.publicUrl, // <-- ДОДАНО: Передаємо публічний URL
                 channel: branch.channel, // Додаємо канал відправки
                 dbType: branch.db?.type || 'sybase' // Додаємо тип БД
             });
@@ -689,6 +723,21 @@ async function updateSmsStatuses(targetDepId = null) {
         return;
     }
 
+    // Перевіряємо стан підключення до БД для цього філіалу
+    if (dbConnectionState[targetDepId] && dbConnectionState[targetDepId].isDown) {
+        const timeSinceLastAttempt = Date.now() - dbConnectionState[targetDepId].lastAttempt;
+        const cooldownPeriod = 5 * 60 * 1000; // 5 хвилин
+
+        if (timeSinceLastAttempt < cooldownPeriod) {
+            // Якщо період "охолодження" ще не минув, пропускаємо спробу
+            logger.debug(`[${targetDepId}] - Підключення до БД недоступне. Наступна спроба через ${Math.round((cooldownPeriod - timeSinceLastAttempt) / 1000)} сек.`);
+            return;
+        }
+        // Якщо період минув, скидаємо стан і пробуємо знову
+        logger.info(`[${targetDepId}] - Період очікування минув. Спроба відновити з'єднання з БД...`);
+        dbConnectionState[targetDepId].isDown = false;
+    }
+
     for (const branch of branchesToProcess) {
         // Пропускаємо "віртуальні" конфігурації, які не є реальними філіалами
         if (!branch.depId || !branch.db) continue;
@@ -710,7 +759,7 @@ async function updateSmsStatuses(targetDepId = null) {
                 continue;
             }
 
-            const messageIds = recordsToUpdate.map(rec => rec.messageId).filter(Boolean);
+            const messageIds = recordsToUpdate.map(rec => rec.messageid).filter(Boolean);
 
             // 3. Робимо запит до TurboSMS API
             logger.info(`[${branch.depId}] - Запит статусів для message IDs: ${JSON.stringify(messageIds)}`);
@@ -729,6 +778,11 @@ async function updateSmsStatuses(targetDepId = null) {
             }
         } catch (error) {
             logger.error(`[${branch.depId}] - Помилка фонового оновлення статусів SMS: ${error.message}`);
+            // Якщо помилка пов'язана з БД, фіксуємо це
+            if (error.message.toLowerCase().includes('бази даних')) {
+                logger.warn(`[${branch.depId}] - Зафіксовано помилку підключення до БД. Тимчасово припиняємо спроби.`);
+                dbConnectionState[branch.depId] = { isDown: true, lastAttempt: Date.now() };
+            }
         }
     }
 }
@@ -955,7 +1009,10 @@ app.post("/send-custom-sms", async (req, res) => {
  */
 app.post("/trigger-sms-update", (req, res) => {
     const { depId } = req.body;
-    if (depId) {
+    const branch = Object.values(BRANCHES).find(b => b.depId === depId);
+
+    // Запускаємо оновлення, тільки якщо філіал знайдено і він має налаштування БД
+    if (branch && branch.db) {
         logger.info(`Примусовий запуск оновлення статусів SMS для філіалу '${depId}' з фронтенду.`);
         updateSmsStatuses(depId); // Запускаємо без await, щоб не блокувати відповідь
     } else {
@@ -1048,12 +1105,10 @@ const displayPdfRoute = async (req, res) => {
     res.send(finalPdfBuffer);
 
     res.on('finish', () => {
-        // Функція appendPdfToExistingPdf з labrequest.js сама видаляє папку після об'єднання.
-        // Якщо був лише один файл, потрібно викликати очищення вручну.
-        if (filesInDir.length === 1) {
+        // Додаємо затримку перед видаленням, щоб уникнути помилок блокування файлів на Windows
+        setTimeout(() => {
             cleanupFiles(null, directoryPath, key);
-        }
-        logger.info(`[${key}] - PDF успішно відправлено. Очищення виконано.`);
+        }, 10000); // 10 секунд
     });
   } catch (error) {
     logger.error(`[${key}] - Помилка обробки: ${error.message}`);
@@ -1138,7 +1193,23 @@ server2.listen(process.env.PORT2 || 1026, async () => {
     await loadTranslations();
 
     // Запускаємо фонове оновлення статусів SMS кожні 5 хвилин
-    setInterval(updateSmsStatuses, 300000); // 300000 мс = 5 хвилин
-    // Перший запуск одразу після старту сервера для швидкого оновлення
-    updateSmsStatuses();
+    setInterval(async () => {
+        try {
+            await updateSmsStatuses();
+        } catch (error) {
+            logger.error(`Критична помилка під час періодичного оновлення статусів SMS: ${error.message}`);
+        }
+    }, 300000); // 300000 мс = 5 хвилин
+
+    // Запускаємо періодичне очищення "осиротілих" папок кожні 30 хвилин
+    setInterval(async () => {
+        try {
+            await cleanupOrphanedDirectories();
+        } catch (error) {
+            logger.error(`Критична помилка під час періодичного очищення папок: ${error.message}`);
+        }
+    }, 1800000); // 1800000 мс = 30 хвилин
+
+    // Перший запуск очищення одразу після старту
+    cleanupOrphanedDirectories();
 });

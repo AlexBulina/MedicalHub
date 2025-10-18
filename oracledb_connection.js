@@ -77,7 +77,8 @@ export async function runOracleQuery(dbConfig, query, binds = []) {
         return [];
     } catch (err) {
         console.error("Помилка при виконанні запиту до Oracle DB:", err);
-        return undefined;
+        // Прокидаємо помилку далі для централізованої обробки
+        throw new Error(`Помилка підключення до бази даних Oracle: ${err.message}`);
     } finally {
         if (connection) {
             await connection.close();

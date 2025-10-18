@@ -100,7 +100,7 @@ export async function processLocalFiles(directoryId, DepartmentId = null) {
                         if (err.code !== 'ENOENT') throw err; // Ігноруємо помилку, тільки якщо файл не знайдено
                         console.log(`Файл ${inputPath} вже був видалений, пропускаємо.`);
                     });
-                } else if (localFile.toLowerCase().endsWith('.pdf') && DepartmentId === null) {
+                } else if (localFile.toLowerCase().endsWith('.pdf')) {
                     // PDF → очищення метаданих
                     await removePdfMetadata(inputPath);
                 } else {

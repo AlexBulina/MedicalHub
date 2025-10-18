@@ -739,14 +739,10 @@
                             ${translatedSmsLabel} ${translateDeliveryStatus(deliveryStatus)}
                         </span>
                     </p>
-                    <p class="mt-1 text-xs text-gray-500 font-mono">
-                        ${translatedDocumentLabel} <a href="http://localhost:1026/${department}?${webcode}" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${webcode}</a>
-                    </p>
                     ${webcode && config.publicUrl ? `
                         <p class="mt-1 text-xs text-gray-500 font-mono">
                             ${translatedDocumentLabel} <a href="${config.publicUrl}?${webcode}" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${webcode}</a>
-                        </p>
-                    ` : ''}
+                        </p>` : ''}
                 `;
                 searchJournalList.appendChild(entryDiv);
             }
