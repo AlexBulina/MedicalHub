@@ -26,6 +26,7 @@
     "searchByDocument": "Пошук по документу",
     "documentNumber": "Номер документа",
     "createNewPatient": "Створити нового пацієнта",
+    "createPatientShort": "Створити пацієнта",
     "lastName": "Прізвище",
     "firstName": "Ім'я",
     "search": "Пошук",

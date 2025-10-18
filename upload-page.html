@@ -112,6 +112,16 @@
                 left: 1rem; /* 16px відступ зліва */
                 right: auto;
             }
+
+            /* Робимо бічні панелі на всю ширину на маленьких екранах */
+            #journal-form, #search-journal-form {
+                width: 100%;
+                top: 0;
+                height: 100%;
+                border-radius: 0; /* Прибираємо скруглення кутів */
+            }
+
+            /* Стилі для кнопки створення пацієнта на малих екранах залишаються, але текст буде керуватися JS */
         }
     </style>
 </head>
@@ -574,6 +584,25 @@
                 if (journalSearchTerm && journalSearchTerm.length >= 3) {
                     searchJournal(journalSearchTerm);
                 }
+
+                // Оновлюємо текст вкладки створення пацієнта
+                updateCreateTabButtonText();
+            }
+
+            /**
+             * @description Оновлює текст на кнопці "Створити пацієнта" залежно від розміру екрана.
+             */
+            function updateCreateTabButtonText() {
+                const createTabButton = document.getElementById('create-tab-button');
+                if (!createTabButton || !translations) return;
+
+                if (window.innerWidth < 768) {
+                    // Використовуємо короткий текст для маленьких екранів
+                    createTabButton.textContent = translations.createPatientShort || translations.createNewPatient;
+                } else {
+                    // Використовуємо повний текст для великих екранів
+                    createTabButton.textContent = translations.createNewPatient;
+                }
             }
 
             // Обробник кліків на кнопки вибору мови.
@@ -583,6 +612,9 @@
                     setLanguage(langButton.dataset.lang);
                 }
             });
+
+            // Додаємо слухача на зміну розміру вікна для оновлення тексту кнопки
+            window.addEventListener('resize', updateCreateTabButtonText);
 
             // Логіка: приховує/показує селектор мов при прокручуванні сторінки.
             const langSelectorContainer = document.getElementById('language-selector-container');
@@ -803,15 +835,33 @@
 
             // Обробники подій для відкриття/закриття бічних панелей.
             toggleJournalBtn.addEventListener('click', () => {
+                const isOpening = journalForm.classList.contains('-translate-x-full');
                 journalForm.classList.toggle('-translate-x-full');
                 journalIconOpen.classList.toggle('hidden');
                 journalIconClose.classList.toggle('hidden');
                 handleButtonOpacity(); // Перевіряємо стан кнопки після кожного кліку
-                if (!journalForm.classList.contains('-translate-x-full')) toggleJournalBtn.onmouseleave(); // Запускаємо таймер, якщо відкрили
+                if (isOpening) {
+                    toggleJournalBtn.onmouseleave(); // Запускаємо таймер, якщо відкрили
+                    // На малих екранах ховаємо перемикач мов
+                    if (window.innerWidth <= 768) {
+                        langSelectorContainer.classList.add('opacity-0', '-translate-y-20');
+                    }
+                } else {
+                    // Якщо закриваємо і сторінка вгорі, показуємо перемикач мов
+                    if (window.innerWidth <= 768 && window.scrollY <= 50) {
+                        langSelectorContainer.classList.remove('opacity-0', '-translate-y-20');
+                    }
+                }
             });
 
             toggleSearchJournalBtn.addEventListener('click', () => {
+                const isOpening = searchJournalForm.classList.contains('translate-x-full');
                 searchJournalForm.classList.toggle('translate-x-full');
+                // Ховаємо/показуємо перемикач мов на малих екранах
+                if (window.innerWidth <= 768) {
+                    langSelectorContainer.classList.toggle('opacity-0', isOpening);
+                    langSelectorContainer.classList.toggle('-translate-y-20', isOpening);
+                }
             });
 
             // Затримка перед виконанням пошуку, щоб не надсилати запит на кожну введену літеру.
