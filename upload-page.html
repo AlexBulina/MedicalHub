@@ -93,6 +93,26 @@
             font-weight: 600;
             box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
+
+        /* Стилі для маленьких екранів */
+        @media (max-width: 768px) {
+            #toggle-journal-btn, #toggle-search-journal-btn {
+                top: auto; /* Скасовуємо вертикальне центрування */
+                bottom: 0.5rem; /* 32px відступ від низу */
+                transform: none; /* Скасовуємо transform */
+                width: 3.5rem; /* 56px */
+                height: 3.5rem; /* 56px */
+                border-radius: 9999px; /* робимо круглими */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            #toggle-journal-btn {
+                left: 1rem; /* 16px відступ зліва */
+                right: auto;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
@@ -176,17 +196,21 @@
             <p class="text-gray-500 mb-6" data-translate="findOrCreatePatient">Знайдіть існуючого пацієнта або створіть нового.</p>
             
             <div class="border-b border-gray-200">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-                    <button id="search-tab-button" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-translate="searchPatient">
+                <!-- 
+                    На маленьких екранах (мобільні) - сітка 2x2.
+                    На середніх екранах (md) і більше - flex-контейнер в один рядок.
+                -->
+                <nav class="grid grid-cols-2 md:flex md:space-x-8 -mb-px" aria-label="Tabs">
+                    <button id="search-tab-button" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center md:text-left" data-translate="searchPatient">
                         Пошук пацієнта
                     </button>
-                    <button id="create-tab-button" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-translate="createNewPatient">
+                    <button id="create-tab-button" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="createNewPatient">
                         Створити нового пацієнта
                     </button>
-                    <button id="doc-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-translate="searchByDocument">
+                    <button id="doc-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="searchByDocument">
                         Пошук по документу
                     </button>
-                    <button id="partner-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300" data-translate="searchByPartner">
+                    <button id="partner-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="searchByPartner">
                         Пошук по партнеру
                     </button>
                 </nav>
