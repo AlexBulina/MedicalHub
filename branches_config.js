@@ -42,17 +42,18 @@ const BRANCHES = {
         path: '/radiology',
         resultPath: '/rd',
         depId: 'rd',
-        hasPartnerLab: true, // Наявність лабораторії партнера
+        hasPartnerLab: false, // Наявність лабораторії партнера publicUrl: 'http://37.53.72.157:1090/rd', zdorovya
         partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
-        publicUrl: 'http://rad.hemomedika.ua:1026/rd',
+        publicUrl: 'http://85.159.5.112:1090/rd',
         labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
         titleKey: "branchTitle_rd",
         clinicNameKey: "branchClinicName_rd",
         smsTextKey: "branchSmsText_rd",
         channel: 'sms', // <--- Перемикач каналу
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
-        auth: { user: process.env.AUTH_USER_RD, pass: process.env.AUTH_PASS_RD },
-        sms: { token: process.env.SMS_TOKEN_RD, sender: process.env.SMS_SENDER_RD },
+        auth: { user: process.env.AUTH_USER_ZDVRD, pass: process.env.AUTH_PASS_ZDVRD },
+        sms: { token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD
+ },
         viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
       //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
         db: {
@@ -95,12 +96,12 @@ const BRANCHES = {
             }
         }
     },
-    zdvrd: {
-        path: '/zdvrd',
-        resultPath: '/zdvrd',
-        depId: 'zdvrd',
+    zdvct: {
+        path: '/zdvct',
+        resultPath: '/zct',
+        depId: 'zct',
         hasPartnerLab: false, // Наявність лабораторії партнера
-        publicUrl: 'http://85.159.5.112:1026/zdvrd',
+        publicUrl: 'http://85.159.5.112:1026/zct',
         channel: 'sms',
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
         titleKey: "branchTitle_zdvrd",
@@ -115,6 +116,73 @@ const BRANCHES = {
                 host: process.env.FTP_HOST,
                 user: process.env.FTP_USER,
                 password: process.env.FTP_PASS
+            }
+        }
+    },
+     ol: {
+        path: '/onelab',
+        hasPartnerLab: false, // Наявність лабораторії партнера
+        resultPath: '/ol',
+        depId: 'ol',
+        hasPartnerLab: false, // Наявність лабораторії партнера publicUrl: 'http://37.53.72.157:1090/rd', zdorovya
+        partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
+        publicUrl: 'http://85.159.5.112:1090/ol',
+        labResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab',
+        titleKey: "branchTitle_rd",
+        clinicNameKey: "branchClinicName_ol",
+        smsTextKey: "branchSmsText_ol",
+        channel: 'sms', // <--- Перемикач каналу
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        auth: { user: process.env.AUTH_USER_OL, pass: process.env.AUTH_PASS_OL },
+        sms: { token: process.env.SMS_TOKEN_OL, sender: process.env.SMS_SENDER_OL },
+        viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
+      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        db: {
+            type: 'oracle',
+            user: process.env.DB_USER_ORA_OL,
+            password: process.env.DB_PASSWORD_ORA_OL,
+            connectString: process.env.DB_CONNECT_STRING_ORA_OL
+        },
+        storage: {
+            type: 'google-drive',
+            config: {
+                clientId: process.env.GDRIVE_CLIENT_ID,
+                clientSecret: process.env.GDRIVE_CLIENT_SECRET,
+                redirectUri: process.env.GDRIVE_REDIRECT_URI,
+                folderId: process.env.GDRIVE_FOLDER_ID_RD,
+                tokenKey: 'rd' // Унікальний ключ для збереження токену
+            }
+        }
+    },
+
+mongo: {
+        path: '/mongo',
+        resultPath: '/mg',
+        depId: 'mg',
+        hasPartnerLab: true, // Наявність лабораторії партнера publicUrl: 'http://37.53.72.157:1090/rd', zdorovya
+        partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
+        publicUrl: 'http://rad.hemomedika.ua:1026/rd',
+        labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
+        titleKey: "branchTitle_rd",
+        clinicNameKey: "branchClinicName_rd",
+        smsTextKey: "branchSmsText_rd",
+        channel: 'sms', // <--- Перемикач каналу 'sms' - 'viber'
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+         auth: { user: process.env.AUTH_USER_MONGO, pass: process.env.AUTH_PASS_MONGO },
+         sms: { token: process.env.SMS_TOKEN_MONGO, sender: process.env.SMS_SENDER_MONGO },
+         db: {
+             type: 'mongodb',
+             uri: process.env.DB_MONGO_URI, // Напр., "mongodb://localhost:27017"
+             dbName: process.env.DB_MONGO_NAME // Напр., "MedicalHubDb"
+         },
+        storage: {
+            type: 'google-drive',
+            config: {
+                clientId: process.env.GDRIVE_CLIENT_ID,
+                clientSecret: process.env.GDRIVE_CLIENT_SECRET,
+                redirectUri: process.env.GDRIVE_REDIRECT_URI,
+                folderId: process.env.GDRIVE_FOLDER_ID_RD,
+                tokenKey: 'rd' // Унікальний ключ для збереження токену
             }
         }
     },
@@ -141,6 +209,6 @@ const BRANCHES = {
     defaultSybase: {
         db: { dsn: process.env.DB_DSN_SYBASE, type: 'sybase' }
     },
-};
+}
 
 export default BRANCHES;

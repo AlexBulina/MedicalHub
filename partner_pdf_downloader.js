@@ -15,27 +15,25 @@ const __dirname = path.dirname(__filename);
  * @description Завантажує PDF-файл за веб-кодом з URL партнерської лабораторії.
  * @param {string} webCode - Веб-код для пошуку результату.
  * @param {string} partnerLabResultUrl - URL для запиту результатів.
- * @param {string} corId - Унікальний ідентифікатор запиту для створення спільної тимчасової папки.
- * @returns {Promise<string>} - Шлях до тимчасово збереженого PDF-файлу.
+ * @param {string} destinationDir - Шлях до директорії, куди зберегти файл.
+ * @returns {Promise<string>} - Повертає шлях до завантаженого файлу.
  */
-export async function downloadPartnerPdf(webCode, partnerLabResultUrl, corId) {
-    if (!webCode || !partnerLabResultUrl || !corId) {
-        throw new Error('Веб-код, URL партнера та corId є обов\'язковими.');
+export async function downloadPartnerPdf(webCode, partnerLabResultUrl, destinationDir) {
+    if (!webCode || !partnerLabResultUrl || !destinationDir) {
+        throw new Error('Веб-код, URL партнера та директорія призначення є обов\'язковими.');
     }
 
     const url = `${partnerLabResultUrl}?oid=${webCode}`;
     console.log(`Запит до партнерської лабораторії за URL: ${url}`);
 
+    const tempSubDir = path.join(__dirname, 'temp', destinationDir); // Зберігаємо у піддиректорії всередині 'temp'
+    await fs.mkdir(tempSubDir, { recursive: true }); // Переконуємось, що директорія існує
     const response = await axios.get(url, {
-        responseType: 'arraybuffer' // Важливо для отримання бінарних даних
+        responseType: 'arraybuffer'
     });
 
-    const tempDir = path.join(__dirname, 'temp', `merge_${corId}`);
-    await fs.mkdir(tempDir, { recursive: true });
-
-    const tempFilePath = path.join(tempDir, `${webCode}.pdf`);
+    const tempFilePath = path.join(tempSubDir, `${webCode}.pdf`);
     await fs.writeFile(tempFilePath, response.data);
-
-    console.log(`PDF від партнера успішно збережено у: ${tempFilePath}`);
-    return tempFilePath;
+    console.log(`PDF від партнера (${webCode}.pdf) успішно збережено у: ${destinationDir}`);
+    return tempFilePath; // Повертаємо шлях до створеного файлу
 }

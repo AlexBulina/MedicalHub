@@ -1,5 +1,4 @@
 import { promises as fs } from 'fs'; // Імпорт функцій роботи з файлами
-import path from 'path'; // <-- ДОДАНО ЦЕЙ РЯДОК
 import { PDFDocument } from 'pdf-lib'; // Імпорт необхідних компонентів з pdf-lib
 
 /**
@@ -10,8 +9,8 @@ import { PDFDocument } from 'pdf-lib'; // Імпорт необхідних ко
 export async function appendPdfToExistingPdf(pdfFilePaths) {
     try {
         if (!pdfFilePaths || pdfFilePaths.length === 0) {
-            console.warn("Масив шляхів до PDF-файлів порожній. Повертаю null.");
-            return null;
+            // Викидаємо помилку замість повернення null
+            throw new Error("Масив шляхів до PDF-файлів для об'єднання порожній.");
         }
 
         // Якщо є тільки один файл, просто повертаємо його вміст
@@ -39,6 +38,6 @@ export async function appendPdfToExistingPdf(pdfFilePaths) {
         return await mergedPdfDoc.save();
     } catch (error) {
         console.error('Сталася помилка під час об\'єднання PDF:', error);
-        return null; // Повертаємо null у разі помилки
+        throw error; // Прокидаємо помилку далі для централізованої обробки
     }
 }

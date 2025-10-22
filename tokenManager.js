@@ -5,15 +5,14 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import winston from 'winston'; // Припустимо, що логер може знадобитися
+import { fileURLToPath } from 'url'; 
+import logger from './logger.js'; // Імпортуємо централізований логер
 
 // Отримуємо __dirname в ES-модулях
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const TOKENS_PATH = path.join(__dirname, 'tokens.json');
-const logger = winston.loggers.get('default'); // Отримуємо існуючий логер
 
 /**
  * @description Зберігає токени для вказаного ключа у файл.
@@ -42,9 +41,14 @@ export async function getTokens(key) {
     try {
         const data = await fs.readFile(TOKENS_PATH, 'utf-8');
         const allTokens = JSON.parse(data);
-        return allTokens[key] || null;
+        const tokens = allTokens[key] || null;
+        if (!tokens) {
+            logger.warn(`Токени для ключа '${key}' не знайдено у файлі tokens.json.`);
+        }
+        return tokens;
     } catch (error) {
         // Помилка читання або парсингу, файл може не існувати
+        logger.warn(`Не вдалося прочитати або розпарсити tokens.json для ключа '${key}'. Файл може не існувати.`);
         return null;
     }
 }

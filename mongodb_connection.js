@@ -34,6 +34,8 @@ export async function runMongoOperation(dbConfig, collectionName, operation, par
                 return await collection.insertOne(params.document || {}, params.options || {});
             case 'updateOne':
                 return await collection.updateOne(params.filter || {}, params.update || {}, params.options || {});
+            case 'countDocuments':
+                return await collection.countDocuments(params.query || {});
             default:
                 throw new Error(`Непідтримувана операція MongoDB: ${operation}`);
         }

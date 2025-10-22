@@ -33,19 +33,10 @@ try {
 */     
 
 import axios from 'axios';
-import winston from 'winston'; // Припускаємо, що логер може знадобитися
+import logger from './logger.js'; // Імпортуємо централізований логер
 
 // URL для надсилання повідомлень
 const API_URL = 'https://api.turbosms.ua/message/send.json';
-
-// Створення простого логера, якщо він потрібен
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    transports: [
-        new winston.transports.Console({ format: winston.format.simple() }),
-    ],
-});
 
 /**
  * @description Надсилає повідомлення через Viber.

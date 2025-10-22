@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.png" type="image/x-icon">
-    <title>Керування пацієнтами та завантаженням</title>
+    <title>Керування пацієнтами та завантаженням результатів</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -560,7 +560,10 @@
                         element.title = translations[key];
                     }
                 });
-                document.title = translations.pageTitle || document.title;
+                // Оновлюємо заголовок сторінки, додаючи назву клініки
+                const baseTitle = translations.pageTitle || 'Керування пацієнтами та завантаження';
+                const clinicName = config.clinicName || '';
+                document.title = clinicName ? `${baseTitle} - ${clinicName}` : baseTitle;
             }
 
             /**
@@ -862,9 +865,12 @@
                 journalIconClose.classList.toggle('hidden');
                 handleButtonOpacity(); // Перевіряємо стан кнопки після кожного кліку
 
-                // Якщо відкриваємо ліву панель, закриваємо праву
-                if (isOpening && !searchJournalForm.classList.contains('translate-x-full')) {
+                // На малих екранах, якщо відкриваємо ліву панель, закриваємо праву
+                if (window.innerWidth <= 768 && isOpening && !searchJournalForm.classList.contains('translate-x-full')) {
                     searchJournalForm.classList.add('translate-x-full');
+                    // Оновлюємо іконку правої кнопки
+                    searchJournalIconOpen.classList.remove('hidden');
+                    searchJournalIconClose.classList.add('hidden');
                 }
 
                 if (isOpening) {
@@ -888,8 +894,8 @@
                 searchJournalIconOpen.classList.toggle('hidden');
                 searchJournalIconClose.classList.toggle('hidden');
 
-                // Якщо відкриваємо праву панель, закриваємо ліву
-                if (isOpening && !journalForm.classList.contains('-translate-x-full')) {
+                // На малих екранах, якщо відкриваємо праву панель, закриваємо ліву
+                if (window.innerWidth <= 768 && isOpening && !journalForm.classList.contains('-translate-x-full')) {
                     journalForm.classList.add('-translate-x-full');
                     journalIconOpen.classList.remove('hidden');
                     journalIconClose.classList.add('hidden');
@@ -1528,7 +1534,11 @@
                     });
                     const result = await response.json();
                     
-                    if(response.ok && (!result.length || !result[0]['Помилка'])) {
+                    // Універсальна перевірка успіху для Sybase, Oracle та MongoDB
+                    const isSuccess = response.ok && result && result.length > 0 && (result[0].status === 'Patient created' || result[0].status === 'Patient already exists');
+                    const errorMessage = result && result.length > 0 ? (result[0]['Помилка'] || result[0].status) : 'Невідома помилка';
+
+                    if(isSuccess) {
                         const fullName = `${data.lastName} ${data.firstName}`;
                         document.getElementById('phoneNumber').value = data.phone;
                         document.getElementById('selected-patient-info').textContent = fullName;
@@ -1538,7 +1548,7 @@
                         updateSmsButtonState();
                         createForm.reset();
                     } else {
-                        throw new Error(result[0]['Помилка'] || 'Невідома помилка');
+                        throw new Error(errorMessage);
                     }
                 } catch(error) {
                     showModal(translations.creationError || 'Помилка створення', error.message, false);

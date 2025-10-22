@@ -1,6 +1,6 @@
 /**
  * @file KT_BackendNew.js
- * @description Бекенд-сервер для системи "HemoMed", що обробляє запити від клієнтських сторінок,
+ * @description Бекенд-сервер для системи "MedicalHub", що обробляє запити від клієнтських сторінок,
  * керує даними пацієнтів, завантажує файли на FTP, відправляє SMS-повідомлення через TurboSMS
  * та надає доступ до результатів досліджень у форматі PDF.
  */
@@ -20,10 +20,9 @@ import cors from "cors";
 import { processLocalFiles} from './docxTopdfRad.js';
 import iconv from "iconv-lite";
 import axios from 'axios';
-import basicAuth from "basic-auth";
-import winston from "winston";
-import 'winston-daily-rotate-file';
+import basicAuth from "basic-auth"; 
 import http from "node:http";
+import logger from './logger.js'; // <-- ІМПОРТУЄМО НАШ НОВИЙ ЛОГЕР
 
 import { appendPdfToExistingPdf } from './labrequestKT.js';
 import { getStorageAdapter } from './storage/storageFactory.js'; // <-- ІМПОРТУЄМО ФАБРИКУ
@@ -81,34 +80,6 @@ const FTP_CONFIG = {
     password: process.env.FTP_PASS,
     secure: false,
 };
-
-// ===================================================================
-// НАЛАШТУВАННЯ ЛОГЕРА (WINSTON)
-// ===================================================================
-const transport = new winston.transports.DailyRotateFile({
-    filename: join(process.env.APPDATA, 'RD_Backend', `application-%DATE%.log`),
-    datePattern: 'YYYY-MM-DD',
-    maxSize: '20m',
-    maxFiles: '14d',
-});
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.combine(
-        winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-        winston.format.printf(({ timestamp, level, message }) => `${timestamp} [${level.toUpperCase()}]: ${message}`)
-    ),
-    transports: [
-        transport,
-        new winston.transports.DailyRotateFile({
-            filename: join(__dirname, 'logs', `debug-%DATE%.log`),
-            maxSize: '20m',
-            maxFiles: '14d',
-            datePattern: 'YYYY-MM-DD',
-            level: 'debug',
-        })
-    ],
-});
 
 // ===================================================================
 // ЛОКАЛІЗАЦІЯ
@@ -335,15 +306,15 @@ async function getTokens(key) {
  * @param {string} message - Детальний текст помилки.
  * @param {number} [statusCode=500] - HTTP-статус код.
  */
-function sendErrorPage(res, title, message, statusCode = 500) {
+function sendErrorPage(res, title, message, statusCode = 500, branchName = '') {
     const htmlContent = `
         <!DOCTYPE html>
         <html lang="uk">
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <link rel="icon" href="/favicon.png" type="image/x-icon">
-            <title>Помилка - HEMO MEDIKA</title>
+            <link rel="icon" href="/favicon.png" type="image/x-icon">            
+            <title>${branchName ? `Помилка - ${branchName}` : 'Помилка запиту'}</title>
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
             <style>
                 body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; margin: 0; }
@@ -378,7 +349,7 @@ function sendErrorPage(res, title, message, statusCode = 500) {
  * Функція шукає в кореневій директорії проєкту папки, імена яких складаються з 12 цифр,
  * і видаляє їх разом з усім вмістом. Це допомагає очищати дані, які могли залишитися
  * після збоїв або незавершених запитів.
- */
+ */ 
 async function cleanupOrphanedDirectories() {
     logger.info('Запуск періодичного очищення тимчасових директорій...');
     try {
@@ -386,7 +357,12 @@ async function cleanupOrphanedDirectories() {
         const orphanDirRegex = /^\d{12}$/; // Регулярний вираз для папок з 12 цифр
 
         for (const entry of entries) {
-            if (entry.isDirectory() && orphanDirRegex.test(entry.name)) {
+            // Перевіряємо, чи є директорія і чи її ім'я відповідає шаблону 12 цифр
+            // Також перевіряємо, чи це не основна директорія 'temp', щоб уникнути її видалення
+            if (entry.isDirectory() && orphanDirRegex.test(entry.name) && entry.name !== 'temp') {
+                // Якщо директорія знаходиться безпосередньо в корені проекту і відповідає шаблону,
+                // це може бути стара тимчасова директорія. Видаляємо її.
+                // Нові тимчасові директорії будуть створюватися в 'temp'
                 const dirPath = path.join(__dirname, entry.name);
                 try {
                     await fs.rm(dirPath, { recursive: true, force: true });
@@ -396,6 +372,28 @@ async function cleanupOrphanedDirectories() {
                 }
             }
         }
+
+        // Додатково перевіряємо директорії всередині 'temp'
+        const baseTempDir = path.join(__dirname, "temp");
+        if (existsSync(baseTempDir)) {
+            const tempEntries = await fs.readdir(baseTempDir, { withFileTypes: true });
+            for (const entry of tempEntries) {
+                if (entry.isDirectory() && orphanDirRegex.test(entry.name)) {
+                    const dirPath = path.join(baseTempDir, entry.name);
+                    try {
+                        await fs.rm(dirPath, { recursive: true, force: true });
+                        logger.info(`Видалено "осиротілу" тимчасову директорію: ${dirPath}`);
+                    } catch (rmError) {
+                        logger.error(`Не вдалося видалити тимчасову директорію ${dirPath}: ${rmError.message}`);
+                    }
+                }
+            }
+        } else {
+            // Якщо основна тимчасова директорія не існує, створюємо її
+            await fs.mkdir(baseTempDir, { recursive: true });
+            logger.info(`Створено базову тимчасову директорію: ${baseTempDir}`);
+        }
+
     } catch (error) {
         logger.error(`Помилка під час очищення "осиротілих" директорій: ${error.message}`);
     }
@@ -485,8 +483,8 @@ app.post("/pacientcreate", async (req, res) => {
         logger.info(`[${firstName} ${lastName} ${phone}] - Спроба створення пацієнта. Статус: ${result?.[0]?.status}`);
         res.json(result);
     } catch (error) {
-        logger.error(`Помилка створення пацієнта: ${error.message}`);
-        res.status(503).json({ message: 'Сервіс тимчасово недоступний' });
+        logger.error(`[${branch.depId}] - Помилка створення пацієнта: ${error.message}`);
+        res.status(503).json({ message: `Не вдалося створити пацієнта. ${error.message}` });
     }
 });
 
@@ -500,14 +498,16 @@ app.post("/pacientupdate", async (req, res) => {
         const result = await db.updatePatientPhone({ phone, rodcisActual }, dbConfig);
         res.json(result);
     } catch (error) {
-        logger.error(`Помилка оновлення пацієнта: ${error.message}`);
-        res.status(503).json({ message: 'Сервіс тимчасово недоступний' });
+        logger.error(`[${branch.depId}] - Помилка оновлення пацієнта: ${error.message}`);
+        res.status(503).json({ message: `Не вдалося оновити дані пацієнта. ${error.message}` });
     }
 });
 
 app.post("/search", async (req, res) => {
     const { lastName, firstName, page = 1, limit = 10 } = req.body;
     const offset = (page - 1) * limit;
+
+    logger.info(`[Пошук пацієнта] - Отримано запит: Прізвище='${lastName}', Ім'я='${firstName}', Сторінка=${page}`);
 
     if (!lastName) {
         return res.status(400).json({ message: "Прізвище є обов'язковим для пошуку" });
@@ -523,10 +523,11 @@ app.post("/search", async (req, res) => {
     try {
         const { results, total } = await db.searchPatients({ lastName, firstName, limit, offset }, dbConfig);
         const formattedData = results.map(p => ({ ...p, tel: formatPhoneNumber(p.tel) }));
+        logger.info(`[Пошук пацієнта] - Знайдено: ${total} записів. Повертаємо ${formattedData.length} на сторінці ${page}.`);
         res.json({ results: formattedData, total });
     } catch (error) {
-        logger.error(`Помилка пошуку пацієнта: ${error.message}`);
-        res.status(503).json({ message: 'Сервіс тимчасово недоступний' });
+        logger.error(`[${branch.depId}] - Помилка пошуку пацієнта: ${error.message}`);
+        res.status(503).json({ message: `Не вдалося виконати пошук. ${error.message}` });
     }
 });
 
@@ -567,8 +568,8 @@ app.post("/doc-search", async (req, res) => {
         }));
         res.json(formattedResults);
     } catch (error) {
-        logger.error(`Помилка пошуку по документу ${docNumber}: ${error.message}`);
-        res.status(503).json({ message: 'Сервіс тимчасово недоступний' });
+        logger.error(`[${dbConfig.type}] - Помилка пошуку по документу ${docNumber}: ${error.message}`);
+        res.status(503).json({ message: `Не вдалося виконати пошук по документу. ${error.message}` });
     }
 });
 
@@ -778,11 +779,11 @@ async function updateSmsStatuses(targetDepId = null) {
             }
         } catch (error) {
             logger.error(`[${branch.depId}] - Помилка фонового оновлення статусів SMS: ${error.message}`);
-            // Якщо помилка пов'язана з БД, фіксуємо це
-            if (error.message.toLowerCase().includes('бази даних')) {
-                logger.warn(`[${branch.depId}] - Зафіксовано помилку підключення до БД. Тимчасово припиняємо спроби.`);
-                dbConnectionState[branch.depId] = { isDown: true, lastAttempt: Date.now() };
-            }
+            // Більше не потрібно відстежувати стан, оскільки помилки обробляються централізовано
+            // if (error.message.toLowerCase().includes('бази даних')) {
+            //     logger.warn(`[${branch.depId}] - Зафіксовано помилку підключення до БД. Тимчасово припиняємо спроби.`);
+            //     dbConnectionState[branch.depId] = { isDown: true, lastAttempt: Date.now() };
+            // }
         }
     }
 }
@@ -810,12 +811,13 @@ app.post("/upload", async (req, res) => {
     const uploadedFiles = req.files && req.files.file ? (Array.isArray(req.files.file) ? req.files.file : [req.files.file]) : [];
     let filesToUpload = [...uploadedFiles];
     const pdfsToMerge = [];
-    let mergedPdfPath = null;
+    let mergedPdfPath = null; // Шлях до об'єднаного PDF
+
+    const tempWorkingDir = path.join(__dirname, 'temp', corId); // Центральна тимчасова директорія для цього запиту
+    await fs.mkdir(tempWorkingDir, { recursive: true }); // Створюємо її
 
     try {
         await ensureTempDir();
-        const storage = await getStorageAdapter(branch);
-        const folderPath = `/${corId}`;
 
         // Перевірка, чи потрібно завантажувати додаткові PDF
         const shouldDownloadPdfs = (isDocSearchChecked === 'true' && webCode) || (isPartnerSearchChecked === 'true' && partnerWebCode);
@@ -826,7 +828,7 @@ app.post("/upload", async (req, res) => {
                 const downloadUrl = `${branch.labResultUrl}/BackEnd/TestResult`;
                 logger.info(`[${corId}] - Завантаження PDF по документу (webCode: ${webCode}).`);
                 try {
-                    const docPdfPath = await downloadPartnerPdf(webCode, downloadUrl, corId);
+                    const docPdfPath = await downloadPartnerPdf(webCode, downloadUrl, corId); // downloadPartnerPdf тепер зберігає в temp/${corId}
                     pdfsToMerge.push(docPdfPath);
                 } catch (pdfError) {
                     logger.error(`[${corId}] - Помилка завантаження PDF по документу: ${pdfError.message}`);
@@ -836,8 +838,8 @@ app.post("/upload", async (req, res) => {
             // Завантаження PDF з "Пошуку по партнеру"
             if (isPartnerSearchChecked === 'true' && partnerWebCode && branch.partnerLabResultUrl) {
                 logger.info(`[${corId}] - Завантаження PDF партнера (webCode: ${partnerWebCode}).`);
-                try {
-                    const partnerPdfPath = await downloadPartnerPdf(partnerWebCode, branch.partnerLabResultUrl, corId);
+                try { 
+                    const partnerPdfPath = await downloadPartnerPdf(partnerWebCode, branch.partnerLabResultUrl, corId); // downloadPartnerPdf тепер зберігає в temp/${corId}
                     pdfsToMerge.push(partnerPdfPath);
                 } catch (pdfError) {
                     logger.error(`[${corId}] - Помилка завантаження PDF партнера: ${pdfError.message}`);
@@ -846,77 +848,122 @@ app.post("/upload", async (req, res) => {
             
             // 2. Обробляємо основні завантажені файли (якщо вони є)
             if (uploadedFiles.length > 0) {
-                for (const [index, mainFile] of uploadedFiles.entries()) {
+                const mainFilesTempSubDir = path.join(tempWorkingDir, 'main_uploads'); // Піддиректорія для основних завантажень
+                await fs.mkdir(mainFilesTempSubDir, { recursive: true });
+
+                // Переміщуємо всі завантажені файли до тимчасової директорії
+                for (const mainFile of uploadedFiles) {
                     const mainFileDecodedName = iconv.decode(Buffer.from(mainFile.name, "binary"), "utf-8");
-                    // Створюємо унікальну піддиректорію для кожного файлу
-                    const mainFileTempDir = path.join(__dirname, 'temp', `main_${corId}_${index}`);
-                    await fs.mkdir(mainFileTempDir, { recursive: true });
-                    const mainFileLocalPath = path.join(mainFileTempDir, mainFileDecodedName);
+                    const mainFileLocalPath = path.join(mainFilesTempSubDir, mainFileDecodedName);
                     await mainFile.mv(mainFileLocalPath);
-                    
-                    // Конвертуємо файл в PDF, якщо він не PDF
-                    await processLocalFiles(mainFileTempDir.replace(/\\/g, '/'), branch.depId);
-                    
-                    const processedFiles = await fs.readdir(mainFileTempDir);
-                    const mainPdfFileName = processedFiles.find(f => f.toLowerCase().endsWith('.pdf'));
+                }
 
-                    if (!mainPdfFileName) {
-                        logger.warn(`[${corId}] - Не вдалося сконвертувати файл ${mainFileDecodedName} в PDF. Пропускаємо.`);
-                        continue; // Пропускаємо файл, якщо конвертація не вдалася
-                    }
-
-                    const mainPdfPath = path.join(mainFileTempDir, mainPdfFileName);
-
-                    // Додаємо оброблений PDF в список для об'єднання
-                    pdfsToMerge.push(mainPdfPath);
+                // Обробляємо всі файли в піддиректорії ОДИН РАЗ після того, як всі файли переміщено
+                const processedResult = await processLocalFiles(mainFilesTempSubDir, branch.depId);
+                if (processedResult.pdfFiles.length > 0) {
+                    processedResult.pdfFiles.forEach(pdfName => {
+                        pdfsToMerge.push(path.join(mainFilesTempSubDir, pdfName));
+                    });
+                } else {
+                    logger.warn(`[${corId}] - Не вдалося сконвертувати або знайти PDF файли в ${mainFilesTempSubDir}. Пропускаємо.`);
                 }
             }
 
             // 3. Об'єднуємо всі PDF-файли в один
             if (pdfsToMerge.length > 0) {
                 logger.info(`[${corId}] - Запускаємо об'єднання ${pdfsToMerge.length} PDF-файлів. Порядок: ${JSON.stringify(pdfsToMerge)}`);
-                
-                const mergedPdfBuffer = await appendPdfToExistingPdf(pdfsToMerge);
-                if (mergedPdfBuffer) {
-                    mergedPdfPath = path.join(__dirname, 'temp', `${corId}_merged.pdf`);
-                    await fs.writeFile(mergedPdfPath, mergedPdfBuffer);
-                    // Оновлюємо масив файлів для завантаження: тепер це один об'єднаний файл
-                    filesToUpload = [{ name: `${corId}_merged.pdf`, localPath: mergedPdfPath }];
+                // Перевіряємо наявність файлів перед об'єднанням
+                const existingPdfsForMerge = [];
+                for (const p of pdfsToMerge) {
+                    if (existsSync(p)) {
+                        existingPdfsForMerge.push(p);
+                    } else {
+                        logger.warn(`[${corId}] - Очікуваний PDF файл ${p} не знайдено під час підготовки до об'єднання.`);
+                    }
+                }
+
+                if (existingPdfsForMerge.length > 0) {
+                    const mergedPdfBuffer = await appendPdfToExistingPdf(existingPdfsForMerge);
+                    if (mergedPdfBuffer) {
+                        mergedPdfPath = path.join(tempWorkingDir, `${corId}_merged.pdf`);
+                        await fs.writeFile(mergedPdfPath, mergedPdfBuffer);
+                        filesToUpload = [{ name: `${corId}_merged.pdf`, localPath: mergedPdfPath }];
+                    } else {
+                        logger.error(`[${corId}] - Об'єднання PDF не вдалося. mergedPdfBuffer is undefined. Спроба завантажити файли окремо.`);
+                        // Якщо об'єднання не вдалося, завантажуємо існуючі окремі PDF
+                        filesToUpload = existingPdfsForMerge.map(pdfPath => ({ name: path.basename(pdfPath), localPath: pdfPath }));
+                    }
                 } else {
-                    logger.error(`[${corId}] - Об'єднання PDF не вдалося. mergedPdfBuffer is undefined. Спроба завантажити файли окремо.`);
-                    // Якщо об'єднання не вдалося, завантажуємо файли як є
-                    filesToUpload = pdfsToMerge.map(pdfPath => ({ name: path.basename(pdfPath), localPath: pdfPath }));
+                    logger.error(`[${corId}] - Немає існуючих PDF файлів для об'єднання.`);
+                    if (isFileRequired) {
+                        return res.status(400).json({ message: "Не вдалося обробити завантажені файли." });
+                    }
+                    filesToUpload = []; // Немає файлів для завантаження
                 }
             } else {
-                // Якщо жоден файл не вдалося обробити, повертаємо помилку
+                // Якщо жоден файл не вдалося обробити або завантажити
                 if (isFileRequired) {
                     return res.status(400).json({ message: "Не вдалося обробити завантажені файли." });
                 }
-                // Якщо файли не були обов'язковими, просто продовжуємо без них
                 logger.warn(`[${corId}] - Немає файлів для завантаження.`);
+                filesToUpload = [];
+            }
+        } else { // Якщо не shouldDownloadPdfs, то обробляємо лише оригінальні завантажені файли
+            if (uploadedFiles.length > 0) {
+                const tempDirForOriginals = path.join(tempWorkingDir, 'original_uploads');
+                await fs.mkdir(tempDirForOriginals, { recursive: true });
+                for (const mainFile of uploadedFiles) {
+                    const mainFileDecodedName = iconv.decode(Buffer.from(mainFile.name, "binary"), "utf-8");
+                    const mainFileLocalPath = path.join(tempDirForOriginals, mainFileDecodedName);
+                    await mainFile.mv(mainFileLocalPath);
+                }
+
+                const processedResult = await processLocalFiles(tempDirForOriginals, branch.depId);
+                const processedPdfFileNames = processedResult.pdfFiles;
+
+                if (processedPdfFileNames.length > 0) {
+                    filesToUpload = processedPdfFileNames.map(pdfName => ({
+                        name: pdfName,
+                        localPath: path.join(tempDirForOriginals, pdfName)
+                    }));
+                } else {
+                    logger.error(`[${corId}] - Не вдалося обробити оригінальні завантажені файли в PDF.`);
+                    if (isFileRequired) {
+                        return res.status(400).json({ message: "Не вдалося обробити завантажені файли." });
+                    }
+                    filesToUpload = [];
+                }
+            } else {
+                if (isFileRequired) {
+                    return res.status(400).json({ message: "Файл не вибрано" });
+                }
                 filesToUpload = [];
             }
         }
 
-        const remoteFolderIdentifier = await storage.ensureDir(folderPath);
-
         // 4. Завантажуємо фінальні файли у сховище
+        const storage = await getStorageAdapter(branch);
+        const remoteFolderPath = `/${corId}`;
+        const finalFilesToUpload = [];
         for (const file of filesToUpload) {
-            const decodedFileName = iconv.decode(Buffer.from(file.name, "binary"), "utf-8");
-            const localPath = file.localPath || path.join(__dirname, "temp", decodedFileName);
-            
-            // Якщо файл ще не збережений локально (стандартний потік)
-            if (!file.localPath) {
-                await file.mv(localPath);
+            if (existsSync(file.localPath)) {
+                finalFilesToUpload.push(file);
+            } else {
+                logger.error(`[${corId}] - Файл для завантаження не знайдено: ${file.localPath}`);
             }
-            
-            // Використовуємо наш адаптер. Для FTP remoteFolderIdentifier буде undefined, тому шлях буде правильним.
-            // Для Google Drive remoteFolderIdentifier буде ID папки.
-            const remoteTarget = branch.storage.type === 'google-drive' ? remoteFolderIdentifier : `${folderPath}/${decodedFileName}`;
-            await storage.uploadFrom(localPath, remoteTarget);
+        }
 
-            if (!file.localPath) { // Видаляємо тимчасовий файл, тільки якщо він не є частиною процесу об'єднання
-                await fs.unlink(localPath);
+        if (finalFilesToUpload.length === 0) {
+            if (isFileRequired) {
+                return res.status(400).json({ message: "Не вдалося підготувати файли для завантаження." });
+            }
+            logger.warn(`[${corId}] - Немає фінальних файлів для завантаження.`);
+        } else {
+            const remoteFolderIdentifier = await storage.ensureDir(remoteFolderPath);
+            for (const file of finalFilesToUpload) {
+                const decodedFileName = iconv.decode(Buffer.from(file.name, "binary"), "utf-8");
+                const remoteTarget = branch.storage.type === 'google-drive' ? remoteFolderIdentifier : `${remoteFolderPath}/${decodedFileName}`;
+                await storage.uploadFrom(file.localPath, remoteTarget);
             }
         }
 
@@ -966,41 +1013,59 @@ app.post("/upload", async (req, res) => {
             messageId
         }, branch.db);
 
-        logger.info(`[${phoneNumber}] [${corId}] - Файл успішно завантажено на FTP. Статус SMS (${lang}): ${smsStatusText}`);
+        // Визначаємо назву сховища для коректного логування та відповіді
+        const storageTypeName = branch.storage.type === 'google-drive' ? 'Google Drive' : 'FTP';
+
+        logger.info(`[${phoneNumber}] [${corId}] - Файл успішно завантажено на ${storageTypeName}. Статус SMS (${lang}): ${smsStatusText}`);
         res.json({
-            message: "Файл успішно завантажено на FTP",
+            message: `Файл успішно завантажено на ${storageTypeName}`,
             smsStatus: smsStatusText,
             isSuccess: isSmsSuccess(smsStatusCode)
         });
-
-        // Очищення тимчасових файлів після всіх операцій
-        const cleanupPaths = pdfsToMerge
-            .map(p => path.dirname(p)).filter(Boolean) // Отримуємо папки всіх тимчасових PDF
-            .concat(mergedPdfPath ? [path.dirname(mergedPdfPath)] : []) // Додаємо папку об'єднаного PDF
-            .concat(uploadedFiles.map((_, index) => path.join(__dirname, 'temp', `main_${corId}_${index}`))) // Додаємо папки всіх основних файлів
-            .filter((value, index, self) => self.indexOf(value) === index); // Залишаємо тільки унікальні шляхи
-
-        for (const dirPath of cleanupPaths) {
-            try {
-                if (existsSync(dirPath)) {
-                    await fs.rm(dirPath, { recursive: true, force: true });
-                    logger.info(`[${corId}] - Тимчасову директорію ${dirPath} видалено.`);
-                }
-            } catch (cleanupError) {
-                logger.error(`[${corId}] - Помилка видалення тимчасової директорії ${dirPath}: ${cleanupError.message}`);
-            }
-        }
 
     } catch (error) {
         console.error("Помилка:", error);
         logger.error(`[${phoneNumber}] [${corId}] - Помилка при завантаженні файлу: ${error.message}`);
         res.status(500).json({ message: "Помилка при завантаженні файлу" });
+    } finally {
+        // Очищення центральної тимчасової директорії для цього запиту
+        if (existsSync(tempWorkingDir)) {
+            await fs.rm(tempWorkingDir, { recursive: true, force: true }).catch(err => {
+                logger.error(`[${corId}] - Помилка видалення тимчасової директорії ${tempWorkingDir}: ${err.message}`);
+            });
+        }
     }
 });
 
 // --- Маршрут для відправки довільного SMS ---
 app.post("/send-custom-sms", async (req, res) => {
-    // ... (логіка відправки довільного SMS)
+    const { phoneNumber, messageText, patientName } = req.body;
+    const lang = req.headers['accept-language']?.startsWith('en') ? 'en' : (req.headers['accept-language']?.startsWith('ka') ? 'geo' : 'uk');
+
+    if (!phoneNumber || !messageText) {
+        return res.status(400).json({ isSuccess: false, message: "Номер телефону та текст повідомлення є обов'язковими." });
+    }
+
+    const referer = req.get('Referer');
+    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
+
+    if (!branch || !branch.sms || !branch.sms.token) {
+        return res.status(400).json({ isSuccess: false, message: "Не вдалося визначити конфігурацію для відправки SMS." });
+    }
+
+    try {
+        // Для довільного SMS код доступу (corId) не потрібен, тому передаємо null.
+        // Функція sendSMS коректно обробить це і не буде додавати посилання.
+        const smsResult = await sendSMS(phoneNumber, null, messageText, branch);
+        const smsStatusCode = smsResult.response_code ?? (smsResult.error ? 999 : -1);
+        const smsStatusText = getStatusDescription(smsStatusCode, lang);
+
+        logger.info(`[${phoneNumber}] [custom] - Відправлено довільне SMS. Статус: ${smsStatusText}`);
+        res.json({ isSuccess: isSmsSuccess(smsStatusCode), message: smsStatusText });
+    } catch (error) {
+        logger.error(`[${phoneNumber}] [custom] - Помилка відправки довільного SMS: ${error.message}`);
+        res.status(500).json({ isSuccess: false, message: `Помилка сервера: ${error.message}` });
+    }
 });
 
 /**
@@ -1027,6 +1092,10 @@ app.post("/trigger-sms-update", (req, res) => {
  */
 const displayPdfRoute = async (req, res) => {
   const key = Object.keys(req.query)[0];
+  // Determine language for error messages
+  const langHeader = req.headers['accept-language'] || 'uk';
+  const lang = langHeader.startsWith('en') ? 'en' : (langHeader.startsWith('ka') ? 'geo' : 'uk');
+
   if (!key) {
       return sendErrorPage(res, "Помилка запиту", "Не вказано ідентифікатор результату. Будь ласка, перевірте посилання.", 400);
   }
@@ -1037,82 +1106,109 @@ const displayPdfRoute = async (req, res) => {
 
   // Визначаємо філіал за URL-шляхом запиту (наприклад, /rd, /ct)
   const branch = Object.values(BRANCHES).find(b => b.resultPath && req.path === b.resultPath);
+  let branchDisplayName = '';
   if (!branch) {
       return sendErrorPage(res, "Помилка конфігурації", `Не вдалося визначити філіал для цього запиту.`, 404);
   }
+  branchDisplayName = translations[lang]?.[branch.clinicNameKey] || branch.depId;
+
+  const tempDisplayDir = path.join(__dirname, 'temp', key); // Використовуємо тимчасову директорію для відображення
+  let filesInDir = []; // Ініціалізуємо список файлів
 
   try {
+    await fs.mkdir(tempDisplayDir, { recursive: true }); // Переконуємось, що тимчасова директорія існує
+
     const storage = await getStorageAdapter(branch);
-    const directoryPath = path.join(__dirname, `/${key}`);
+    const remoteFolderIdentifier = branch.storage.type === 'google-drive' ? await storage.ensureDir(`/${key}`) : `/${key}`;
+    const filesToDownload = await storage.list(remoteFolderIdentifier);
 
-    // Перевіряємо, чи існує директорія. Якщо ні, завантажуємо файли зі сховища.
-    if (!existsSync(directoryPath)) {
-      logger.info(`[${key}] - Локальної директорії не знайдено. Завантаження файлів зі сховища (${branch.storage.type})...`);
-      await fs.mkdir(directoryPath, { recursive: true });
-
-      // Отримуємо список файлів зі сховища
-      const remoteFolderIdentifier = branch.storage.type === 'google-drive' ? await storage.ensureDir(`/${key}`) : `/${key}`;
-      const filesToDownload = await storage.list(remoteFolderIdentifier);
-
-      // Перевіряємо, чи є що завантажувати
-      if (!filesToDownload || filesToDownload.length === 0) {
-          logger.warn(`[${key}] - За введеним кодом не знайдено файлів у сховищі (${branch.storage.type}).`);
-          return sendErrorPage(res, "Результат не знайдено", "Результат за цим кодом ще не готовий або код невірний. Будь ласка, перевірте код або спробуйте пізніше.", 404);
-      }
-
-      // Завантажуємо кожен файл
-      for (const file of filesToDownload) { // filesToDownload - це масив об'єктів { id, name, ... }
-          const remoteFilePath = branch.storage.type === 'google-drive' ? file.id : `${remoteFolderIdentifier}/${file.name}`;
-          const localFilePath = path.join(directoryPath, file.name);
-          await storage.downloadTo(remoteFilePath, localFilePath);
-      }
-      // Після завантаження запускаємо обробку (конвертацію, додавання фону і т.д.)
-      await processLocalFiles(key, branch.depId);
+    // Перевіряємо, чи є що завантажувати
+    if (!filesToDownload || filesToDownload.length === 0) {
+        logger.warn(`[${key}] - За введеним кодом не знайдено файлів у сховищі (${branch.storage.type}).`);
+        return sendErrorPage(res, "Результат не знайдено", "Результат за цим кодом ще не готовий або код невірний. Будь ласка, перевірте код або спробуйте пізніше.", 404, branchDisplayName);
     }
 
-    let filesInDir = await fs.readdir(directoryPath);
-    if (filesInDir.length === 0) {
-      logger.warn(`[${key}] - Директорія порожня після обробки. Повторна спроба обробки FTP.`);
-      await processLocalFiles(key, branch.depId); // Повторна спроба, якщо файли не з'явились
-      filesInDir = await fs.readdir(directoryPath);
+    // Завантажуємо кожен файл у тимчасову директорію
+    for (const file of filesToDownload) { // filesToDownload - це масив об'єктів { id, name, ... }
+        const remoteFilePath = branch.storage.type === 'google-drive' ? file.id : `${remoteFolderIdentifier}/${file.name}`;
+        const localFilePath = path.join(tempDisplayDir, file.name);
+        await storage.downloadTo(remoteFilePath, localFilePath);
     }
+    // Після завантаження запускаємо обробку (конвертацію, очищення метаданих)
+    const processedResult = await processLocalFiles(tempDisplayDir, branch.depId);
+    filesInDir = processedResult.pdfFiles; // Отримуємо список успішно оброблених PDF-файлів (базові імена)
 
     if (filesInDir.length === 0) {
-        logger.error(`[${key}] - Файли для обробки не знайдено навіть після повторної спроби.`);
-        return sendErrorPage(res, "Результат не знайдено", "На жаль, файли для цього дослідження не знайдено. Можливо, вони ще в обробці.", 404);
+        logger.error(`[${key}] - Файли для обробки не знайдено після обробки.`);
+        return sendErrorPage(res, "Результат не знайдено", "На жаль, файли для цього дослідження не знайдено. Можливо, вони ще в обробці.", 404, branchDisplayName);
     }
 
-    let finalPdfBuffer;
+    let finalPdfBuffer = null;
 
-    if (filesInDir.length === 1) {
-        // Якщо файл один, просто читаємо його
-        const filePath = path.join(directoryPath, filesInDir[0]);
-        finalPdfBuffer = await fs.readFile(filePath);
-    } else {
-        // Якщо файлів декілька, об'єднуємо їх
-        logger.info(`[${key}] - Знайдено ${filesInDir.length} файлів. Запускаємо об'єднання...`);
-        const masterPdfPath = path.join(directoryPath, filesInDir[0]);
-        const masterPdfBuffer = await fs.readFile(masterPdfPath);
-        const otherPdfFiles = filesInDir.slice(1);
+    try {
+        const pdfPathsToMerge = filesInDir.map(file => path.join(tempDisplayDir, file)); // Створюємо повні шляхи
 
-        // Викликаємо оригінальну функцію з labrequest.js
-        finalPdfBuffer = await appendPdfToExistingPdf(masterPdfBuffer, otherPdfFiles, null, directoryPath);
+        // Перевіряємо наявність файлів перед об'єднанням
+        const existingPdfPaths = [];
+        for (const p of pdfPathsToMerge) {
+            if (existsSync(p)) {
+                existingPdfPaths.push(p);
+            } else {
+                logger.warn(`[${key}] - Очікуваний PDF файл ${p} не знайдено під час підготовки до об'єднання.`);
+            }
+        }
+
+        if (existingPdfPaths.length === 0) {
+            logger.error(`[${key}] - Жодного існуючого PDF файлу не знайдено для об'єднання/відправки.`);
+            return sendErrorPage(res, "Помилка обробки PDF", "Не вдалося знайти жодного PDF файлу для відображення.", 500, branchDisplayName);
+        }
+
+        if (existingPdfPaths.length === 1) {
+            // Якщо файл один, просто читаємо його
+            finalPdfBuffer = await fs.readFile(existingPdfPaths[0]);
+        } else {
+            // Якщо файлів декілька, об'єднуємо їх
+            logger.info(`[${key}] - Знайдено ${existingPdfPaths.length} файлів. Запускаємо об'єднання...`);
+            finalPdfBuffer = await appendPdfToExistingPdf(existingPdfPaths);
+        }
+    } catch (pdfProcessingError) {
+        logger.error(`[${key}] - Помилка під час створення або об'єднання PDF: ${pdfProcessingError.message}`);        
+        return sendErrorPage(res, "Помилка обробки PDF", "Не вдалося обробити або об'єднати PDF файли.", 500, branchDisplayName);
     }
 
-    // Відправляємо готовий PDF-файл клієнту.
-    res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `inline; filename="${key}.pdf"`);
-    res.send(finalPdfBuffer);
+    // Перевіряємо, чи був успішно створений буфер PDF
+    if (!finalPdfBuffer) {
+        logger.error(`[${key}] - Фінальний PDF-буфер порожній після спроби об'єднання/читання.`);
+        return sendErrorPage(res, "Помилка створення файлу", "Не вдалося створити фінальний PDF-документ. Можливо, один з файлів пошкоджено.", 500, branchDisplayName);
+    }
+
+    // Зберігаємо фінальний буфер у тимчасовий файл перед відправкою
+    const finalPdfPath = path.join(tempDisplayDir, `${key}_final.pdf`);
+    try {
+        await fs.writeFile(finalPdfPath, finalPdfBuffer);
+        logger.info(`[${key}] - Фінальний PDF успішно збережено локально: ${finalPdfPath}`);
+    } catch (writeError) {
+        logger.error(`[${key}] - Помилка збереження фінального PDF: ${writeError.message}`);
+        return sendErrorPage(res, "Помилка збереження файлу", "Не вдалося зберегти фінальний PDF-документ перед відправкою.", 500, branchDisplayName);
+    }
+
+    // Відправляємо готовий PDF-файл клієнту, читаючи його з диска.
+    res.sendFile(finalPdfPath, {
+        headers: {
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename="${key}.pdf"`
+        }
+    });
 
     res.on('finish', () => {
         // Додаємо затримку перед видаленням, щоб уникнути помилок блокування файлів на Windows
         setTimeout(() => {
-            cleanupFiles(null, directoryPath, key);
+            cleanupFiles(null, tempDisplayDir, key); // Очищаємо тимчасову директорію
         }, 10000); // 10 секунд
     });
   } catch (error) {
     logger.error(`[${key}] - Помилка обробки: ${error.message}`);
-    sendErrorPage(res, "Помилка сервера", `Під час обробки вашого запиту сталася внутрішня помилка. Будь ласка, спробуйте пізніше.`, 500);
+    sendErrorPage(res, "Помилка сервера", `Під час обробки вашого запиту сталася внутрішня помилка. Будь ласка, спробуйте пізніше.`, 500, branchDisplayName);
   }
 };
 
@@ -1121,8 +1217,11 @@ app.get("/pdf-data/:key", async (req, res) => {
     const { key } = req.params;
     if (!key) return res.status(400).send("Не вказано ID результату.");
 
-    const directoryPath = path.join(__dirname, `/${key}`);
-    const filePath = path.join(directoryPath, `${key}.pdf`); // Припускаємо, що файл завжди називається key.pdf
+    // Цей маршрут, ймовірно, застарів або використовується для іншого сценарію.
+    // Якщо він має віддавати PDF, який вже був оброблений і збережений,
+    // то шлях до файлу має бути в тимчасовій директорії.
+    const directoryPath = path.join(__dirname, 'temp', key); // Припускаємо, що файл знаходиться в temp/${key}
+    const filePath = path.join(directoryPath, `${key}_final.pdf`); // Припускаємо, що фінальний файл називається key_final.pdf
 
     try {
         if (existsSync(filePath)) {
@@ -1132,7 +1231,7 @@ app.get("/pdf-data/:key", async (req, res) => {
                 }
                 // Додаємо затримку, щоб уникнути помилки EPERM на Windows.
                 setTimeout(() => {
-                    cleanupFiles(filePath, directoryPath, key);
+                    cleanupFiles(null, directoryPath, key); // Очищаємо всю тимчасову директорію
                 }, 10000); // Затримка 10 секунд
             });
         } else {
@@ -1148,6 +1247,8 @@ app.get("/pdf-data/:key", async (req, res) => {
 app.get("/mrt", displayPdfRoute);
 app.get("/ct", displayPdfRoute);
 app.get("/rd", displayPdfRoute);
+app.get("/zdvrd",displayPdfRoute);
+app.get("/ol",displayPdfRoute);
 
 /**
  * @description Повертає текстовий опис для коду статусу TurboSMS.
@@ -1186,8 +1287,8 @@ server1.listen(process.env.PORT1 || 3000, () => {
 
 const server2 = http.createServer(app);
 server2.listen(process.env.PORT2 || 1026, async () => {
-    console.log(`Server is running on port ${process.env.PORT2 || 1026}`);
-    logger.info(`Server is running on port ${process.env.PORT2 || 1026}`);
+    console.log(`Server is running on port ${process.env.PORT2 || 1080}`);
+    logger.info(`Server is running on port ${process.env.PORT2 || 1080}`);
     
     // Завантажуємо переклади перед початком роботи
     await loadTranslations();

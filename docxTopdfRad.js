@@ -25,8 +25,19 @@ export async function convertDocxToPdf(docxPath, outputPdfPath) {
         const command = `${libreOfficePath} --headless --convert-to pdf --outdir "${absoluteOutDir}" "${absoluteDocxPath}"`;
         exec(command, (error, stdout, stderr) => {
             if (error) return reject(new Error(`Помилка при конвертації: ${error.message}. Stderr: ${stderr}`));
-            if (stderr && !stderr.includes('writer_pdf_Export')) return reject(new Error(`Сталася помилка: ${stderr}`));
-            resolve(`Конвертація завершена! PDF збережено за адресою: ${outputPdfPath}`);
+            
+            // LibreOffice може виводити попередження в stderr, але все одно успішно конвертувати.
+            // Перевіряємо, чи stderr містить явні ознаки помилки.
+            if (stderr && (stderr.toLowerCase().includes('error') || stderr.toLowerCase().includes('failed'))) {
+                return reject(new Error(`Сталася помилка під час конвертації: ${stderr}`));
+            }
+
+            // Важлива перевірка: переконуємось, що вихідний PDF файл дійсно існує
+            fs.access(outputPdfPath)
+                .then(() => resolve(`Конвертація завершена! PDF збережено за адресою: ${outputPdfPath}`))
+                .catch(() => reject(new Error(`Конвертація завершилась, але вихідний PDF файл ${outputPdfPath} не знайдено.`)));
+
+            
         });
     });
 }
@@ -74,48 +85,61 @@ export function changeExtensionToPdf(filePath) {
 
 // Локальна обробка файлів (конвертація, метадані, фон)
 export async function processLocalFiles(directoryId, DepartmentId = null) {
+    const successfullyProcessedPdfPaths = []; // Зберігаємо повні шляхи успішно оброблених PDF
     try {
         const localFiles = await fs.readdir(directoryId);
 
         if (!localFiles || localFiles.length === 0) {
-            throw new Error('У локальній директорії відсутні файли для обробки');
+            console.warn(`[processLocalFiles] У локальній директорії ${directoryId} відсутні файли для обробки.`);
+            return { WebPath: path.basename(directoryId), pdfFiles: [] };
         }
 
         for (const localFile of localFiles) {
+            const inputPath = path.join(directoryId, localFile);
+            const outputPdfPath = path.join(directoryId, changeExtensionToPdf(localFile));
+
             try {
-                console.log(`Обробляємо локальний файл: ${localFile}`);
-                const inputPath = path.join(directoryId, localFile);
-                const outputPdfPath = path.join(directoryId, changeExtensionToPdf(localFile));
+                console.log(`[processLocalFiles] Обробляємо локальний файл: ${localFile}`);
 
                 if (/\.(docx?)$/i.test(localFile)) {
                     // DOCX → конвертація
-                    const message = await convertDocxToPdf(inputPath, outputPdfPath);
-                    console.log(message);
-
-                    // очищаємо метадані
-                    await removePdfMetadata(outputPdfPath);
-
-                    // видаляємо оригінал DOCX
-                    await fs.unlink(inputPath).catch(err => {
-                        if (err.code !== 'ENOENT') throw err; // Ігноруємо помилку, тільки якщо файл не знайдено
-                        console.log(`Файл ${inputPath} вже був видалений, пропускаємо.`);
-                    });
+                    try {
+                        await convertDocxToPdf(inputPath, outputPdfPath);
+                        // Після успішної конвертації перевіряємо, чи існує вихідний PDF
+                        if (await fs.access(outputPdfPath).then(() => true).catch(() => false)) {
+                            await removePdfMetadata(outputPdfPath);
+                            successfullyProcessedPdfPaths.push(outputPdfPath);
+                        } else {
+                            console.error(`[processLocalFiles] Помилка: Конвертація DOCX ${localFile} в PDF не створила файл ${outputPdfPath}.`);
+                        }
+                    } catch (conversionError) {
+                        handleError(`Конвертація DOCX ${localFile}`, conversionError);
+                    } finally {
+                        // Завжди намагаємося видалити оригінальний DOCX файл
+                        if (await fs.access(inputPath).then(() => true).catch(() => false)) {
+                            await fs.unlink(inputPath).catch(err => {
+                                if (err.code !== 'ENOENT') handleError(`Видалення DOCX ${inputPath}`, err);
+                            });
+                        }
+                    }
                 } else if (localFile.toLowerCase().endsWith('.pdf')) {
                     // PDF → очищення метаданих
-                    await removePdfMetadata(inputPath);
+                    if (await fs.access(inputPath).then(() => true).catch(() => false)) {
+                        await removePdfMetadata(inputPath);
+                        successfullyProcessedPdfPaths.push(inputPath);
+                    } else {
+                        console.warn(`[processLocalFiles] PDF файл ${inputPath} не існує, пропускаємо очищення метаданих.`);
+                    }
                 } else {
-                    console.warn(`⚠ Файл ${localFile} має непідтримуване розширення`);
+                    console.warn(`[processLocalFiles] Файл ${localFile} має непідтримуване розширення, пропускаємо.`);
                 }
-
             } catch (fileError) {
                 handleError(`Обробка файлу ${localFile}`, fileError);
             }
         }
 
-        const files = await fs.readdir(directoryId);
-        console.log('Список файлів:', files);
-
-        return { WebPath: path.basename(directoryId), pdfFiles: files };
+        console.log(`[processLocalFiles] Завершено обробку. Знайдено ${successfullyProcessedPdfPaths.length} PDF файлів.`);
+        return { WebPath: path.basename(directoryId), pdfFiles: successfullyProcessedPdfPaths.map(p => path.basename(p)) };
     } catch (e) {
         handleError('Локальна обробка файлів', e);
         throw e;

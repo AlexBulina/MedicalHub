@@ -52,7 +52,7 @@ export async function checkCodeExists(code, dbConfig) {
             query = `SELECT number FROM UniqueRandomNumbers WHERE number = '${code}'`;
         }
         const result = await executeQuery(query, dbConfig);
-        return result && result.length > 0;
+        return !!(result && result.length > 0);
     }
 }
 
@@ -109,16 +109,17 @@ export async function saveUniqueId(params, dbConfig) {
  */
 export async function createPatient({ firstName, lastName, dob, phone, gender }, dbConfig) {
     const dbType = dbConfig.type || 'sybase';
-    const formattedGender = gender === 'male' ? 'M' : (gender === 'female' ? 'F' : gender);
-
+    
     if (dbType === 'mongodb') {
-        const existingPatient = await runMongoOperation(dbConfig, 'Pacient', 'findOne', {
+        const existingPatient = await runMongoOperation(dbConfig, 'pacients', 'findOne', {
             query: { meno: firstName, priezvisko: lastName, datumnarod: new Date(dob) }
         });
 
         if (existingPatient) {
-            return [{ status: 'Patient already exists' }];
+            return [{ status: 'Patient already exists' }]; // Українською: "Пацієнт вже існує"
         }
+
+        const formattedGender = gender === 'male' ? 'M' : (gender === 'female' ? 'F' : gender);
 
         const newPatient = {
             meno: firstName,
@@ -129,13 +130,45 @@ export async function createPatient({ firstName, lastName, dob, phone, gender },
             createdAt: new Date()
             // rodcis генерується автоматично в MongoDB як _id
         };
-        const result = await runMongoOperation(dbConfig, 'Pacient', 'insertOne', { document: newPatient });
-        return [{ status: 'Patient created', rodcis: result.insertedId.toString() }];
+        const result = await runMongoOperation(dbConfig, 'pacients', 'insertOne', { document: newPatient });
+        return [{ status: 'Patient created', rodcis: result.insertedId.toString() }]; // Українською: "Пацієнта створено"
     } else {
         let query;
         if (dbType === 'oracle') {
-            query = `SELECT 'Oracle createPatient not implemented' AS status FROM DUAL`;
+            // Oracle процедура очікує кириличні значення 'ч' або 'ж'
+            const formattedGender = gender === 'male' ? 'ч' : (gender === 'female' ? 'ж' : gender);
+
+            // Тимчасова конфігурація для підключення до тестової бази даних Oracle
+          //  const tempDbConfig = {
+           //     type: 'oracle',
+           //     user: 'onelab_dev',
+          //      password: 'color',
+          //      connectString: '10.0.0.10:1521/nuni'
+         //   };
+
+            // Викликаємо збережену процедуру для створення пацієнта
+            query = `
+                BEGIN
+                    create_patient_by_medical_hub(p_first_name => :p_first_name,
+                                                 p_last_name  => :p_last_name,
+                                                 p_dob        => TO_DATE(:p_dob, 'YYYY-MM-DD'),
+                                                 p_tel        => :p_tel,
+                                                 p_sex        => :p_sex);
+                END;`;
+            const binds = { p_first_name: firstName, p_last_name: lastName, p_dob: dob, p_tel: phone, p_sex: formattedGender };
+            const result = await executeQuery(query, dbConfig, binds);
+            // Якщо процедура виконалась без помилок, повертаємо успішний статус.
+            // Обробка помилок (напр., дублікат пацієнта) має бути реалізована в самій процедурі.
+            if (result !== undefined) {
+                return [{ status: 'Patient created' }];
+            }
+            // Якщо executeQuery повернув undefined, це означає, що сталася помилка на рівні БД.
+            // Помилка буде оброблена в блоці catch у KT_BackendNew.js
+            return undefined;
         } else { // Sybase
+            // Sybase очікує латинські значення 'M' або 'F'
+            const formattedGender = gender === 'male' ? 'M' : (gender === 'female' ? 'F' : gender);
+
             query = `
                 DECLARE @new_rodcis CHAR(10)
                 SELECT @new_rodcis = RIGHT('0000000000' || CAST(CAST(MAX(rodcis) AS INT) + 1 AS VARCHAR(10)), 10)
@@ -160,7 +193,7 @@ export async function createPatient({ firstName, lastName, dob, phone, gender },
                 END
             `;
         }
-        return executeQuery(query, dbConfig);
+        return executeQuery(query, dbConfig); // Цей виклик для Sybase
     }
 }
 
@@ -177,7 +210,7 @@ export async function updatePatientPhone({ phone, rodcisActual }, dbConfig) {
         // В MongoDB _id є незмінним, тому ми шукаємо за іншими полями або оновлюємо по _id
         // Припускаємо, що rodcisActual - це _id з MongoDB
         const { ObjectId } = await import('mongodb');
-        const result = await runMongoOperation(dbConfig, 'Pacient', 'updateOne', {
+        const result = await runMongoOperation(dbConfig, 'pacients', 'updateOne', { // Використовуємо правильну назву колекції
             filter: { _id: new ObjectId(rodcisActual) },
             update: { $set: { tel: phone } }
         });
@@ -226,21 +259,23 @@ export async function searchPatients({ lastName, firstName, limit, offset }, dbC
     };
 
     if (dbType === 'mongodb') {
+        console.log(`[DB] Пошук пацієнтів в MongoDB. Прізвище: ${lastName}, Ім'я: ${firstName}`);
+
         const query = {
-            priezvisko: { $regex: `^${lastName}`, $options: 'i' }
+            priezvisko: { $regex: `^${lastName}`, $options: 'i' } // Виправлено поле на `priezvisko`
         };
         if (firstName) {
-            query.meno = { $regex: `^${firstName}`, $options: 'i' };
+            query.meno = { $regex: `^${firstName}`, $options: 'i' }; // Виправлено поле на `meno`
         }
 
-        const total = await runMongoOperation(dbConfig, 'Pacient', 'countDocuments', { query });
-        const results = await runMongoOperation(dbConfig, 'Pacient', 'find', {
+        const total = await runMongoOperation(dbConfig, 'pacients', 'countDocuments', { query });
+        const results = await runMongoOperation(dbConfig, 'pacients', 'find', {
             query,
             options: {
                 limit,
                 skip: offset,
-                sort: { priezvisko: 1, meno: 1 },
-                projection: { _id: 1, priezvisko: 1, meno: 1, datumnarod: 1, tel: 1, pohlavie: 1 }
+                sort: { priezvisko: 1, meno: 1 }, // Виправлено поля для сортування
+                projection: { _id: 1, priezvisko: 1, meno: 1, datumnarod: 1, tel: 1, pohlavie: 1 } // Виправлено поля для вибірки
             }
         });
 
@@ -249,13 +284,15 @@ export async function searchPatients({ lastName, firstName, limit, offset }, dbC
             rodcis: p._id.toString(),
             priezvisko: p.priezvisko,
             meno: p.meno,
-            datumnarod: p.datumnarod.toISOString().split('T')[0],
+            datumnarod: new Date(p.datumnarod).toISOString().split('T')[0],
             tel: p.tel,
             pohlavie: p.pohlavie
         }));
 
         return { results: formattedResults, total };
     } else {
+        console.log(`[DB] Пошук пацієнтів в ${dbType}. Прізвище: ${lastName}, Ім'я: ${firstName}`);
+
         let countQuery, dataQuery;
         if (dbType === 'oracle') {
             const whereClause = `WHERE lower("Повна назва") like lower('${lastName}%${firstName || ''}%')`;
@@ -355,14 +392,14 @@ export async function getJournalByDate({ date, depId }, dbConfig) {
         });
         // Адаптуємо результат до очікуваного формату
         return results.map(r => ({
-            webcode: r.ID,
-            created_at: r.created_at,
-            patient_name: r.patient,
-            phone_number: r.tel,
-            sms_status: r.turbo_sms_status,
+            webcode: r.ID, // `webcode` використовується на фронтенді
+            createdAt: r.created_at, // `createdAt` використовується на фронтенді
+            patientName: r.patient, // Уніфіковано до camelCase
+            phoneNumber: r.tel, // Уніфіковано до camelCase
+            smsStatus: r.turbo_sms_status, // `smsStatus` використовується на фронтенді
             department: r.department,
-            sms_status_code: r.turbo_sms_status_code,
-            delivery_status: r.turbo_sms_delivery_status
+            smsStatusCode: r.turbo_sms_status_code, // Уніфіковано до camelCase
+            deliveryStatus: r.turbo_sms_delivery_status // Уніфіковано до camelCase
         }));
     } else {
         let query;
@@ -421,7 +458,16 @@ export async function searchJournal({ term, depId, onlySuccessful }, dbConfig) {
                 limit: 50
             }
         });
-        return results; // Структура вже схожа на очікувану
+        // Адаптуємо результат до очікуваного формату, як і в getJournalByDate
+        return results.map(r => ({
+            webcode: r.ID,
+            createdAt: r.created_at,
+            patientName: r.patient,
+            phoneNumber: r.tel,
+            smsStatus: r.turbo_sms_status,
+            smsStatusCode: r.turbo_sms_status_code,
+            deliveryStatus: r.turbo_sms_delivery_status
+        }));
     } else {
         let query;
         if (dbType === 'oracle') {
@@ -474,7 +520,7 @@ export async function getPendingSmsRecords(dbConfig) {
             }
         });
         // Адаптуємо результат до очікуваного формату
-        return results.map(r => ({ messageId: r.turbo_sms_message_Id, department: r.department }));
+        return results.map(r => ({ messageid: r.turbo_sms_message_Id, department: r.department }));
     } else {
         let query;
         if (dbType === 'oracle') {

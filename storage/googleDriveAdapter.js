@@ -1,6 +1,7 @@
 // storage/googleDriveAdapter.js
 import { google } from 'googleapis';
 import { OAuth2Client } from 'google-auth-library';
+import { saveTokens } from '../tokenManager.js'; // Імпортуємо функцію збереження
 import fs, { createReadStream, createWriteStream } from 'fs';
 import path from 'path';
 
@@ -8,7 +9,7 @@ class GoogleDriveAdapter {
     constructor(config, tokens) {
         if (!tokens || !tokens.refresh_token) {
             // Створюємо помилку, яка буде перехоплена і пояснить, що робити
-            const authUrl = `http://localhost:1026/auth/google/${config.tokenKey}`;
+            const authUrl = `http://localhost:1090/auth/google/${config.tokenKey}`;
             throw new Error(`Токен доступу для '${config.tokenKey}' відсутній. Будь ласка, пройдіть авторизацію за посиланням: ${authUrl}`);
         }
         this.drive = this.authenticate(config, tokens);
@@ -19,9 +20,19 @@ class GoogleDriveAdapter {
     authenticate(config, tokens) {
         const { clientId, clientSecret, redirectUri } = config;
         const oauth2Client = new OAuth2Client(clientId, clientSecret, redirectUri);
-        
+
         // Встановлюємо отримані токени для клієнта
         oauth2Client.setCredentials(tokens);
+
+        // ВАЖЛИВО: Додаємо обробник події 'tokens'.
+        // Він спрацює, коли бібліотека автоматично оновить access_token.
+        oauth2Client.on('tokens', (newTokens) => {
+            console.log('Google Drive: Токени було оновлено.');
+            // Зберігаємо оновлені токени. Важливо зберегти і новий access_token,
+            // і refresh_token, якщо він раптом теж оновився (хоча це рідкість).
+            const finalTokens = { ...tokens, ...newTokens };
+            saveTokens(this.config.tokenKey, finalTokens);
+        });
 
         // Повертаємо готовий до роботи drive-клієнт
         return google.drive({ version: 'v3', auth: oauth2Client });
