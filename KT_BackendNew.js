@@ -28,6 +28,7 @@ import { appendPdfToExistingPdf } from './labrequestKT.js';
 import { getStorageAdapter } from './storage/storageFactory.js'; // <-- ІМПОРТУЄМО ФАБРИКУ
 import { sendViberMessage } from './turbosmsviber.js';
 import * as db from './database_repository.js'; // Імпортуємо наш новий репозиторій
+import { logDownload } from './download_logger.js'; // <-- ІМПОРТУЄМО НОВИЙ ЛОГЕР ЗАВАНТАЖЕНЬ
 import { downloadPartnerPdf } from './partner_pdf_downloader.js'; // Імпортуємо новий модуль
 import BRANCHES from './branches_config.js'; // <-- ІМПОРТУЄМО КОНФІГУРАЦІЮ
 
@@ -432,6 +433,7 @@ app.get('/config', async (req, res) => {
                 clinicName: translations[branch.clinicNameKey] || branch.clinicNameKey,
                 supportedLanguages: SUPPORTED_LANGUAGES, // Додаємо список мов
                 labResultUrl: branch.labResultUrl, // Додаємо URL для результатів лабораторії
+                labResultUrlEng: branch.labResultUrlEng, // <-- ДОДАНО: Передаємо URL для англомовної версії
                 hasPartnerLab: branch.hasPartnerLab, // Додаємо прапорець наявності лабораторії
                 partnerLabResultUrl: branch.partnerLabResultUrl, // Додаємо URL для результатів партнерської лабораторії
                 publicUrl: branch.publicUrl, // <-- ДОДАНО: Передаємо публічний URL
@@ -790,7 +792,7 @@ async function updateSmsStatuses(targetDepId = null) {
 
 // --- Маршрут для завантаження файлу ---
 app.post("/upload", async (req, res) => {
-    const { phoneNumber, depId, smsText, patientName, isDocSearchChecked, webCode, isPartnerSearchChecked, partnerWebCode } = req.body;
+    const { phoneNumber, depId, smsText, patientName, isDocSearchChecked, webCode, isEnglishVersion, isPartnerSearchChecked, partnerWebCode } = req.body;
 
     // Визначаємо, чи є обов'язковим файл. Файл не потрібен, якщо обрано результат з одного з пошуків.
     const isFileRequired = isDocSearchChecked !== 'true' && isPartnerSearchChecked !== 'true';
@@ -822,13 +824,27 @@ app.post("/upload", async (req, res) => {
         // Перевірка, чи потрібно завантажувати додаткові PDF
         const shouldDownloadPdfs = (isDocSearchChecked === 'true' && webCode) || (isPartnerSearchChecked === 'true' && partnerWebCode);
 
+        // Створюємо піддиректорії для кожного типу файлів
+        const mainUploadsDir = path.join(tempWorkingDir, 'main_uploads');
+        const docDownloadsDir = path.join(tempWorkingDir, 'doc_downloads');
+        const partnerDownloadsDir = path.join(tempWorkingDir, 'partner_downloads');
+
+        await fs.mkdir(mainUploadsDir, { recursive: true });
+        await fs.mkdir(docDownloadsDir, { recursive: true });
+        await fs.mkdir(partnerDownloadsDir, { recursive: true });
+
         if (shouldDownloadPdfs) {
             // Завантаження PDF з "Пошуку по документу"
             if (isDocSearchChecked === 'true' && webCode && branch.labResultUrl) {
-                const downloadUrl = `${branch.labResultUrl}/BackEnd/TestResult`;
-                logger.info(`[${corId}] - Завантаження PDF по документу (webCode: ${webCode}).`);
+                // Визначаємо URL залежно від вибору англійської версії
+                const downloadUrl = (isEnglishVersion === 'true' && branch.labResultUrlEng)
+                    ? branch.labResultUrlEng
+                    : `${branch.labResultUrl}/BackEnd/TestResult`;
+
+                logger.info(`[${corId}] - Завантаження PDF по документу (webCode: ${webCode}) у ${docDownloadsDir}.`);
                 try {
-                    const docPdfPath = await downloadPartnerPdf(webCode, downloadUrl, corId); // downloadPartnerPdf тепер зберігає в temp/${corId}
+                    // Зберігаємо завантажений PDF у спеціальну підпапку
+                    const docPdfPath = await downloadPartnerPdf(webCode, downloadUrl, docDownloadsDir);
                     pdfsToMerge.push(docPdfPath);
                 } catch (pdfError) {
                     logger.error(`[${corId}] - Помилка завантаження PDF по документу: ${pdfError.message}`);
@@ -837,9 +853,10 @@ app.post("/upload", async (req, res) => {
 
             // Завантаження PDF з "Пошуку по партнеру"
             if (isPartnerSearchChecked === 'true' && partnerWebCode && branch.partnerLabResultUrl) {
-                logger.info(`[${corId}] - Завантаження PDF партнера (webCode: ${partnerWebCode}).`);
+                logger.info(`[${corId}] - Завантаження PDF партнера (webCode: ${partnerWebCode}) у ${partnerDownloadsDir}.`);
                 try { 
-                    const partnerPdfPath = await downloadPartnerPdf(partnerWebCode, branch.partnerLabResultUrl, corId); // downloadPartnerPdf тепер зберігає в temp/${corId}
+                    // Зберігаємо завантажений PDF у спеціальну підпапку
+                    const partnerPdfPath = await downloadPartnerPdf(partnerWebCode, branch.partnerLabResultUrl, partnerDownloadsDir);
                     pdfsToMerge.push(partnerPdfPath);
                 } catch (pdfError) {
                     logger.error(`[${corId}] - Помилка завантаження PDF партнера: ${pdfError.message}`);
@@ -848,24 +865,21 @@ app.post("/upload", async (req, res) => {
             
             // 2. Обробляємо основні завантажені файли (якщо вони є)
             if (uploadedFiles.length > 0) {
-                const mainFilesTempSubDir = path.join(tempWorkingDir, 'main_uploads'); // Піддиректорія для основних завантажень
-                await fs.mkdir(mainFilesTempSubDir, { recursive: true });
-
                 // Переміщуємо всі завантажені файли до тимчасової директорії
                 for (const mainFile of uploadedFiles) {
                     const mainFileDecodedName = iconv.decode(Buffer.from(mainFile.name, "binary"), "utf-8");
-                    const mainFileLocalPath = path.join(mainFilesTempSubDir, mainFileDecodedName);
+                    const mainFileLocalPath = path.join(mainUploadsDir, mainFileDecodedName);
                     await mainFile.mv(mainFileLocalPath);
                 }
 
                 // Обробляємо всі файли в піддиректорії ОДИН РАЗ після того, як всі файли переміщено
-                const processedResult = await processLocalFiles(mainFilesTempSubDir, branch.depId);
+                const processedResult = await processLocalFiles(mainUploadsDir, branch.depId);
                 if (processedResult.pdfFiles.length > 0) {
                     processedResult.pdfFiles.forEach(pdfName => {
-                        pdfsToMerge.push(path.join(mainFilesTempSubDir, pdfName));
+                        pdfsToMerge.push(path.join(mainUploadsDir, pdfName));
                     });
                 } else {
-                    logger.warn(`[${corId}] - Не вдалося сконвертувати або знайти PDF файли в ${mainFilesTempSubDir}. Пропускаємо.`);
+                    logger.warn(`[${corId}] - Не вдалося сконвертувати або знайти PDF файли в ${mainUploadsDir}. Пропускаємо.`);
                 }
             }
 
@@ -910,21 +924,19 @@ app.post("/upload", async (req, res) => {
             }
         } else { // Якщо не shouldDownloadPdfs, то обробляємо лише оригінальні завантажені файли
             if (uploadedFiles.length > 0) {
-                const tempDirForOriginals = path.join(tempWorkingDir, 'original_uploads');
-                await fs.mkdir(tempDirForOriginals, { recursive: true });
                 for (const mainFile of uploadedFiles) {
                     const mainFileDecodedName = iconv.decode(Buffer.from(mainFile.name, "binary"), "utf-8");
-                    const mainFileLocalPath = path.join(tempDirForOriginals, mainFileDecodedName);
+                    const mainFileLocalPath = path.join(mainUploadsDir, mainFileDecodedName);
                     await mainFile.mv(mainFileLocalPath);
                 }
 
-                const processedResult = await processLocalFiles(tempDirForOriginals, branch.depId);
+                const processedResult = await processLocalFiles(mainUploadsDir, branch.depId);
                 const processedPdfFileNames = processedResult.pdfFiles;
 
                 if (processedPdfFileNames.length > 0) {
                     filesToUpload = processedPdfFileNames.map(pdfName => ({
                         name: pdfName,
-                        localPath: path.join(tempDirForOriginals, pdfName)
+                        localPath: path.join(mainUploadsDir, pdfName)
                     }));
                 } else {
                     logger.error(`[${corId}] - Не вдалося обробити оригінальні завантажені файли в PDF.`);
@@ -1203,6 +1215,7 @@ const displayPdfRoute = async (req, res) => {
     res.on('finish', () => {
         // Додаємо затримку перед видаленням, щоб уникнути помилок блокування файлів на Windows
         setTimeout(() => {
+            logDownload(branch.depId, key); // <-- ЛОГУЄМО УСПІШНЕ ЗАВАНТАЖЕННЯ
             cleanupFiles(null, tempDisplayDir, key); // Очищаємо тимчасову директорію
         }, 10000); // 10 секунд
     });

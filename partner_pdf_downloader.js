@@ -26,13 +26,12 @@ export async function downloadPartnerPdf(webCode, partnerLabResultUrl, destinati
     const url = `${partnerLabResultUrl}?oid=${webCode}`;
     console.log(`Запит до партнерської лабораторії за URL: ${url}`);
 
-    const tempSubDir = path.join(__dirname, 'temp', destinationDir); // Зберігаємо у піддиректорії всередині 'temp'
-    await fs.mkdir(tempSubDir, { recursive: true }); // Переконуємось, що директорія існує
+    await fs.mkdir(destinationDir, { recursive: true }); // Переконуємось, що директорія призначення існує
     const response = await axios.get(url, {
         responseType: 'arraybuffer'
     });
 
-    const tempFilePath = path.join(tempSubDir, `${webCode}.pdf`);
+    const tempFilePath = path.join(destinationDir, `${webCode}.pdf`);
     await fs.writeFile(tempFilePath, response.data);
     console.log(`PDF від партнера (${webCode}.pdf) успішно збережено у: ${destinationDir}`);
     return tempFilePath; // Повертаємо шлях до створеного файлу

@@ -46,6 +46,7 @@ const BRANCHES = {
         partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
         publicUrl: 'http://85.159.5.112:1090/rd',
         labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
+        labResultUrlEng: 'http://be.zdorovya.kdg.com.ua:17298/zdorovya/zdorovya/ER/ENG', // <-- ДОДАНО: URL для англомовної версії
         titleKey: "branchTitle_rd",
         clinicNameKey: "branchClinicName_rd",
         smsTextKey: "branchSmsText_rd",
@@ -77,22 +78,35 @@ const BRANCHES = {
         path: '/tomograf',
         resultPath: '/ct',
         depId: 'ct',
-        hasPartnerLab: false, // Наявність лабораторії партнера
-        publicUrl: 'http://rad.hemomedika.ua:1026/ct',
-        channel: 'sms',
-        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        hasPartnerLab: false, // Наявність лабораторії партнера publicUrl: 'http://37.53.72.157:1090/rd', zdorovya
+        partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
+        publicUrl: 'http://85.159.5.112:1090/ct',
+        labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
+        labResultUrlEng: 'http://be.zdorovya.kdg.com.ua:17298/zdorovya/zdorovya/ER/ENG', // <-- ДОДАНО: URL для англомовної версії
         titleKey: "branchTitle_ct",
         clinicNameKey: "branchClinicName_ct",
         smsTextKey: "branchSmsText_ct",
-        auth: { user: process.env.AUTH_USER_HMU, pass: process.env.AUTH_PASS_HMU },
-        sms: { token: process.env.SMS_TOKEN_CT, sender: process.env.SMS_SENDER_CT },
-        db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        channel: 'sms', // <--- Перемикач каналу
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        auth: { user: process.env.AUTH_USER_CT, pass: process.env.AUTH_PASS_CT },
+        sms: { token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD
+ },
+        viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
+      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        db: {
+            type: 'oracle',
+            user: process.env.DB_USER_ORA_RD,
+            password: process.env.DB_PASSWORD_ORA_RD,
+            connectString: process.env.DB_CONNECT_STRING_ORA_RD
+        },
         storage: {
-            type: 'ftp', 
-            config: { 
-                host: process.env.FTP_HOST,
-                user: process.env.FTP_USER,
-                password: process.env.FTP_PASS
+            type: 'google-drive',
+            config: {
+                clientId: process.env.GDRIVE_CLIENT_ID,
+                clientSecret: process.env.GDRIVE_CLIENT_SECRET,
+                redirectUri: process.env.GDRIVE_REDIRECT_URI,
+                folderId: process.env.GDRIVE_FOLDER_ID_RD,
+                tokenKey: 'ct' // Унікальний ключ для збереження токену
             }
         }
     },
@@ -124,11 +138,11 @@ const BRANCHES = {
         hasPartnerLab: false, // Наявність лабораторії партнера
         resultPath: '/ol',
         depId: 'ol',
-        hasPartnerLab: false, // Наявність лабораторії партнера publicUrl: 'http://37.53.72.157:1090/rd', zdorovya
         partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
-        publicUrl: 'http://85.159.5.112:1090/ol',
+        publicUrl: 'http://37.53.72.157:1090/ol',
         labResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab',
-        titleKey: "branchTitle_rd",
+        labResultUrlEng: 'http://195.211.240.20:11898/onelab/onelab/ER/ENG', // <-- ДОДАНО: URL для англомовної версії
+        titleKey: "branchTitle_ol",
         clinicNameKey: "branchClinicName_ol",
         smsTextKey: "branchSmsText_ol",
         channel: 'sms', // <--- Перемикач каналу
@@ -151,6 +165,41 @@ const BRANCHES = {
                 redirectUri: process.env.GDRIVE_REDIRECT_URI,
                 folderId: process.env.GDRIVE_FOLDER_ID_RD,
                 tokenKey: 'rd' // Унікальний ключ для збереження токену
+            }
+        }
+    },
+      zd: {
+        path: '/zdorovya',
+        hasPartnerLab: true, // Наявність лабораторії партнера
+        resultPath: '/zd',
+        depId: 'zd',
+        partnerLabResultUrl: 'http://be.onelab.kdg.com.ua:9998/OneLab/OneLab/BackEnd/TestResult/', // URL для результатів партнерської лабораторії
+        publicUrl: 'http://37.53.72.157:1090/zd',
+        labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
+        labResultUrlEng: 'http://be.zdorovya.kdg.com.ua:17298/zdorovya/zdorovya/ER/ENG', // <-- ДОДАНО: URL для англомовної версії
+        titleKey: "branchTitle_zd",
+        clinicNameKey: "branchClinicName_zd",
+        smsTextKey: "branchSmsText_zd",
+        channel: 'sms', // <--- Перемикач каналу
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        auth: { user: process.env.AUTH_USER_ZD, pass: process.env.AUTH_PASS_ZD },
+        sms: { token: process.env.SMS_TOKEN_ZD, sender: process.env.SMS_SENDER_ZD },
+        viber: { token: process.env.VIBER_TOKEN_ZD, sender: process.env.VIBER_SENDER_ZD }, // Потрібно додати в .env
+      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        db: {
+            type: 'oracle',
+            user: process.env.DB_USER_ORA_ZD,
+            password: process.env.DB_PASSWORD_ORA_ZD,
+            connectString: process.env.DB_CONNECT_STRING_ORA_ZD
+        },
+        storage: {
+            type: 'google-drive',
+            config: {
+                clientId: process.env.GDRIVE_CLIENT_ID,
+                clientSecret: process.env.GDRIVE_CLIENT_SECRET,
+                redirectUri: process.env.GDRIVE_REDIRECT_URI,
+                folderId: process.env.GDRIVE_FOLDER_ID_RD,
+                tokenKey: 'zd' // Унікальний ключ для збереження токену
             }
         }
     },
