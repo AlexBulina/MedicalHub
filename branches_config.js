@@ -146,7 +146,7 @@ const BRANCHES = {
         clinicNameKey: "branchClinicName_ol",
         smsTextKey: "branchSmsText_ol",
         channel: 'sms', // <--- Перемикач каналу
-        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        messagingEnabled: false, // true - відправляти повідомлення, false - імітувати відправку
         auth: { user: process.env.AUTH_USER_OL, pass: process.env.AUTH_PASS_OL },
         sms: { token: process.env.SMS_TOKEN_OL, sender: process.env.SMS_SENDER_OL },
         viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env

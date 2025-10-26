@@ -119,21 +119,48 @@ async function loadTranslations() {
  * @param {string} directoryPath - Абсолютний шлях до директорії, яку потрібно видалити.
  * @param {string} key - Унікальний ідентифікатор (код доступу), що використовується для логування.
  */
-async function cleanupFiles(filePath, directoryPath, key) {
+async function cleanupFiles(filePath, directoryPath, key) {    
+    const trashDir = path.join(__dirname, '.trash');
+
     try {
-        const timestamp = () => `[${new Date().toLocaleString()}]`;
-        if (existsSync(filePath)) {
+        await fs.mkdir(trashDir, { recursive: true }); // Переконуємось, що "карантин" існує
+    } catch (mkdirError) {
+        logger.error(`[${key}] - Не вдалося створити карантинну директорію: ${mkdirError.message}`);
+        // Не зупиняємо процес, просто логуємо помилку
+    }
+
+    const timestamp = () => `[${new Date().toLocaleString()}]`;
+
+    if (filePath && existsSync(filePath)) {
+        try {
             await fs.unlink(filePath);
-            console.log(`${timestamp()} Файл ${filePath} видалено`);
+            logger.info(`${timestamp()} Файл ${filePath} видалено.`);
+        } catch (fileErr) {
+            logger.warn(`[${key}] - Не вдалося видалити файл ${filePath}: ${fileErr.message}. Спроба перемістити в карантин.`);
+            try {
+                const newPath = path.join(trashDir, `${Date.now()}-${path.basename(filePath)}`);
+                await fs.rename(filePath, newPath);
+                logger.info(`[${key}] - Файл ${filePath} переміщено в карантин: ${newPath}`);
+            } catch (moveErr) {
+                logger.error(`[${key}] - Не вдалося перемістити файл ${filePath} в карантин: ${moveErr.message}`);
+            }
         }
-        if (existsSync(directoryPath)) {
+    }
+
+    if (directoryPath && existsSync(directoryPath)) {
+        try {
             await fs.rm(directoryPath, { recursive: true, force: true });
-            console.log(`${timestamp()} Директорія ${directoryPath} видалена`);
+            logger.info(`${timestamp()} Директорія ${directoryPath} видалена.`);
+        } catch (dirErr) {
+            logger.warn(`[${key}] - Не вдалося видалити директорію ${directoryPath}: ${dirErr.message}. Спроба перемістити в карантин.`);
+            try {
+                const newPath = path.join(trashDir, `${Date.now()}-${path.basename(directoryPath)}`);
+                await fs.rename(directoryPath, newPath);
+                logger.info(`[${key}] - Директорію ${directoryPath} переміщено в карантин: ${newPath}`);
+            } catch (moveErr) {
+                logger.error(`[${key}] - Не вдалося перемістити директорію ${directoryPath} в карантин: ${moveErr.message}`);
+            }
         }
-        logger.info(`[${key}] - Результат успішно видалено`);
-    } catch (err) {
-        console.error(`[${new Date().toLocaleString()}] Помилка при видаленні ${key}:`, err);
-        logger.error(`[${key}] - Помилка при видаленні: ${err.message}`);
     }
 }
 
