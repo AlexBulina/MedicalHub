@@ -1195,8 +1195,17 @@
                 updateFileNameDisplay(fileInput.files);
 
                 searchForm.reset(); // Очищаємо поля форми
+                docSearchForm.reset(); // Очищуємо форму пошуку по документу
+                partnerSearchForm.reset(); // Очищуємо форму пошуку по партнеру
+
                 resultsBody.innerHTML = ''; // Очищаємо тіло таблиці
+                docResultsBody.innerHTML = '';
+                partnerResultsBody.innerHTML = '';
+
                 searchResultsDiv.classList.add('hidden'); // Ховаємо блок результатів
+                docSearchResultsDiv.classList.add('hidden');
+                partnerSearchResultsDiv.classList.add('hidden');
+
                 noResultsP.classList.add('hidden'); // Ховаємо повідомлення "не знайдено"
                 document.getElementById('selected-patient-info').textContent = ''; // Очищаємо видиму інформацію про пацієнта
                 document.getElementById('patientName').value = ''; // Очищаємо приховане поле з іменем пацієнта
@@ -1204,8 +1213,21 @@
                 const currentlySelected = resultsBody.querySelector('.selected-row');
                 document.getElementById('isDocSearchChecked').value = 'false';
                 document.getElementById('webCode').value = '';
-                document.getElementById('docSearchSource').value = '';
+                document.getElementById('isPartnerSearchChecked').value = 'false';
+                document.getElementById('partnerWebCode').value = '';
                 paginationControls.classList.add('hidden');
+
+                // Знімаємо позначки з усіх чекбоксів у таблицях результатів
+                document.querySelectorAll('.doc-select-patient-cb, .partner-select-patient-cb').forEach(cb => {
+                    cb.checked = false;
+                    // Також деактивуємо чекбокс англійської версії, якщо він є
+                    const engCheckbox = cb.closest('tr').querySelector('.doc-english-version-cb');
+                    if (engCheckbox) {
+                        engCheckbox.disabled = true;
+                        engCheckbox.checked = false;
+                    }
+                });
+
                 if (currentlySelected) {currentlySelected.classList.remove('selected-row');}
                 updateSmsButtonState(); // Оновлюємо стан кнопки-конверта
 
@@ -1328,14 +1350,9 @@
 
             // Обробник для кнопки "Очистити" у формі пошуку по документу.
             clearDocSearchBtn.addEventListener('click', () => {
-                // Очищуємо поле вибору файлів, щоб уникнути випадкової відправки
-                fileInput.value = '';
-                updateFileNameDisplay(fileInput.files);
-
-                docSearchForm.reset();
-                docResultsBody.innerHTML = '';
-                docSearchResultsDiv.classList.add('hidden');
-                noDocResultsP.classList.add('hidden');
+                // Викликаємо клік на основній кнопці очищення, щоб скинути ВСІ поля,
+                // включаючи інформацію про пацієнта у формі завантаження.
+                clearSearchBtn.click();
             });
 
             // Обробник відправки форми пошуку по партнеру.
@@ -1437,6 +1454,8 @@
                 partnerSearchForm.reset();
                 partnerResultsBody.innerHTML = '';
                 partnerSearchResultsDiv.classList.add('hidden');
+                // Викликаємо клік на основній кнопці очищення, щоб скинути ВСІ поля.
+                clearSearchBtn.click();
             });
             
             // Логіка для кнопки "х" (очищення) всередині поля вводу "Номер документа".
