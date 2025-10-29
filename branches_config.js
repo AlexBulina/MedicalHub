@@ -145,8 +145,13 @@ const BRANCHES = {
         titleKey: "branchTitle_ol",
         clinicNameKey: "branchClinicName_ol",
         smsTextKey: "branchSmsText_ol",
+        hasAdvancedPatientSearch: true,
+        advancedSearch: {
+            url: 'http://195.211.240.20:11998/KDG_SIMPLE_LAB_API/Onelab/', // URL вашого API
+            token: 'b25lbGFifG9uZUxhYldlYjpvbmVMYWJXZWIxMjMh' // Токен авторизації
+        },
         channel: 'sms', // <--- Перемикач каналу
-        messagingEnabled: false, // true - відправляти повідомлення, false - імітувати відправку
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
         auth: { user: process.env.AUTH_USER_OL, pass: process.env.AUTH_PASS_OL },
         sms: { token: process.env.SMS_TOKEN_OL, sender: process.env.SMS_SENDER_OL },
         viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
@@ -181,7 +186,12 @@ const BRANCHES = {
         clinicNameKey: "branchClinicName_zd",
         smsTextKey: "branchSmsText_zd",
         channel: 'sms', // <--- Перемикач каналу
-        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        hasAdvancedPatientSearch: true,
+        advancedSearch: {
+            url: 'http://be.zdorovya.kdg.com.ua:17298/KDG_SIMPLE_LAB_API/Zdorovya/', // URL вашого API
+            token: 'WmRvcm92eWF8U01TX0JhY2tlbmQ6JE0kQkBjazEyMzQ=' // Токен авторизації
+        },
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку 
         auth: { user: process.env.AUTH_USER_ZD, pass: process.env.AUTH_PASS_ZD },
         sms: { token: process.env.SMS_TOKEN_ZD, sender: process.env.SMS_SENDER_ZD },
         viber: { token: process.env.VIBER_TOKEN_ZD, sender: process.env.VIBER_SENDER_ZD }, // Потрібно додати в .env

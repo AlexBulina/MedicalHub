@@ -60,12 +60,22 @@ class FtpAdapter {
      * @param {string} localPath - Повний шлях для збереження файлу локально.
      */
     async downloadTo(remotePath, localPath) {
-        const client = await this._getClient();
-        try {
-            await client.downloadTo(createWriteStream(localPath), remotePath);
-        } finally {
-            client.close();
-        }
+        return new Promise(async (resolve, reject) => {
+            const client = await this._getClient();
+            const writeStream = createWriteStream(localPath);
+
+            writeStream.on('finish', () => {
+                client.close();
+                resolve();
+            });
+
+            writeStream.on('error', (err) => {
+                client.close();
+                reject(err);
+            });
+
+            client.downloadTo(writeStream, remotePath).catch(reject);
+        });
     }
 
     /**

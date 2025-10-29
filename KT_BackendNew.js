@@ -14,8 +14,9 @@ import fileUpload from "express-fileupload";
 import ftp from "basic-ftp";
 import { existsSync, promises as fs } from 'fs';
 import 'dotenv/config'; // Завантажує змінні середовища з .env файлу
+import fse from 'fs-extra'; // <-- ДОДАНО: для надійного видалення директорій
 import path, { join } from "path";
-import { fileURLToPath } from "url";
+import { fileURLToPath, pathToFileURL } from "url";
 import cors from "cors";
 import { processLocalFiles} from './docxTopdfRad.js';
 import iconv from "iconv-lite";
@@ -111,6 +112,25 @@ async function loadTranslations() {
 }
 // ===================================================================
 // ОСНОВНІ ФУНКЦІЇ
+
+/**
+ * @description Функція-обгортка для повторних спроб виконання асинхронної операції.
+ * @param {Function} action - Асинхронна функція для виконання.
+ * @param {number} retries - Кількість повторних спроб.
+ * @param {number} delay - Затримка між спробами в мілісекундах.
+ * @returns {Promise<any>}
+ */
+async function retry(action, retries = 3, delay = 100) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await action();
+        } catch (error) {
+            if (i === retries - 1) throw error; // Якщо це остання спроба, прокидаємо помилку
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+}
+
 // ===================================================================
 
 /**
@@ -135,31 +155,32 @@ async function cleanupFiles(filePath, directoryPath, key) {
         try {
             await fs.unlink(filePath);
             logger.info(`${timestamp()} Файл ${filePath} видалено.`);
-        } catch (fileErr) {
-            logger.warn(`[${key}] - Не вдалося видалити файл ${filePath}: ${fileErr.message}. Спроба перемістити в карантин.`);
-            try {
+        } catch (fileErr) { // Якщо видалення не вдалося, пробуємо перемістити
+            logger.warn(`[${key}] - Не вдалося видалити файл ${filePath}: ${fileErr.message}. Спроба перемістити в карантин...`);
+            await retry(async () => {
                 const newPath = path.join(trashDir, `${Date.now()}-${path.basename(filePath)}`);
                 await fs.rename(filePath, newPath);
                 logger.info(`[${key}] - Файл ${filePath} переміщено в карантин: ${newPath}`);
-            } catch (moveErr) {
+            }).catch(moveErr => {
                 logger.error(`[${key}] - Не вдалося перемістити файл ${filePath} в карантин: ${moveErr.message}`);
-            }
+            });
         }
     }
 
     if (directoryPath && existsSync(directoryPath)) {
         try {
-            await fs.rm(directoryPath, { recursive: true, force: true });
+            // Використовуємо fse.remove, який є більш надійним для видалення непустих директорій
+            await retry(() => fse.remove(directoryPath), 3, 500);
             logger.info(`${timestamp()} Директорія ${directoryPath} видалена.`);
         } catch (dirErr) {
-            logger.warn(`[${key}] - Не вдалося видалити директорію ${directoryPath}: ${dirErr.message}. Спроба перемістити в карантин.`);
-            try {
+            logger.warn(`[${key}] - Не вдалося видалити директорію ${directoryPath}: ${dirErr.message}. Спроба перемістити в карантин...`);
+            await retry(async () => {
                 const newPath = path.join(trashDir, `${Date.now()}-${path.basename(directoryPath)}`);
                 await fs.rename(directoryPath, newPath);
                 logger.info(`[${key}] - Директорію ${directoryPath} переміщено в карантин: ${newPath}`);
-            } catch (moveErr) {
+            }).catch(moveErr => {
                 logger.error(`[${key}] - Не вдалося перемістити директорію ${directoryPath} в карантин: ${moveErr.message}`);
-            }
+            });
         }
     }
 }
@@ -465,6 +486,8 @@ app.get('/config', async (req, res) => {
                 partnerLabResultUrl: branch.partnerLabResultUrl, // Додаємо URL для результатів партнерської лабораторії
                 publicUrl: branch.publicUrl, // <-- ДОДАНО: Передаємо публічний URL
                 channel: branch.channel, // Додаємо канал відправки
+                hasAdvancedPatientSearch: branch.hasAdvancedPatientSearch, // Додаємо прапорець для розширеного пошуку
+                advancedSearchUrl: branch.advancedSearch?.url, // Додаємо URL для розширеного пошуку
                 dbType: branch.db?.type || 'sybase' // Додаємо тип БД
             });
         } catch (error) {
@@ -473,6 +496,62 @@ app.get('/config', async (req, res) => {
     } else {
         res.status(404).json({ message: 'Конфігурацію не знайдено' });
     }
+});
+
+// --- Маршрути для керування конфігурацією філіалів ---
+
+// Захист для адмін-панелі
+const adminAuth = auth(process.env.ADMIN_USER || 'admin', process.env.ADMIN_PASS || 'adminpass');
+
+// 1. Маршрут для віддачі HTML-сторінки керування
+app.get('/admin/branches', adminAuth, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'branch_config.html'));
+});
+
+// 2. API для отримання поточної конфігурації
+app.get('/api/branches', adminAuth, async (req, res) => {
+    try {
+        // Використовуємо динамічний імпорт, щоб завжди читати свіжу версію файлу
+        const configPath = path.join(__dirname, 'branches_config.js');
+        const configUrl = pathToFileURL(configPath).href; // Перетворюємо шлях у URL
+        // Додаємо '?' + Date.now() щоб уникнути кешування модуля
+        const branchesModule = await import(`${configUrl}?v=${Date.now()}`);
+        res.json(branchesModule.default);
+    } catch (error) {
+        logger.error(`Помилка читання конфігурації філіалів: ${error.message}`);
+        res.status(500).json({ message: 'Не вдалося завантажити конфігурацію.' });
+    }
+});
+
+// 3. API для збереження оновленої конфігурації
+app.post('/api/branches', adminAuth, async (req, res) => {
+    const newConfig = req.body;
+
+    if (!newConfig || Object.keys(newConfig).length === 0) {
+        return res.status(400).json({ message: 'Надіслано порожню конфігурацію.' });
+    }
+
+    // Додаємо назад блок 'defaultSybase', який не редагується на фронтенді
+    newConfig.defaultSybase = {
+        db: { dsn: process.env.DB_DSN_SYBASE, type: 'sybase' }
+    };
+
+    // Форматуємо конфігурацію у вигляд JS-файлу
+    const fileContent = `/**
+ * @file branches_config.js
+ * @description Централізована конфігурація для всіх філіалів системи.
+ * УВАГА: Цей файл генерується автоматично через адмін-панель.
+ * Не редагуйте його вручну, оскільки зміни можуть бути втрачені.
+ */
+
+const BRANCHES = ${JSON.stringify(newConfig, null, 4)};
+
+export default BRANCHES;
+`;
+    const configPath = path.join(__dirname, 'branches_config.js');
+    await fs.writeFile(configPath, fileContent, 'utf-8');
+    logger.info('Конфігурацію філіалів було успішно оновлено через веб-інтерфейс.');
+    res.json({ message: 'Конфігурацію успішно збережено. Сервер використовуватиме нові налаштування при наступних запитах.' });
 });
 
 // --- Маршрут для перевірки стану SMS-сервісу ---
@@ -602,6 +681,65 @@ app.post("/doc-search", async (req, res) => {
     }
 });
 
+app.post("/advanced-search", async (req, res) => {
+    const { dob, phone, dateFrom, dateTo } = req.body;
+    logger.info(`[Розширений пошук] - Отримано запит: Дата народження='${dob}', Телефон='${phone}', Період='${dateFrom}-${dateTo}'`);
+
+    const referer = req.get('Referer') || '';
+    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
+
+    if (!branch || !branch.advancedSearch?.url || !branch.advancedSearch?.token) {
+        logger.error(`[${branch?.depId || 'unknown'}] - Конфігурацію для розширеного пошуку (URL або токен) не знайдено.`);
+        return res.status(500).json({ message: "Конфігурацію для розширеного пошуку не налаштовано на сервері." });
+    }
+
+    // Форматуємо дати
+    const formattedDob = dob ? new Date(dob).toISOString().split('T')[0] : ''; // YYYY-MM-DD
+
+    // Формуємо BegDate та EndDate на основі року з dateFrom та dateTo
+    const begDateYear = dateFrom ? new Date(dateFrom).getFullYear() : null;
+    const endDateYear = dateTo ? new Date(dateTo).getFullYear() : null;
+
+    const formattedBegDate = begDateYear ? `${begDateYear}-01-01` : '';
+    const formattedEndDate = endDateYear ? `${endDateYear}-12-31` : '';
+
+
+    // Формуємо URL для зовнішнього API
+    const externalApiUrl = new URL(`${branch.advancedSearch.url}/custom/GetPatientExams`);
+    if (formattedDob) externalApiUrl.searchParams.append('BurnDate', formattedDob);
+    if (phone) externalApiUrl.searchParams.append('PhoneNumber', phone);
+    if (formattedBegDate) externalApiUrl.searchParams.append('BegDate', formattedBegDate);
+    if (formattedEndDate) externalApiUrl.searchParams.append('EndDate', formattedEndDate);
+
+    logger.info(`[Розширений пошук] - Запит до зовнішнього API: ${externalApiUrl.toString()}`);
+
+    try {
+        const response = await axios.get(externalApiUrl.toString(), {
+            headers: {
+                'Authorization': `Basic ${branch.advancedSearch.token}`
+            }
+        });
+
+        // Виводимо повну відповідь від зовнішнього API в консоль/лог
+        console.log(`[Розширений пошук] - Отримана відповідь від API: ${JSON.stringify(response.data, null, 2)}`);
+
+        if (response.status === 204 || !response.data) { // 204 No Content
+             return res.json([]);
+        }
+
+        logger.info(`[Розширений пошук] - Отримано ${response.data.length} записів.`);
+        // Додаємо номер телефону з запиту до кожного об'єкта відповіді, якщо він там відсутній
+        const resultsWithPhone = response.data.map(item => ({
+            ...item,
+            PhoneNumber: item.PhoneNumber || phone // Якщо API не повернуло телефон, використовуємо той, що вводили для пошуку
+        }));
+        res.json(resultsWithPhone);
+    } catch (error) {
+        const errorMessage = error.response ? JSON.stringify(error.response.data) : error.message;
+        logger.error(`[Розширений пошук] - Помилка запиту до зовнішнього API: ${errorMessage}`);
+        res.status(503).json({ message: `Помилка під час виконання розширеного пошуку: ${errorMessage}` });
+    }
+});
 // --- Маршрут для ігнорування запитів на favicon.ico ---
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 /**
@@ -1240,14 +1378,17 @@ const displayPdfRoute = async (req, res) => {
     });
 
     res.on('finish', () => {
-        // Додаємо затримку перед видаленням, щоб уникнути помилок блокування файлів на Windows
+        // Логуємо успішне завантаження
+        logDownload(branch.depId, key);
+
+        // Додаємо затримку перед видаленням, щоб уникнути помилок блокування файлів (EPERM) на Windows.
+        // Це дає системі час звільнити дескриптор файлу після завершення res.sendFile.
         setTimeout(() => {
-            logDownload(branch.depId, key); // <-- ЛОГУЄМО УСПІШНЕ ЗАВАНТАЖЕННЯ
             cleanupFiles(null, tempDisplayDir, key); // Очищаємо тимчасову директорію
-        }, 10000); // 10 секунд
+        }, 10000); // Затримка 10 секунд
     });
   } catch (error) {
-    logger.error(`[${key}] - Помилка обробки: ${error.message}`);
+    logger.error(`[${key}] - Глобальна помилка в displayPdfRoute: ${error.message}`);
     sendErrorPage(res, "Помилка сервера", `Під час обробки вашого запиту сталася внутрішня помилка. Будь ласка, спробуйте пізніше.`, 500, branchDisplayName);
   }
 };

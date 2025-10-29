@@ -7,130 +7,9 @@
     <title>Керування пацієнтами та завантаженням результатів</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .file-drop-area {
-            transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
-        }
-        .file-drop-area.dragover {
-            background-color: #e0e7ff;
-            border-color: #4f46e5;
-        }
-        #spinner, #search-spinner, #create-spinner {
-            border-top-color: #4f46e5;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .modal-backdrop {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(0, 0, 0, 0.5); display: flex;
-            justify-content: center; align-items: center; z-index: 50;
-        }
-        .modal-content {
-            background-color: white; padding: 2rem; border-radius: 0.5rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            max-width: 90%; width: 500px; text-align: center;
-        }
-        .tab-button {
-            border-color: transparent;
-        }
-        .tab-button.active {
-            border-color: #4f46e5;
-            color: #4f46e5;
-        }
-        .blinking-border {
-            animation: blink-border 2s infinite alternate;
-        }
-        @keyframes blink-border {
-            from { border-left-color: #ef4444; } /* red-500 */
-            to { border-left-color: #fca5a5; } /* red-300 */
-        }
-        #resultsBody tr:nth-child(even) {
-            background-color: #f9fafb; /* Tailwind's gray-50 */
-        }
-        .selected-row {
-            background-color: #e0e7ff !important; /* Tailwind's indigo-100, !important to override even/odd styling */
-        }
-        #resultsBody tr:hover {
-            background-color: #f0f9ff; /* Tailwind's sky-100 */
-        }
-        .tooltip-container {
-            position: relative;
-            display: inline-block;
-        }
-        .tooltip-text {
-            visibility: hidden;
-            width: 240px;
-            background-color: #f9fafb; /* Tailwind's gray-50 */
-            color: #1f2937; /* Tailwind's gray-800 */
-            text-align: center;
-            font-size: 0.8rem; /* Зменшуємо розмір шрифту */
-            border-radius: 0.5rem; /* rounded-lg */
-            padding: 0.5rem 0.75rem; /* py-2 px-3 */
-            position: absolute;
-            z-index: 1;
-            top: 100%; /* Позиціонуємо підказку під іконкою */
-            right: 0; /* Вирівнюємо правий край підказки по правому краю іконки */
-            margin-top: 8px; /* Невеликий відступ знизу */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* shadow-lg */
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-        .tooltip-container:hover .tooltip-text {
-            visibility: visible;
-            opacity: 1;
-        }
-        .lang-btn {
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .lang-btn.active-lang {
-            background-color: white;
-            color: #4f46e5; /* indigo-600 */
-            font-weight: 600;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-        }
-
-        /* Стилі для маленьких екранів */
-        @media (max-width: 768px) {
-            #toggle-journal-btn, #toggle-search-journal-btn {
-                top: auto; /* Скасовуємо вертикальне центрування */
-                bottom: 4.8rem; /* 32px відступ від низу */
-                transform: none; /* Скасовуємо transform */
-                width: 3.5rem; /* 56px */
-                height: 3.5rem; /* 56px */
-                border-radius: 9999px; /* робимо круглими */
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 0 14px 2px rgba(255, 255, 255, 0.7); /* Додаємо біле світіння */
-            }
-
-            #toggle-journal-btn {
-                left: 0.2rem; /* 16px відступ зліва */
-                right: 0.2rem; /* 16px відступ зправа */
-            }
-
-            #toggle-search-journal-btn {
-                right: 0.2rem; /* 16px відступ зправа */
-            }
-
-            /* Робимо бічні панелі на всю ширину на маленьких екранах */
-            #journal-form, #search-journal-form {
-                width: 100%;
-                top: 0;
-                height: 100%;
-                border-radius: 0; /* Прибираємо скруглення кутів */
-            }
-
-            /* Стилі для кнопки створення пацієнта на малих екранах залишаються, але текст буде керуватися JS */
-        }
-    </style>
+    <link rel="stylesheet" href="/upload-page.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
+<body id="main-body" class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
     <div class="fixed top-4 right-4 z-50 flex items-center space-x-4">
         <!-- Channel Icon with Tooltip -->
         <div id="channel-icon-container" class="tooltip-container hidden">
@@ -222,7 +101,7 @@
                     На маленьких екранах (мобільні) - сітка 2x2.
                     На середніх екранах (md) і більше - flex-контейнер в один рядок.
                 -->
-                <nav class="grid grid-cols-2 md:flex md:space-x-8 -mb-px" aria-label="Tabs">
+                <nav class="grid grid-cols-2 md:flex md:justify-between -mb-px" aria-label="Tabs">
                     <button id="search-tab-button" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center md:text-left" data-translate="searchPatient">
                         Пошук пацієнта
                     </button>
@@ -234,6 +113,9 @@
                     </button>
                     <button id="partner-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="searchByPartner">
                         Пошук по партнеру
+                    </button>
+                    <button id="advanced-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="advancedSearchPatient">
+                        Історія пацієнта
                     </button>
                 </nav>
             </div>
@@ -397,10 +279,57 @@
                     </div>
                 </div>
             </div>
+            <!-- Advanced Patient Search Tab -->
+            <div id="advanced-search-tab-content" class="hidden mt-6">
+                <form id="advancedSearchForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+                    <div>
+                        <label for="advancedDob" class="block text-sm font-medium text-gray-700" data-translate="dob">Дата народження</label>
+                        <input type="date" id="advancedDob" name="dob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                    </div>
+                    <div>
+                        <label for="advancedPhone" class="block text-sm font-medium text-gray-700" data-translate="phone">Телефон</label>
+                        <input type="tel" id="advancedPhone" name="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567" required>
+                    </div>
+                    <div>
+                        <label for="advancedDateFrom" class="block text-sm font-medium text-gray-700" data-translate="periodFrom">Період з</label>
+                        <input type="date" id="advancedDateFrom" name="dateFrom" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    </div>
+                    <div>
+                        <label for="advancedDateTo" class="block text-sm font-medium text-gray-700" data-translate="periodTo">Період по</label>
+                        <input type="date" id="advancedDateTo" name="dateTo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                    </div>
+                    <div class="md:col-span-2 flex gap-4">
+                        <button type="submit" id="advancedSearchSubmitBtn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                            <span id="advanced-search-button-text" data-translate="search">Пошук</span>
+                            <div id="advanced-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                        </button>
+                        <button type="button" id="clearAdvancedSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" data-translate="clear">
+                            Очистити
+                        </button>
+                    </div>
+                </form>
+                <div id="advancedSearchResults" class="hidden mt-6">
+                    <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
+                    <div class="overflow-x-auto mt-4 border rounded-lg">
+                        <table id="advancedResultsTable" class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderOrderDate">Дата замовлення</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderOrderNum">Номер замовлення</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="webCode">Веб-код</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="status">Статус</th>
+                                </tr>
+                            </thead>
+                            <tbody id="advancedResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
         
         <!-- File Upload Card -->
-        <div class="w-full mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
+        <div id="file-upload-card" class="w-full mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
             <div class="text-center mb-8">
                 <img id="clinic-logo" src="" alt="Логотип клініки" class="mx-auto mb-4">
                 <h1 id="page-title" class="text-2xl md:text-3xl font-bold text-gray-800" data-translate="uploadResults">Завантаження результатів</h1>
@@ -1006,6 +935,14 @@
                         partnerSearchTabButton.classList.add('hidden');
                     }
 
+                    // Показуємо вкладку "Розширений пошук" тільки якщо є відповідний прапорець
+                    const advancedSearchTabButton = document.getElementById('advanced-search-tab-button');
+                    if (config.hasAdvancedPatientSearch) {
+                        advancedSearchTabButton.classList.remove('hidden');
+                    } else {
+                        advancedSearchTabButton.classList.add('hidden');
+                    }
+
 
                     // Примусово оновлюємо текст кнопки після зміни атрибута
                     translatePage();
@@ -1112,73 +1049,240 @@
             const docSearchTabContent = document.getElementById('doc-search-tab-content');
             const partnerSearchTabButton = document.getElementById('partner-search-tab-button');
             const partnerSearchTabContent = document.getElementById('partner-search-tab-content');
+            const advancedSearchTabButton = document.getElementById('advanced-search-tab-button');
+            const advancedSearchForm = document.getElementById('advancedSearchForm');
+            const advancedSearchResultsDiv = document.getElementById('advancedSearchResults');
+            const advancedResultsBody = document.getElementById('advancedResultsBody');
+            const clearAdvancedSearchBtn = document.getElementById('clearAdvancedSearchBtn');
+             const docSearchForm = document.getElementById('docSearchForm');
+            const docResultsBody = document.getElementById('docResultsBody');
+            const docSearchResultsDiv = document.getElementById('docSearchResults');
+            const docSearchBtnText = document.getElementById('doc-search-button-text');
+            const docSearchSpinner = document.getElementById('doc-search-spinner');
+            const partnerSearchForm = document.getElementById('partnerSearchForm');
+            const partnerResultsBody = document.getElementById('partnerResultsBody');
+            const partnerSearchResultsDiv = document.getElementById('partnerSearchResults');
+            const searchForm = document.getElementById('searchForm');
+            const searchBtnText = document.getElementById('search-button-text');
+            const searchSpinner = document.getElementById('search-spinner');
+            const resultsBody = document.getElementById('resultsBody');
+            const noResultsP = document.getElementById('no-results');
+            const searchResultsDiv = document.getElementById('searchResults');
+            const advancedSearchTabContent = document.getElementById('advanced-search-tab-content');
 
+            // Встановлюємо поточну дату в поле "Період по" за замовчуванням
+            document.getElementById('advancedDateTo').value = new Date().toISOString().split('T')[0];
+
+            // Встановлюємо дату "мінус 5 років" в поле "Період з" за замовчуванням
+            const dateFrom = new Date();
+            dateFrom.setFullYear(dateFrom.getFullYear() - 5);
+            document.getElementById('advancedDateFrom').value = dateFrom.toISOString().split('T')[0];
+
+            // Обробник кліку на вкладку "Пошук пацієнта".
             searchTabButton.addEventListener('click', () => {
+                // Робимо активною кнопку поточної вкладки.
                 searchTabButton.classList.add('active');
+                // Робимо неактивними кнопки інших вкладок.
                 createTabButton.classList.remove('active');
                 docSearchTabButton.classList.remove('active');
                 partnerSearchTabButton.classList.remove('active');
+                advancedSearchTabButton.classList.remove('active');
+                // Показуємо контент поточної вкладки.
                 searchTabContent.classList.remove('hidden');
+                // Ховаємо контент інших вкладок.
                 createTabContent.classList.add('hidden');
                 docSearchTabContent.classList.add('hidden');
+                advancedSearchTabContent.classList.add('hidden');
                 partnerSearchTabContent.classList.add('hidden');
             });
+            
+
+            // Обробник кліку на вкладку "Створити нового пацієнта".
             createTabButton.addEventListener('click', () => {
                 createTabButton.classList.add('active');
                 searchTabButton.classList.remove('active');
                 docSearchTabButton.classList.remove('active');
                 partnerSearchTabButton.classList.remove('active');
+                advancedSearchTabButton.classList.remove('active');
+
                 createTabContent.classList.remove('hidden');
                 searchTabContent.classList.add('hidden');
                 docSearchTabContent.classList.add('hidden');
                 partnerSearchTabContent.classList.add('hidden');
+                advancedSearchTabContent.classList.add('hidden');
             });
+
+            // Обробник кліку на вкладку "Пошук по документу".
             docSearchTabButton.addEventListener('click', () => {
                 docSearchTabButton.classList.add('active');
                 searchTabButton.classList.remove('active');
                 createTabButton.classList.remove('active');
                 partnerSearchTabButton.classList.remove('active');
+                advancedSearchTabButton.classList.remove('active');
+
                 docSearchTabContent.classList.remove('hidden');
                 searchTabContent.classList.add('hidden');
                 createTabContent.classList.add('hidden');
                 partnerSearchTabContent.classList.add('hidden');
+                advancedSearchTabContent.classList.add('hidden');
             });
+
+            // Обробник кліку на вкладку "Пошук по партнеру".
             partnerSearchTabButton.addEventListener('click', () => {
                 partnerSearchTabButton.classList.add('active');
                 searchTabButton.classList.remove('active');
                 createTabButton.classList.remove('active');
                 docSearchTabButton.classList.remove('active');
+                advancedSearchTabButton.classList.remove('active');
+
                 partnerSearchTabContent.classList.remove('hidden');
                 searchTabContent.classList.add('hidden');
                 createTabContent.classList.add('hidden');
                 docSearchTabContent.classList.add('hidden');
+                advancedSearchTabContent.classList.add('hidden');
             });
 
-            // Елементи форми пошуку пацієнта.
-            const searchForm = document.getElementById('searchForm');
-            const searchResultsDiv = document.getElementById('searchResults');
-            const resultsBody = document.getElementById('resultsBody');
-            const noResultsP = document.getElementById('no-results');
-            const searchBtnText = document.getElementById('search-button-text');
-            const searchSpinner = document.getElementById('search-spinner');
-            const clearSearchBtn = document.getElementById('clearSearchBtn');
+            // --- Єдина логіка перемикання вкладок ---
+            const mainBody = document.getElementById('main-body');
+            const fileUploadCard = document.getElementById('file-upload-card');
+            const allTabs = [searchTabButton, createTabButton, docSearchTabButton, partnerSearchTabButton, advancedSearchTabButton];
+            const allContents = [searchTabContent, createTabContent, docSearchTabContent, partnerSearchTabContent, advancedSearchTabContent];
 
-            // Елементи форми пошуку по документу.
-            const docSearchForm = document.getElementById('docSearchForm');
-            const docSearchSpinner = document.getElementById('doc-search-spinner');
-            const docSearchBtnText = document.getElementById('doc-search-button-text');
-            const clearDocSearchBtn = document.getElementById('clearDocSearchBtn');
-            const docSearchResultsDiv = document.getElementById('docSearchResults');
-            const docResultsBody = document.getElementById('docResultsBody');
-            const noDocResultsP = document.getElementById('no-doc-results');
+            allTabs.forEach((button, index) => {
+                button.addEventListener('click', () => {
+                    // Деактивуємо всі вкладки та ховаємо весь контент
+                    allTabs.forEach(b => b.classList.remove('active'));
+                    allContents.forEach(c => c.classList.add('hidden'));
 
-            // Елементи форми пошуку по партнеру.
-            const partnerSearchForm = document.getElementById('partnerSearchForm');
-            const partnerSearchSpinner = document.getElementById('partner-search-spinner');
-            const partnerSearchBtnText = document.getElementById('partner-search-button-text');
-            const clearPartnerSearchBtn = document.getElementById('clearPartnerSearchBtn');
-            const partnerSearchResultsDiv = document.getElementById('partnerSearchResults');
-            const partnerResultsBody = document.getElementById('partnerResultsBody');
+                    // Активуємо натиснуту вкладку та показуємо її контент
+                    button.classList.add('active');
+                    if (allContents[index]) {
+                        allContents[index].classList.remove('hidden');
+                    }
+
+                    // Керуємо видимістю блоку завантаження файлів
+                    if (button === advancedSearchTabButton) {
+                        // Якщо це вкладка "Історія пацієнта", ховаємо блок завантаження
+                        fileUploadCard.classList.add('hidden');
+                        mainBody.classList.remove('items-center'); // і прибираємо центрування
+                    } else {
+                        // Для всіх інших вкладок - показуємо блок завантаження
+                        fileUploadCard.classList.remove('hidden');
+                        mainBody.classList.add('items-center'); // і повертаємо центрування
+                    }
+                });
+            });
+            // --- Кінець єдиної логіки ---
+
+
+            // Обробник відправки форми розширеного пошуку
+            advancedSearchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const submitBtn = document.getElementById('advancedSearchSubmitBtn');
+                const btnText = document.getElementById('advanced-search-button-text');
+                const spinner = document.getElementById('advanced-search-spinner');
+
+                btnText.textContent = translations.searching || 'Пошук...';
+                spinner.classList.remove('hidden');
+                submitBtn.disabled = true;
+
+                const formData = new FormData(advancedSearchForm);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch('/advanced-search', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const results = await response.json();
+                    if (!response.ok) {
+                        throw new Error(results.message || 'Помилка сервера');
+                    }
+
+                    advancedResultsBody.innerHTML = '';
+                    if (results && results.length > 0) {
+                        // Сортуємо результати за ПІБ, а потім за датою замовлення
+                        results.sort((a, b) => {
+                            const nameA = a.FullName || '';
+                            const nameB = b.FullName || '';
+                            const nameCompare = nameA.localeCompare(nameB, 'uk');
+                            if (nameCompare !== 0) {
+                                return nameCompare;
+                            }
+                            // Якщо ПІБ однакові, сортуємо за датою замовлення (від новіших до старіших)
+                            const dateA = a.Date ? new Date(a.Date) : 0;
+                            const dateB = b.Date ? new Date(b.Date) : 0;
+                            return dateB - dateA;
+                        });
+                        results.forEach(p => {
+                            const row = document.createElement('tr');
+                            row.className = 'cursor-pointer hover:bg-indigo-50'; // Додаємо стилі для клікабельного рядка
+                            const orderDate = p.Date ? new Date(p.Date).toLocaleDateString() : '';
+
+                            // Додаємо колір рядка залежно від статусу
+                            const status = p.Docstatus ? p.Docstatus.toLowerCase() : '';
+                            switch (status) {
+                                case 'перевірено':
+                                    row.classList.add('bg-blue-100');
+                                    break;
+                                case 'в роботі':
+                                    row.classList.add('bg-green-100');
+                                    break;
+                                case 'виконано':
+                                    row.classList.add('bg-green-200');
+                                    break;
+                                case 'відмінено':
+                                    row.classList.add('bg-red-100');
+                                    break;
+                            }
+
+                            const isCancelled = status === 'відмінено';
+
+                            // Формуємо гіперпосилання для веб-коду, якщо статус НЕ "відмінено"
+                            const webCodeLinkHtml = p.WebCode && config.labResultUrl && !isCancelled
+                                ? `<a href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.WebCode}</a>` 
+                                : (p.WebCode || '');
+
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${orderDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.Num || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-gray-500' : ''}">${p.FullName || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${webCodeLinkHtml}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-red-700 font-semibold' : ''}">${p.Docstatus || ''}</td>
+                            `;
+                            row.addEventListener('click', (event) => {
+                                // Якщо клік був не по посиланню, або якщо посилання з якоїсь причини не спрацювало,
+                                // ми все одно відкриваємо URL. Це запобігає подвійному відкриттю.
+                                if (event.target.tagName !== 'A' && p.WebCode && config.labResultUrl && !isCancelled) {
+                                    const url = `${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true`;
+                                    window.open(url, '_blank');
+                                }
+                            });
+                            advancedResultsBody.appendChild(row);
+                        });
+                        advancedSearchResultsDiv.classList.remove('hidden');
+                    } else {
+                        advancedSearchResultsDiv.classList.add('hidden');
+                        showModal(translations.searchResults || 'Результати пошуку', translations.patientsNotFound || 'Пацієнтів не знайдено.', true);
+                    }
+                } catch (error) {
+                    showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
+                } finally {
+                    btnText.textContent = translations.search || 'Пошук';
+                    spinner.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }
+            });
+
+            clearAdvancedSearchBtn.addEventListener('click', () => {
+                // Очищуємо поля вручну, залишаючи дати
+                document.getElementById('advancedDob').value = '';
+                document.getElementById('advancedPhone').value = '';
+                advancedSearchResultsDiv.classList.add('hidden');
+                advancedResultsBody.innerHTML = ''; // Також очищуємо тіло таблиці
+            });
 
             // Елементи керування пагінацією (перемикання сторінок).
             const paginationControls = document.getElementById('pagination-controls');
@@ -1193,7 +1297,6 @@
                 // Очищуємо поле вибору файлів, щоб уникнути випадкової відправки
                 fileInput.value = '';
                 updateFileNameDisplay(fileInput.files);
-
                 searchForm.reset(); // Очищаємо поля форми
                 docSearchForm.reset(); // Очищуємо форму пошуку по документу
                 partnerSearchForm.reset(); // Очищуємо форму пошуку по партнеру
@@ -1201,7 +1304,6 @@
                 resultsBody.innerHTML = ''; // Очищаємо тіло таблиці
                 docResultsBody.innerHTML = '';
                 partnerResultsBody.innerHTML = '';
-
                 searchResultsDiv.classList.add('hidden'); // Ховаємо блок результатів
                 docSearchResultsDiv.classList.add('hidden');
                 partnerSearchResultsDiv.classList.add('hidden');
@@ -1215,6 +1317,8 @@
                 document.getElementById('webCode').value = '';
                 document.getElementById('isPartnerSearchChecked').value = 'false';
                 document.getElementById('partnerWebCode').value = '';
+                document.getElementById('isEnglishVersion').value = 'false'; // <-- ДОДАНО: Скидаємо прапорець англійської версії
+                console.log(`[DEBUG] isEnglishVersion set to 'false' by clearSearchBtn`);
                 paginationControls.classList.add('hidden');
 
                 // Знімаємо позначки з усіх чекбоксів у таблицях результатів
@@ -1233,14 +1337,57 @@
 
             });
 
+            /**
+             * @description Допоміжна функція для вибіркового очищення результатів пошуку та стану.
+             * Очищує все, крім результатів та форми, що належать до активного типу пошуку.
+             * @param {string} activeSearchType - Тип активного пошуку ('doc', 'partner', 'main').
+             */
+            function clearOtherSearchResults(activeSearchType) {
+                if (activeSearchType !== 'main') {
+                    resultsBody.innerHTML = '';
+                    searchResultsDiv.classList.add('hidden');
+                    paginationControls.classList.add('hidden');
+                }
+                // Очищення результатів пошуку по документу
+                if (activeSearchType !== 'doc') {
+                    docResultsBody.innerHTML = '';
+                    docSearchResultsDiv.classList.add('hidden');
+                }
+                // Очищення результатів пошуку по партнеру
+                if (activeSearchType !== 'partner') {
+                    partnerResultsBody.innerHTML = '';
+                    partnerSearchResultsDiv.classList.add('hidden');
+                }
+
+                // Скидання загального стану
+                document.getElementById('selected-patient-info').textContent = '';
+                document.getElementById('patientName').value = '';
+                document.getElementById('phoneNumber').value = '';
+                document.getElementById('isDocSearchChecked').value = 'false';
+                document.getElementById('webCode').value = '';
+                document.getElementById('isPartnerSearchChecked').value = 'false';
+                document.getElementById('partnerWebCode').value = '';
+                document.getElementById('isEnglishVersion').value = 'false';
+                console.log(`[DEBUG] isEnglishVersion set to 'false' by clearOtherSearchResults for '${activeSearchType}' search`);
+
+                updateSmsButtonState();
+            }
+
+
             // Обробник відправки форми пошуку по документу.
             docSearchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // Очищуємо поле вибору файлів, щоб уникнути випадкової відправки
+
+                // --- ВИБІРКОВЕ ОЧИЩЕННЯ ПЕРЕД ПОШУКОМ ---
+                // Очищуємо результати та вибори з інших вкладок, не чіпаючи поточну форму.
                 fileInput.value = '';
                 updateFileNameDisplay(fileInput.files);
+                searchForm.reset();
+                partnerSearchForm.reset();
+                clearOtherSearchResults('doc'); // Функція для очищення всього, крім результатів поточного пошуку
+                // --- КІНЕЦЬ ОЧИЩЕННЯ ---
 
-                const docNumberInput = document.getElementById('docNumber');
+                const docNumberInput = document.getElementById('docNumber'); // Тепер значення читається коректно
                 const docNumber = docNumberInput.value.trim();
 
                 if (!docNumber) {
@@ -1315,12 +1462,14 @@
                                     // Якщо інший чекбокс не обраний, очищуємо основні поля
                                     engCheckbox.checked = false;
                                     document.getElementById('isEnglishVersion').value = 'false';
+                                    console.log(`[DEBUG] isEnglishVersion set to 'false' because main doc checkbox was unchecked.`);
                                     if (document.getElementById('isPartnerSearchChecked').value === 'false') clearSearchBtn.click();
                                 }
                             });
                             row.querySelector('.doc-english-version-cb').addEventListener('change', (e) => {
                                 const isChecked = e.target.checked;
                                 document.getElementById('isEnglishVersion').value = isChecked;
+                                console.log(`[DEBUG] isEnglishVersion set to '${isChecked}' by English version checkbox.`);
 
                                 const webCodeLink = document.getElementById(`doc-webcode-link-${index}`);
                                 if (webCodeLink) {
@@ -1358,11 +1507,16 @@
             // Обробник відправки форми пошуку по партнеру.
             partnerSearchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // Очищуємо поле вибору файлів, щоб уникнути випадкової відправки
+
+                // --- ВИБІРКОВЕ ОЧИЩЕННЯ ПЕРЕД ПОШУКОМ ---
                 fileInput.value = '';
                 updateFileNameDisplay(fileInput.files);
+                searchForm.reset();
+                docSearchForm.reset();
+                clearOtherSearchResults('partner'); // Функція для очищення всього, крім результатів поточного пошуку
+                // --- КІНЕЦЬ ОЧИЩЕННЯ ---
 
-                const docNumberInput = document.getElementById('partnerDocNumber');
+                const docNumberInput = document.getElementById('partnerDocNumber'); // Тепер значення читається коректно
                 const docNumber = docNumberInput.value.trim();
 
                 if (!docNumber) {
@@ -1512,7 +1666,6 @@
              * @description Виконує основний пошук пацієнта з пагінацією.
              */
             async function executeSearch() {
-                // Очищуємо поле вибору файлів, щоб уникнути випадкової відправки
                 fileInput.value = '';
                 updateFileNameDisplay(fileInput.files);
 
