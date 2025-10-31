@@ -168,9 +168,42 @@
                 }
             });
 
+            function toggleChannelFields(selectedChannel) {
+                const smsSection = document.querySelector('[data-section-key="sms"]');
+                const viberSection = document.querySelector('[data-section-key="viber"]');
+            
+                if (smsSection) {
+                    const isSms = selectedChannel === 'sms';
+                    smsSection.style.display = isSms ? '' : 'none';
+                    // Деактивуємо інпути, щоб вони не потрапили в FormData
+                    smsSection.querySelectorAll('input, select').forEach(el => el.disabled = !isSms);
+                }
+            
+                if (viberSection) {
+                    const isViber = selectedChannel === 'viber';
+                    viberSection.style.display = isViber ? '' : 'none';
+                    // Деактивуємо інпути, щоб вони не потрапили в FormData
+                    viberSection.querySelectorAll('input, select').forEach(el => el.disabled = !isViber);
+                }
+            }
+
+            branchForm.addEventListener('change', (event) => {
+                if (event.target.id === 'channel') {
+                    toggleChannelFields(event.target.value);
+                }
+            });
+
             function renderFormForBranch(branchKey) {
                 const branchData = currentConfig[branchKey];
                 branchForm.innerHTML = ''; // Clear previous form
+                
+                // Гарантуємо наявність об'єктів sms та viber для коректного рендерингу форми
+                if (!branchData.sms) {
+                    branchData.sms = { token: '', sender: '' };
+                }
+                if (!branchData.viber) {
+                    branchData.viber = { token: '', sender: '' };
+                }
 
                 // Рекурсивна функція для створення полів форми
                 function createFormFields(data, parentKey = '', container) {
@@ -182,6 +215,7 @@
                             // Створюємо секцію для вкладеного об'єкта
                             const section = document.createElement('div');
                             section.className = 'form-section';
+                            section.dataset.sectionKey = key; // Додаємо ключ секції для легкого доступу
                             
                             const title = document.createElement('h3');
                             title.textContent = key.charAt(0).toUpperCase() + key.slice(1); // Capitalize
@@ -210,6 +244,23 @@
                                 checkbox.checked = value;
                                 checkbox.className = 'form-checkbox';
                                 fieldContainer.appendChild(checkbox);
+                            } else if (fullKey === 'channel') {
+                                const select = document.createElement('select');
+                                select.id = fullKey;
+                                select.name = fullKey;
+                                select.className = 'form-select';
+                                
+                                const options = ['sms', 'viber'];
+                                options.forEach(opt => {
+                                    const optionEl = document.createElement('option');
+                                    optionEl.value = opt;
+                                    optionEl.textContent = opt.charAt(0).toUpperCase() + opt.slice(1);
+                                    if (opt === value) {
+                                        optionEl.selected = true;
+                                    }
+                                    select.appendChild(optionEl);
+                                });
+                                fieldContainer.appendChild(select);
                             } else {
                                 const input = document.createElement('input');
                                 // Робимо поля для паролів та токенів відповідного типу
@@ -258,6 +309,9 @@
                 createFormFields(objectFields, '', mainGrid);
                 
                 branchForm.appendChild(mainGrid);
+
+                // Встановлюємо початкову видимість полів каналу
+                toggleChannelFields(branchData.channel);
             }
 
             saveButton.addEventListener('click', () => {

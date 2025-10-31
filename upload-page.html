@@ -6,6 +6,8 @@
     <link rel="icon" href="/favicon.png" type="image/x-icon">
     <title>Керування пацієнтами та завантаженням результатів</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <title>Керування пацієнтами та завантаженням результатів</title>    
+    <link href="/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/upload-page.css">
 </head>
@@ -353,7 +355,7 @@
                     <div id="file-drop-area" class="file-drop-area relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-600">
                         <input type="file" id="file" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".docx,.pdf" multiple>
                         <div class="flex flex-col items-center justify-center text-gray-500">
-                            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-4-4V6a4 4 0 014-4h10a4 4 0 014 4v6a4 4 0 01-4 4H7z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 16v-4a4 4 0 00-4-4H8a4 4 0 00-4 4v4m16 0l--3-3m-13 3l3-3"></path></svg>
+                            <img src="/draganddrop.png" alt="Перетягніть файли" class="w-16 h-16 mb-3 opacity-75">
                             <p class="font-semibold"><span data-translate="dragOrClick">Перетягніть файл сюди або</span> <span class="text-indigo-600" data-translate="browse">натисніть для вибору</span></p>
                             <p id="file-name" class="mt-2 text-sm text-gray-600"></p>
                         </div>
@@ -1061,6 +1063,8 @@
             const docSearchSpinner = document.getElementById('doc-search-spinner');
             const partnerSearchForm = document.getElementById('partnerSearchForm');
             const partnerResultsBody = document.getElementById('partnerResultsBody');
+            const partnerSearchBtnText = document.getElementById('partner-search-button-text');
+            const partnerSearchSpinner = document.getElementById('partner-search-spinner');
             const partnerSearchResultsDiv = document.getElementById('partnerSearchResults');
             const searchForm = document.getElementById('searchForm');
             const searchBtnText = document.getElementById('search-button-text');
@@ -1378,14 +1382,13 @@
             docSearchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // --- ВИБІРКОВЕ ОЧИЩЕННЯ ПЕРЕД ПОШУКОМ ---
-                // Очищуємо результати та вибори з інших вкладок, не чіпаючи поточну форму.
-                fileInput.value = '';
-                updateFileNameDisplay(fileInput.files);
-                searchForm.reset();
-                partnerSearchForm.reset();
-                clearOtherSearchResults('doc'); // Функція для очищення всього, крім результатів поточного пошуку
-                // --- КІНЕЦЬ ОЧИЩЕННЯ ---
+                // --- ВИПРАВЛЕНО: Очищуємо тільки результати основного пошуку ---
+                // Тепер результати пошуку по партнеру не будуть скидатися,
+                // що дозволяє комбінувати вибори.
+                if (resultsBody.innerHTML !== '') {
+                    resultsBody.innerHTML = '';
+                    searchResultsDiv.classList.add('hidden');
+                }
 
                 const docNumberInput = document.getElementById('docNumber'); // Тепер значення читається коректно
                 const docNumber = docNumberInput.value.trim();
@@ -1508,13 +1511,13 @@
             partnerSearchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
 
-                // --- ВИБІРКОВЕ ОЧИЩЕННЯ ПЕРЕД ПОШУКОМ ---
-                fileInput.value = '';
-                updateFileNameDisplay(fileInput.files);
-                searchForm.reset();
-                docSearchForm.reset();
-                clearOtherSearchResults('partner'); // Функція для очищення всього, крім результатів поточного пошуку
-                // --- КІНЕЦЬ ОЧИЩЕННЯ ---
+                // --- ВИПРАВЛЕНО: Очищуємо тільки результати основного пошуку ---
+                // Тепер результати пошуку по документу не будуть скидатися,
+                // що дозволяє комбінувати вибори.
+                if (resultsBody.innerHTML !== '') {
+                    resultsBody.innerHTML = '';
+                    searchResultsDiv.classList.add('hidden');
+                }
 
                 const docNumberInput = document.getElementById('partnerDocNumber'); // Тепер значення читається коректно
                 const docNumber = docNumberInput.value.trim();

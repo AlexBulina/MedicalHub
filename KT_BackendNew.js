@@ -531,6 +531,17 @@ app.post('/api/branches', adminAuth, async (req, res) => {
         return res.status(400).json({ message: 'Надіслано порожню конфігурацію.' });
     }
 
+    // Очищуємо конфігурацію від неактивного каналу (sms/viber)
+    for (const branchKey in newConfig) {
+        const branch = newConfig[branchKey];
+        if (branch && branch.channel) {
+            if (branch.channel === 'sms' && branch.viber) {
+                delete branch.viber;
+            } else if (branch.channel === 'viber' && branch.sms) {
+                delete branch.sms;
+            }
+        }
+    }
     // Додаємо назад блок 'defaultSybase', який не редагується на фронтенді
     newConfig.defaultSybase = {
         db: { dsn: process.env.DB_DSN_SYBASE, type: 'sybase' }
@@ -1430,6 +1441,7 @@ app.get("/ct", displayPdfRoute);
 app.get("/rd", displayPdfRoute);
 app.get("/zdvrd",displayPdfRoute);
 app.get("/ol",displayPdfRoute);
+app.get("/zd",displayPdfRoute);
 
 /**
  * @description Повертає текстовий опис для коду статусу TurboSMS.
@@ -1490,7 +1502,7 @@ server2.listen(process.env.PORT2 || 1026, async () => {
         } catch (error) {
             logger.error(`Критична помилка під час періодичного очищення папок: ${error.message}`);
         }
-    }, 1800000); // 1800000 мс = 30 хвилин
+    }, 300000); // 300000 мс = 5 хвилин
 
     // Перший запуск очищення одразу після старту
     cleanupOrphanedDirectories();
