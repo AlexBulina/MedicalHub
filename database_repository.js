@@ -24,7 +24,7 @@ export async function executeQuery(query, dbConfig, binds = []) {
         // Операції MongoDB викликаються через runMongoOperation, а не executeQuery.
         // Ця заглушка залишається для сумісності, якщо десь залишився старий виклик.
         console.warn(" застарілий виклик executeQuery для MongoDB. Переведіть логіку на runMongoOperation.");
-        return Promise.resolve([]); 
+        return Promise.resolve([]);
     }
     // Для Sybase передаємо DSN
     return runSybaseQuery(dbConfig.dsn, query);
@@ -38,7 +38,7 @@ export async function executeQuery(query, dbConfig, binds = []) {
  */
 export async function checkCodeExists(code, dbConfig) {
     const dbType = dbConfig.type || 'sybase';
-    
+
     if (dbType === 'mongodb') {
         const result = await runMongoOperation(dbConfig, 'C_MESSAGES_JOURNAL', 'findOne', {
             query: { ID: code }
@@ -49,7 +49,7 @@ export async function checkCodeExists(code, dbConfig) {
         if (dbType === 'oracle') {
             query = `SELECT ID FROM C_MESSAGES_JOURNAL WHERE ID = '${code}'`;
         } else { // Sybase
-            query = `SELECT number FROM UniqueRandomNumbers WHERE number = '${code}'`;
+            query = `SELECT number FROM UniqueRandomNumbersV2 WHERE number = '${code}'`;
         }
         const result = await executeQuery(query, dbConfig);
         return !!(result && result.length > 0);
@@ -92,7 +92,7 @@ export async function saveUniqueId(params, dbConfig) {
             `;
         } else { // Sybase
             query = `
-                INSERT INTO UniqueRandomNumbers (number, created_at, patientName, phoneNumber, smsStatus, department, smsStatusCode, messageId, deliveryStatus)
+                INSERT INTO UniqueRandomNumbersV2 (number, created_at, patientName, phoneNumber, smsStatus, department, smsStatusCode, messageId, deliveryStatus)
                 VALUES ('${uniqId}', CURRENT TIMESTAMP, '${patientName}', '${phoneNumber}', '${smsStatus}', '${department}', ${finalSmsStatusCode}, ${finalMessageId}, NULL)
             `;
         }
@@ -109,7 +109,7 @@ export async function saveUniqueId(params, dbConfig) {
  */
 export async function createPatient({ firstName, lastName, dob, phone, gender }, dbConfig) {
     const dbType = dbConfig.type || 'sybase';
-    
+
     if (dbType === 'mongodb') {
         const existingPatient = await runMongoOperation(dbConfig, 'pacients', 'findOne', {
             query: { meno: firstName, priezvisko: lastName, datumnarod: new Date(dob) }
@@ -139,12 +139,12 @@ export async function createPatient({ firstName, lastName, dob, phone, gender },
             const formattedGender = gender === 'male' ? 'ч' : (gender === 'female' ? 'ж' : gender);
 
             // Тимчасова конфігурація для підключення до тестової бази даних Oracle
-          //  const tempDbConfig = {
-           //     type: 'oracle',
-           //     user: 'onelab_dev',
-          //      password: 'color',
-          //      connectString: '10.0.0.10:1521/nuni'
-         //   };
+            //  const tempDbConfig = {
+            //     type: 'oracle',
+            //     user: 'onelab_dev',
+            //      password: 'color',
+            //      connectString: '10.0.0.10:1521/nuni'
+            //   };
 
             // Викликаємо збережену процедуру для створення пацієнта
             query = `
@@ -315,7 +315,7 @@ export async function searchPatients({ lastName, firstName, limit, offset }, dbC
                 ${whereClause} ORDER BY priezvisko, meno
             `;
         }
-        
+
         // Ця частина залишається спільною для SQL баз
         const countResult = await executeQuery(countQuery, dbConfig);
         const total = countResult?.[0]?.total || 0;
@@ -415,7 +415,7 @@ export async function getJournalByDate({ date, depId }, dbConfig) {
         } else { // Sybase
             query = `
                 SELECT TOP 200 number as webcode, created_at, patientName, phoneNumber, smsStatus, department, smsStatusCode, deliveryStatus 
-                FROM UniqueRandomNumbers 
+                FROM UniqueRandomNumbersV2 
                 WHERE CAST(created_at AS DATE) = '${date}' AND department = '${depId}'
                 ORDER BY created_at DESC
             `;
@@ -481,7 +481,7 @@ export async function searchJournal({ term, depId, onlySuccessful }, dbConfig) {
         } else { // Sybase
             query = `
                 SELECT number as webcode, created_at, patientName, phoneNumber, smsStatus, department, smsStatusCode, deliveryStatus 
-                FROM UniqueRandomNumbers 
+                FROM UniqueRandomNumbersV2 
                 WHERE (patientName LIKE '%${term}%' OR phoneNumber LIKE '%${term}%' OR number LIKE '%${term}%')
             `;
         }
@@ -494,7 +494,7 @@ export async function searchJournal({ term, depId, onlySuccessful }, dbConfig) {
         }
         query += ` ORDER BY created_at DESC`;
         query = (dbType === 'oracle') ? `${query} FETCH FIRST 50 ROWS ONLY` : query.replace('SELECT', 'SELECT TOP 50');
-        
+
         return executeQuery(query, dbConfig);
     }
 }
@@ -531,7 +531,7 @@ export async function getPendingSmsRecords(dbConfig) {
             `;
         } else { // Sybase
             query = `
-                SELECT messageId, department FROM UniqueRandomNumbers 
+                SELECT messageId, department FROM UniqueRandomNumbersV2 
                 WHERE messageId IS NOT NULL AND deliveryStatus IS NULL
                 AND created_at > DATEADD(day, -7, GETDATE())
             `;
@@ -562,9 +562,296 @@ export async function updateSmsDeliveryStatus(messageId, newStatus, dbConfig) {
             query = `UPDATE C_MESSAGES_JOURNAL SET turbo_sms_delivery_status = :newStatus WHERE turbo_sms_message_Id = :messageId`;
             binds = { newStatus, messageId };
         } else { // Sybase
-            query = `UPDATE UniqueRandomNumbers SET deliveryStatus = '${newStatus}' WHERE messageId = '${messageId}'`;
+            query = `UPDATE UniqueRandomNumbersV2 SET deliveryStatus = '${newStatus}' WHERE messageId = '${messageId}'`;
             binds = [];
         }
         return executeQuery(query, dbConfig, binds);
     }
+}
+
+/**
+ * @description Отримує історію обстежень пацієнта (тільки для Sybase).
+ * @param {object} params - Параметри пошуку.
+ * @param {string} params.dob - Дата народження пацієнта (YYYY-MM-DD).
+ * @param {string} params.phone - Номер телефону пацієнта.
+ * @param {string} [params.dateFrom] - Початкова дата періоду (YYYY-MM-DD).
+ * @param {string} [params.dateTo] - Кінцева дата періоду (YYYY-MM-DD).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getPatientHistory({ dob, phone, dateFrom, dateTo }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Patient history search is only supported for Sybase DB.');
+        return []; // Повертаємо порожній масив для інших типів БД
+    }
+
+    let query = `
+  SELECT *, dem.tel 
+FROM ziad_okb AS p
+JOIN c_pacient AS pac ON p.rodcis = pac.rodcis
+JOIN pac_dem AS dem ON pac.rodcis = dem.rodcis
+WHERE 
+  pac.datumnarod = '${dob}'  
+  AND p.stavziad = 2 
+    `;
+
+    if (dateFrom && dateTo) {
+        query += ` AND CAST(p.datodberu AS DATE) BETWEEN '${dateFrom}' AND '${dateTo}'`;
+    }
+
+    const results = await executeQuery(query, dbConfig);
+
+    if (!results) return [];
+
+    // Фільтруємо на рівні JS, оскільки SQL Anywhere 11 не підтримує REGEXP_REPLACE
+    // Це дозволяє очистити номер від будь-якого тексту та символів
+    return results.filter(record => {
+        if (!record.tel) return false;
+
+        let digits = record.tel.replace(/\D/g, '');
+
+        // Нормалізація, аналогічна formatPhoneNumber
+        if (digits.startsWith('380') && digits.length === 12) digits = digits.substring(2);
+        if (digits.length === 9) digits = '0' + digits;
+
+        return digits === phone;
+    });
+}
+
+/**
+ * @description Отримує деталі обстеження пацієнта за датою обстеження та датою народження (тільки для Sybase).
+ * @param {object} params - Параметри пошуку.
+ * @param {string} params.datodberu - Дата та час взяття матеріалу.
+ * @param {string} params.datumnarod - Дата народження пацієнта.
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getPatientExamDetails({ datodberu, datumnarod }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Patient exam details search is only supported for Sybase DB.');
+        return []; // Повертаємо порожній масив для інших типів БД
+    }
+
+    // Важливо: datodberu має бути в точному форматі, як в базі, включаючи час.
+    const query = `
+        SELECT
+            pa.rodcis AS "ID Пацієнта",
+            CONVERT(DATE, pa.datumnarod) AS "Дата народження",
+            CONVERT(DATE, zop.datodberu) AS "Дата отримання матеріалу",
+            CONVERT(DATE, ok.datpotvrd) AS "Дата видачі результатів",
+            ok.poznamka AS "Примітка",
+            CASE
+                WHEN pa.pohlavie = 'M' THEN 'чоловіча'
+                WHEN pa.pohlavie = 'F' THEN 'жіноча'
+                ELSE 'Невідомо'
+            END AS "Стать",
+            pa.priezvisko AS "Прізвище",
+            pa.meno AS "Ім'я",
+            s.kodvys AS "Код дослідження",
+            s.skratka AS "Артикул",
+            ts.nazovskup AS "Панель",
+            s.nazov AS "Обстеження",
+            MAX(a.vysledoknum) AS "Результат",
+            MAX(a.vysledoktext) AS "Результат текст",
+            dtxt.dlhytext AS "Коментар",
+            s.kodmernjedn AS "Одиниця в.",
+            MAX(a.hranicaod) AS "Референт від",
+            MAX(a.hranicado) AS "Референт до",
+            s.pomtext AS "Опис результату",
+            cz.priezvisko AS "ЛаборантФ",
+            cz.meno AS "ЛаборантМ"
+        FROM ziad_okb_pom a JOIN c_okb_vys s ON a.kodvys = s.kodvys JOIN c_okb_tlac_skup ts ON s.kodotecvys >= ts.kodskupod AND s.kodotecvys <= ts.kodskupdo JOIN c_pacient pa ON pa.rodcis = a.rodcis JOIN ziad_okb_prac zop ON zop.datodberu = a.datodberu JOIN ziad_okb ok ON ok.datodberu = zop.datodberu JOIN c_zam cz ON ok.oscispotvr = cz.oscis LEFT JOIN dlhe_texty dtxt ON dtxt.textid = a.vysetrenieid
+        WHERE ok.datodberu = '${datodberu}' AND pa.datumnarod = '${datumnarod}' AND (s.nazov NOT LIKE '%Забір%' AND (a.vysledoknum IS NOT NULL OR a.vysledoktext <> ''))
+        GROUP BY pa.rodcis, pa.datumnarod, zop.datodberu, ok.datpotvrd, ok.poznamka, pa.pohlavie, pa.priezvisko, pa.meno, s.kodvys, s.skratka, ts.nazovskup, s.nazov, s.kodmernjedn, s.pomtext, dtxt.dlhytext, cz.priezvisko, cz.meno
+        ORDER BY s.kodvys ASC
+    `;
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує статистику реєстрацій пацієнтів адміністраторами за період (тільки для Sybase).
+ * @param {object} params - Параметри запиту.
+ * @param {string} params.dateFrom - Початкова дата періоду (YYYY-MM-DD).
+ * @param {string} params.dateTo - Кінцева дата періоду (YYYY-MM-DD).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getAdminRegistrationStats({ dateFrom, dateTo }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Admin registration stats report is only supported for Sybase DB.');
+        return [];
+    }
+
+    const query = `
+        SELECT cz.priezvisko As "Фамілія",  cz.meno As "Адміністратор", COUNT(*) AS record_count
+        FROM pac_obj pac
+        JOIN c_zam cz ON pac.oscis = cz.oscis
+        WHERE pac.datumobj BETWEEN '${dateFrom}' AND '${dateTo}'
+        GROUP BY cz.meno,cz.priezvisko
+        ORDER BY record_count DESC;`;
+
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує статистику реєстрацій досліджень адміністраторами за період (тільки для Sybase).
+ * @param {object} params - Параметри запиту.
+ * @param {string} params.dateFrom - Початкова дата періоду (YYYY-MM-DD).
+ * @param {string} params.dateTo - Кінцева дата періоду (YYYY-MM-DD).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getExamRegistrationStats({ dateFrom, dateTo }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Exam registration stats report is only supported for Sybase DB.');
+        return [];
+    }
+
+    const query = `
+        SELECT cz.priezvisko As "Фамілія",  cz.meno As "Адміністратор", COUNT(*) AS record_count
+        FROM ziad_okb_prac zp JOIN c_zam cz ON zp.oscisprijmu = cz.oscis
+        WHERE zp.datodberu BETWEEN '${dateFrom}' AND '${dateTo}'
+        GROUP BY cz.meno,cz.priezvisko ORDER BY record_count DESC;`;
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує статистику сум замовлень по адміністраторах (Каса) за період (тільки для Sybase).
+ * Використовує таблиці dodaci_list та c_zam.
+ * @param {object} params - Параметри запиту.
+ * @param {string} params.dateFrom - Початкова дата періоду (YYYY-MM-DD або YYYY-MM-DD HH:MM:SS).
+ * @param {string} params.dateTo - Кінцева дата періоду (YYYY-MM-DD або YYYY-MM-DD HH:MM:SS).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getAdministratorCashStats({ dateFrom, dateTo }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Administrator cash report is only supported for Sybase DB.');
+        return [];
+    }
+
+    const query = `
+        SELECT
+            cz.priezvisko AS "Фамілія",
+            cz.meno AS "Ім'я",
+            SUM(d.suma) AS suma_zamovlen
+        FROM dodaci_list d
+        JOIN c_zam cz ON d.oscis = cz.oscis
+        WHERE d.datum BETWEEN '${dateFrom}' AND '${dateTo}'
+        GROUP BY cz.priezvisko, cz.meno
+        HAVING SUM(d.suma) > 0
+        ORDER BY suma_zamovlen DESC;`;
+
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує статистику сум замовлень по адміністраторах (Лабораторія) за період (тільки для Sybase).
+ * Використовує таблиці pokladnicny_doklad та c_zam.
+ * @param {object} params - Параметри запиту.
+ * @param {string} params.dateFrom - Початкова дата періоду (YYYY-MM-DD або YYYY-MM-DD HH:MM:SS).
+ * @param {string} params.dateTo - Кінцева дата періоду (YYYY-MM-DD або YYYY-MM-DD HH:MM:SS).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getAdministratorLabCashStats({ dateFrom, dateTo }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Administrator lab cash report is only supported for Sybase DB.');
+        return [];
+    }
+
+    const query = `
+        select cz.priezvisko AS "Фамілія", cz.meno AS "Ім'я", sum(d.suma) AS suma_zamovlen from pokladnicny_doklad d 
+        JOIN c_zam cz ON d.oscis = cz.oscis
+        WHERE d.datum BETWEEN '${dateFrom}' AND '${dateTo}'
+        GROUP BY cz.priezvisko, cz.meno
+        HAVING sum(d.suma) > 0
+        ORDER BY suma_zamovlen DESC;`;
+
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує динаміку значень конкретного показника для вибраних обстежень (тільки для Sybase).
+ * @param {object} params - Параметри пошуку.
+ * @param {Array<{datodberu: string, datumnarod: string}>} params.exams - Масив об'єктів з даними обстежень.
+ * @param {string[]} params.indicatorCodes - Масив кодів показників (напр., ['HGB', 'ALT']).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<{datodberu: string, vysledoknum: number, skratka: string}>|undefined>}
+ */
+export async function getPatientExamDynamics({ exams, indicatorCodes }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Patient exam dynamics search is only supported for Sybase DB.');
+        return [];
+    }
+
+    // Створюємо список умов WHERE IN для datodberu
+    const datodberuList = exams.map(exam => `'${exam.datodberu}'`).join(',');
+    const indicatorCodeList = indicatorCodes.map(code => `'${code}'`).join(',');
+    const datumnarod = exams[0]?.datumnarod; // Беремо дату народження з першого обстеження
+
+    if (!datodberuList || !datumnarod) {
+        return [];
+    }
+
+    const query = `
+        SELECT
+            a.datodberu,
+            s.skratka,
+            MAX(a.vysledoknum) AS vysledoknum
+        FROM ziad_okb_pom a JOIN c_pacient pa ON a.rodcis = pa.rodcis JOIN c_okb_vys s ON a.kodvys = s.kodvys
+        WHERE a.datodberu IN (${datodberuList}) AND pa.datumnarod = '${datumnarod}' AND s.skratka IN (${indicatorCodeList}) AND a.vysledoknum IS NOT NULL
+        GROUP BY a.datodberu, s.skratka
+        ORDER BY a.datodberu ASC
+    `;
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує список показників, які присутні у більше ніж одному з вибраних обстежень (тільки для Sybase).
+ * @param {object} params - Параметри пошуку.
+ * @param {Array<{datodberu: string, datumnarod: string}>} params.exams - Масив об'єктів з даними обстежень.
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<{skratka: string, nazov: string}>|undefined>}
+ */
+export async function getAvailableIndicatorsForDynamics({ exams }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Available indicators search is only supported for Sybase DB.');
+        return [];
+    }
+
+    const datodberuList = exams.map(exam => `'${exam.datodberu}'`).join(',');
+    const datumnarod = exams[0]?.datumnarod;
+
+    if (!datodberuList || !datumnarod) {
+        return [];
+    }
+
+    const query = `
+        SELECT
+            s.skratka,
+            s.nazov
+        FROM ziad_okb_pom a JOIN c_pacient pa ON a.rodcis = pa.rodcis JOIN c_okb_vys s ON a.kodvys = s.kodvys
+        WHERE a.datodberu IN (${datodberuList}) AND pa.datumnarod = '${datumnarod}' AND a.vysledoknum IS NOT NULL
+        GROUP BY s.skratka, s.nazov
+        HAVING COUNT(DISTINCT a.datodberu) > 1
+        ORDER BY s.nazov ASC
+    `;
+    return executeQuery(query, dbConfig);
 }

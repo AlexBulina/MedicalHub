@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="uk">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.png" type="image/x-icon">
+
+    <!--  <script src="https://cdn.tailwindcss.com"></script>  -->
     <title>Керування пацієнтами та завантаженням результатів</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <title>Керування пацієнтами та завантаженням результатів</title>    
     <link href="/output.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Додаємо Chart.js -->
     <link rel="stylesheet" href="/upload-page.css">
 </head>
-<body id="main-body" class="bg-gray-100 flex items-center justify-center min-h-screen py-10">
+
+<body id="main-body" class="bg-gray-100 min-h-screen py-10">
     <div class="fixed top-4 right-4 z-50 flex items-center space-x-4">
         <!-- Channel Icon with Tooltip -->
         <div id="channel-icon-container" class="tooltip-container hidden">
@@ -21,32 +24,47 @@
 
         <!-- SMS Status Indicator -->
         <div class="tooltip-container">
-            <svg id="sms-status-indicator" class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            <svg id="sms-status-indicator" class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                </path>
             </svg>
-            <span id="sms-tooltip-text" class="tooltip-text" data-translate="smsServiceStatusChecking">сервіс ТурбоСМС: перевірка...</span>
+            <span id="sms-tooltip-text" class="tooltip-text" data-translate="smsServiceStatusChecking">сервіс ТурбоСМС:
+                перевірка...</span>
         </div>
     </div>
-    <div id="language-selector-container" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-in-out">
+    <div id="language-selector-container"
+        class="fixed top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 ease-in-out">
         <div id="language-selector" class="flex space-x-1 bg-gray-200 p-1 rounded-lg shadow-sm">
             <!-- Кнопки мов будуть згенеровані динамічно -->
         </div>
     </div>
-    
+
     <!-- Journal Toggle Button -->
-    <button id="toggle-journal-btn" class="fixed top-1/2 left-0 -translate-y-1/2 bg-indigo-600 text-white p-3 rounded-r-lg shadow-lg z-50 hover:bg-indigo-700 transition-all duration-500 ease-in-out">
+    <button id="toggle-journal-btn"
+        class="fixed top-1/2 left-0 -translate-y-1/2 bg-indigo-600 text-white p-3 rounded-r-lg shadow-lg z-50 hover:bg-indigo-700 transition-all duration-500 ease-in-out">
         <!-- Icon for opening/closing -->
-        <svg id="journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        <svg id="journal-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        <svg id="journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        </svg>
+        <svg id="journal-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
     </button>
 
     <!-- Journal Slide-out Form (Left) -->
-    <div id="journal-form" class="fixed top-10 bottom-0 left-0 w-80 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col rounded-tr-xl">
+    <div id="journal-form"
+        class="fixed top-10 bottom-0 left-0 w-80 bg-white shadow-xl transform -translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col rounded-tr-xl">
         <div class="p-6 border-b border-gray-200 flex-shrink-0">
             <h3 class="text-xl font-bold text-gray-800 mb-4" data-translate="journalTitle">Журнал відправлень</h3>
             <div>
-                <label for="journal-date-picker" class="block text-sm font-medium text-gray-700" data-translate="journalDateLabel">Відобразити за дату</label>
-                <input type="date" id="journal-date-picker" name="journal-date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                <label for="journal-date-picker" class="block text-sm font-medium text-gray-700"
+                    data-translate="journalDateLabel">Відобразити за дату</label>
+                <input type="date" id="journal-date-picker" name="journal-date"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
             </div>
         </div>
         <div id="journal-content" class="flex-grow p-6 overflow-y-auto">
@@ -55,28 +73,43 @@
         <div class="p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50">
             <h4 id="journal-summary" class="text-xl font-bold text-gray-800 flex justify-between items-center">
                 <span data-translate="journalTotal">Загалом:</span>
-                <span id="journal-count" class="bg-indigo-600 text-white text-lg font-semibold px-2 py-1 rounded-md">0</span>
+                <span id="journal-count"
+                    class="bg-indigo-600 text-white text-lg font-semibold px-2 py-1 rounded-md">0</span>
             </h4>
         </div>
     </div>
 
     <!-- Search Journal Toggle Button (Right) -->
-    <button id="toggle-search-journal-btn" class="fixed top-1/2 right-0 -translate-y-1/2 bg-teal-600 text-white p-3 rounded-l-lg shadow-lg z-50 hover:bg-teal-700 transition-colors duration-300 ease-in-out">
-        <svg id="search-journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <svg id="search-journal-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <button id="toggle-search-journal-btn"
+        class="fixed top-1/2 right-0 -translate-y-1/2 bg-teal-600 text-white p-3 rounded-l-lg shadow-lg z-50 hover:bg-teal-700 transition-colors duration-300 ease-in-out">
+        <svg id="search-journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+        <svg id="search-journal-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
     </button>
 
     <!-- Search Journal Slide-out Form (Right) -->
-    <div id="search-journal-form" class="fixed top-10 bottom-0 right-0 w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col rounded-tl-xl">
+    <div id="search-journal-form"
+        class="fixed top-10 bottom-0 right-0 w-96 bg-white shadow-xl transform translate-x-full transition-transform duration-300 ease-in-out z-40 flex flex-col rounded-tl-xl">
         <div class="p-6 border-b border-gray-200 flex-shrink-0">
             <h3 class="text-xl font-bold text-gray-800 mb-4" data-translate="searchInJournal">Пошук по журналу</h3>
             <form id="journal-search-form">
-                <label for="journal-search-input" class="block text-sm font-medium text-gray-700" data-translate="searchByPibPhoneWebcode">Пошук по ПІБ, телефону або вебкоду</label>
-                <input type="search" id="journal-search-input" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2" data-translate-placeholder="searchPlaceholder">
+                <label for="journal-search-input" class="block text-sm font-medium text-gray-700"
+                    data-translate="searchByPibPhoneWebcode">Пошук по ПІБ, телефону або вебкоду</label>
+                <input type="search" id="journal-search-input"
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-teal-500 focus:ring-teal-500 sm:text-sm p-2"
+                    data-translate-placeholder="searchPlaceholder">
                 <div class="mt-4">
                     <label class="inline-flex items-center">
-                        <input type="checkbox" id="filter-sent-sms-checkbox" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
-                        <span class="ml-2 text-sm text-gray-600" data-translate="onlySuccessfullySent">Лише успішно надіслані (Код SMS: 801)</span>
+                        <input type="checkbox" id="filter-sent-sms-checkbox"
+                            class="rounded border-gray-300 text-indigo-600 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                        <span class="ml-2 text-sm text-gray-600" data-translate="onlySuccessfullySent">Лише успішно
+                            надіслані (Код SMS: 801)</span>
                     </label>
                 </div>
             </form>
@@ -87,37 +120,55 @@
         <div class="p-6 border-t border-gray-200 flex-shrink-0 bg-gray-50">
             <h4 id="search-journal-summary" class="text-xl font-bold text-gray-800 flex justify-between items-center">
                 <span data-translate="journalTotal">Загалом:</span>
-                <span id="search-journal-count" class="bg-teal-800 text-white text-lg font-semibold px-2 py-1 rounded-md">0</span>
+                <span id="search-journal-count"
+                    class="bg-teal-800 text-white text-lg font-semibold px-2 py-1 rounded-md">0</span>
             </h4>
         </div>
     </div>
 
-    <div class="w-full max-w-[57rem] mx-auto space-y-8 p-4">
+    <div class="w-full max-w-[70.7rem] mx-auto space-y-8 p-4 sticky top-[60px] z-30 mt-8">
         <!-- Patient Management Card -->
-        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
-            <h2 class="text-xl font-bold text-gray-800 mb-1" data-translate="patientManagement">Керування пацієнтами</h2>
-            <p class="text-gray-500 mb-6" data-translate="findOrCreatePatient">Знайдіть існуючого пацієнта або створіть нового.</p>
-            
+        <div class="bg-white rounded-xl shadow-lg p-6 md:p-8 min-h-[400px]">
+            <h2 class="text-xl font-bold text-gray-800 mb-1" data-translate="patientManagement">Керування пацієнтами
+            </h2>
+            <p class="text-gray-500 mb-6" data-translate="findOrCreatePatient">Знайдіть існуючого пацієнта або створіть
+                нового.</p>
+
             <div class="border-b border-gray-200">
                 <!-- 
                     На маленьких екранах (мобільні) - сітка 2x2.
                     На середніх екранах (md) і більше - flex-контейнер в один рядок.
                 -->
                 <nav class="grid grid-cols-2 md:flex md:justify-between -mb-px" aria-label="Tabs">
-                    <button id="search-tab-button" class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center md:text-left" data-translate="searchPatient">
+                    <button id="search-tab-button"
+                        class="tab-button active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-center md:text-left"
+                        data-translate="searchPatient">
                         Пошук пацієнта
                     </button>
-                    <button id="create-tab-button" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="createNewPatient">
+                    <button id="create-tab-button"
+                        class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left"
+                        data-translate="createNewPatient">
                         Створити нового пацієнта
                     </button>
-                    <button id="doc-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="searchByDocument">
+                    <button id="doc-search-tab-button"
+                        class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left"
+                        data-translate="searchByDocument">
                         Пошук по документу
                     </button>
-                    <button id="partner-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="searchByPartner">
+                    <button id="partner-search-tab-button"
+                        class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left"
+                        data-translate="searchByPartner">
                         Пошук по партнеру
                     </button>
-                    <button id="advanced-search-tab-button" class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left" data-translate="advancedSearchPatient">
+                    <button id="advanced-search-tab-button"
+                        class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left"
+                        data-translate="advancedSearchPatient">
                         Історія пацієнта
+                    </button>
+                    <button id="reports-tab-button"
+                        class="tab-button hidden whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300 text-center md:text-left"
+                        data-translate="reports">
+                        Звіти
                     </button>
                 </nav>
             </div>
@@ -126,42 +177,58 @@
             <div id="search-tab-content" class="mt-6">
                 <form id="searchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-1">
-                        <label for="searchLastName" class="block text-sm font-medium text-gray-700" data-translate="lastName">Прізвище</label>
-                        <input type="text" id="searchLastName" name="lastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                        <label for="searchLastName" class="block text-sm font-medium text-gray-700"
+                            data-translate="lastName">Прізвище</label>
+                        <input type="text" id="searchLastName" name="lastName"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
                     </div>
                     <div class="md:col-span-1">
-                        <label for="searchFirstName" class="block text-sm font-medium text-gray-700" data-translate="firstName">Ім'я</label>
-                        <input type="text" id="searchFirstName" name="firstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
+                        <label for="searchFirstName" class="block text-sm font-medium text-gray-700"
+                            data-translate="firstName">Ім'я</label>
+                        <input type="text" id="searchFirstName" name="firstName"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2">
                     </div>
                     <div class="md:col-span-2 flex gap-4">
-                        <button type="submit" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <span id="search-button-text" data-translate="search">Пошук</span>
-                            <div id="search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                            <div id="search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3"
+                                style="border-top-color: transparent;"></div>
                         </button>
-                        <button type="button" id="clearSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-translate="clear">Очистити</button>
+                        <button type="button" id="clearSearchBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            data-translate="clear">Очистити</button>
                     </div>
                 </form>
                 <div id="searchResults" class="hidden mt-6">
                     <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
-                    <p id="no-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не знайдено.</p>
+                    <p id="no-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не
+                        знайдено.</p>
                     <div class="overflow-x-auto mt-4 border rounded-lg">
                         <table id="resultsTable" class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderDob">Дата народження</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderPhone">Телефон</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderAction"></th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderFullName">ПІБ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderDob">Дата народження</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderPhone">Телефон</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderAction"></th>
                                 </tr>
                             </thead>
                             <tbody id="resultsBody" class="bg-white divide-y divide-gray-200"></tbody>
                         </table>
                     </div>
                     <!-- Pagination Controls -->
-                    <div id="pagination-controls" class="hidden mt-4 flex justify-between items-center text-sm text-gray-600">
-                        <button id="prev-page-btn" class="px-4 py-2 font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Попередні</button>
+                    <div id="pagination-controls"
+                        class="hidden mt-4 flex justify-between items-center text-sm text-gray-600">
+                        <button id="prev-page-btn"
+                            class="px-4 py-2 font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Попередні</button>
                         <span id="page-info"></span>
-                        <button id="next-page-btn" class="px-4 py-2 font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Наступні</button>
+                        <button id="next-page-btn"
+                            class="px-4 py-2 font-medium bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Наступні</button>
                     </div>
                 </div>
             </div>
@@ -171,32 +238,46 @@
                 <form id="createForm" class="space-y-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label for="createFirstName" class="block text-sm font-medium text-gray-700" data-translate="firstName">Ім'я</label>
-                            <input type="text" id="createFirstName" name="firstName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                            <label for="createFirstName" class="block text-sm font-medium text-gray-700"
+                                data-translate="firstName">Ім'я</label>
+                            <input type="text" id="createFirstName" name="firstName"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
                         </div>
                         <div>
-                            <label for="createLastName" class="block text-sm font-medium text-gray-700" data-translate="lastName">Прізвище</label>
-                            <input type="text" id="createLastName" name="lastName" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                            <label for="createLastName" class="block text-sm font-medium text-gray-700"
+                                data-translate="lastName">Прізвище</label>
+                            <input type="text" id="createLastName" name="lastName"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
                         </div>
                         <div>
-                            <label for="createDob" class="block text-sm font-medium text-gray-700" data-translate="dob">Дата народження</label>
-                            <input type="date" id="createDob" name="dob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                            <label for="createDob" class="block text-sm font-medium text-gray-700"
+                                data-translate="dob">Дата народження</label>
+                            <input type="date" id="createDob" name="dob"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
                         </div>
                         <div>
-                            <label for="createPhone" class="block text-sm font-medium text-gray-700" data-translate="phone">Телефон</label>
-                            <input type="tel" id="createPhone" name="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567" required>
+                            <label for="createPhone" class="block text-sm font-medium text-gray-700"
+                                data-translate="phone">Телефон</label>
+                            <input type="tel" id="createPhone" name="phone"
+                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2"
+                                placeholder="0501234567" required>
                         </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700" data-translate="gender">Стать</label>
                         <div class="mt-2 flex items-center space-x-4">
-                           <label class="inline-flex items-center"><input type="radio" name="gender" value="male" class="form-radio" checked> <span class="ml-2" data-translate="male">Чоловік</span></label>
-                           <label class="inline-flex items-center"><input type="radio" name="gender" value="female" class="form-radio"> <span class="ml-2" data-translate="female">Жінка</span></label>
+                            <label class="inline-flex items-center"><input type="radio" name="gender" value="male"
+                                    class="form-radio" checked> <span class="ml-2"
+                                    data-translate="male">Чоловік</span></label>
+                            <label class="inline-flex items-center"><input type="radio" name="gender" value="female"
+                                    class="form-radio"> <span class="ml-2" data-translate="female">Жінка</span></label>
                         </div>
                     </div>
-                    <button type="submit" class="w-full md:w-auto flex justify-center items-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
-                         <span id="create-button-text" data-translate="createPatientBtn">Створити пацієнта</span>
-                         <div id="create-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                    <button type="submit"
+                        class="w-full md:w-auto flex justify-center items-center py-2 px-6 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        <span id="create-button-text" data-translate="createPatientBtn">Створити пацієнта</span>
+                        <div id="create-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3"
+                            style="border-top-color: transparent;"></div>
                     </button>
                 </form>
             </div>
@@ -205,35 +286,55 @@
             <div id="doc-search-tab-content" class="hidden mt-6">
                 <form id="docSearchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-2 relative">
-                        <label for="docNumber" class="block text-sm font-medium text-gray-700" data-translate="documentNumber">Номер документа</label>
-                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="docNumber" name="docNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 pr-10">
-                        <button type="button" id="clearDocNumberBtn" class="absolute inset-y-0 right-0 top-6 flex items-center pr-3 hidden">
-                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        <label for="docNumber" class="block text-sm font-medium text-gray-700"
+                            data-translate="documentNumber">Номер документа</label>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="docNumber" name="docNumber"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 pr-10">
+                        <button type="button" id="clearDocNumberBtn"
+                            class="absolute inset-y-0 right-0 top-6 flex items-center pr-3 hidden">
+                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="currentColor"
+                                viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
                         </button>
                     </div>
                     <div class="md:col-span-2 flex gap-4">
-                        <button type="submit" id="docSearchSubmitBtn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" id="docSearchSubmitBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <span id="doc-search-button-text" data-translate="search">Пошук</span>
-                            <div id="doc-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                            <div id="doc-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3"
+                                style="border-top-color: transparent;"></div>
                         </button>
-                        <button type="button" id="clearDocSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-translate="clear">Очистити</button>
+                        <button type="button" id="clearDocSearchBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            data-translate="clear">Очистити</button>
                     </div>
                 </form>
                 <!-- Результати пошуку по документу -->
                 <div id="docSearchResults" class="hidden mt-6">
                     <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
-                    <p id="no-doc-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не знайдено.</p>
+                    <p id="no-doc-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів
+                        не знайдено.</p>
                     <div class="overflow-x-auto mt-4 border rounded-lg">
                         <table id="docResultsTable" class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
-                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderPhone">Телефон</th>
-                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="webCode">Веб-код</th>
-                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="status">Статус</th>
-                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="confirmationDateTime">Дата підтвердження</th>
-                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderAction"></th>
-                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="englishVersion">Англ. версія</th>
+                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderFullName">ПІБ</th>
+                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderPhone">Телефон</th>
+                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="webCode">Веб-код</th>
+                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="status">Статус</th>
+                                    <th class="px-2 md:px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="confirmationDateTime">Дата підтвердження</th>
+                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderAction"></th>
+                                    <th class="px-2 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="englishVersion">Англ. версія</th>
                                 </tr>
                             </thead>
                             <tbody id="docResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
@@ -246,34 +347,54 @@
             <div id="partner-search-tab-content" class="hidden mt-6">
                 <form id="partnerSearchForm" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
                     <div class="md:col-span-2 relative">
-                        <label for="partnerDocNumber" class="block text-sm font-medium text-gray-700" data-translate="documentNumber">Номер документа</label>
-                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="partnerDocNumber" name="docNumber" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 pr-10">
-                        <button type="button" id="clearPartnerDocNumberBtn" class="absolute inset-y-0 right-0 top-6 flex items-center pr-3 hidden">
-                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path></svg>
+                        <label for="partnerDocNumber" class="block text-sm font-medium text-gray-700"
+                            data-translate="documentNumber">Номер документа</label>
+                        <input type="text" inputmode="numeric" pattern="[0-9]*" id="partnerDocNumber" name="docNumber"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 pr-10">
+                        <button type="button" id="clearPartnerDocNumberBtn"
+                            class="absolute inset-y-0 right-0 top-6 flex items-center pr-3 hidden">
+                            <svg class="h-5 w-5 text-gray-400 hover:text-gray-600" fill="currentColor"
+                                viewBox="0 0 20 20">
+                                <path fill-rule="evenodd"
+                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                                    clip-rule="evenodd"></path>
+                            </svg>
                         </button>
                     </div>
                     <div class="md:col-span-2 flex gap-4">
-                        <button type="submit" id="partnerSearchSubmitBtn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button type="submit" id="partnerSearchSubmitBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             <span id="partner-search-button-text" data-translate="search">Пошук</span>
-                            <div id="partner-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                            <div id="partner-search-spinner"
+                                class="hidden w-5 h-5 border-2 border-white rounded-full ml-3"
+                                style="border-top-color: transparent;"></div>
                         </button>
-                        <button type="button" id="clearPartnerSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" data-translate="clear">Очистити</button>
+                        <button type="button" id="clearPartnerSearchBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                            data-translate="clear">Очистити</button>
                     </div>
                 </form>
                 <!-- Результати пошуку по партнеру -->
                 <div id="partnerSearchResults" class="hidden mt-6">
                     <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку</h3>
-                    <p id="no-partner-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">Пацієнтів не знайдено.</p>
+                    <p id="no-partner-results" class="text-gray-500 mt-2 hidden" data-translate="patientsNotFound">
+                        Пацієнтів не знайдено.</p>
                     <div class="overflow-x-auto mt-4 border rounded-lg">
                         <table id="partnerResultsTable" class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderPhone">Телефон</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="webCode">Веб-код</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="status">Статус</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="confirmationDateTime">Дата підтвердження</th>
-                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderAction"></th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderFullName">ПІБ</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderPhone">Телефон</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="webCode">Веб-код</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="status">Статус</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="confirmationDateTime">Дата підтвердження</th>
+                                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                        data-translate="tableHeaderAction"></th>
                                 </tr>
                             </thead>
                             <tbody id="partnerResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
@@ -285,28 +406,52 @@
             <div id="advanced-search-tab-content" class="hidden mt-6">
                 <form id="advancedSearchForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
                     <div>
-                        <label for="advancedDob" class="block text-sm font-medium text-gray-700" data-translate="dob">Дата народження</label>
-                        <input type="date" id="advancedDob" name="dob" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
+                        <label for="advancedDob" class="block text-sm font-medium text-gray-700"
+                            data-translate="dob">Дата народження</label>
+                        <input type="date" id="advancedDob" name="dob"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
                     </div>
                     <div>
-                        <label for="advancedPhone" class="block text-sm font-medium text-gray-700" data-translate="phone">Телефон</label>
-                        <input type="tel" id="advancedPhone" name="phone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567" required>
+                        <label for="advancedPhone" class="block text-sm font-medium text-gray-700"
+                            data-translate="phone">Телефон</label>
+                        <input type="tel" id="advancedPhone" name="phone"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567"
+                            required>
                     </div>
                     <div>
-                        <label for="advancedDateFrom" class="block text-sm font-medium text-gray-700" data-translate="periodFrom">Період з</label>
-                        <input type="date" id="advancedDateFrom" name="dateFrom" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        <label for="advancedDateFrom" class="block text-sm font-medium text-gray-700"
+                            data-translate="periodFrom">Період з</label>
+                        <input type="date" id="advancedDateFrom" name="dateFrom"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
                     </div>
                     <div>
-                        <label for="advancedDateTo" class="block text-sm font-medium text-gray-700" data-translate="periodTo">Період по</label>
-                        <input type="date" id="advancedDateTo" name="dateTo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                        <label for="advancedDateTo" class="block text-sm font-medium text-gray-700"
+                            data-translate="periodTo">Період по</label>
+                        <input type="date" id="advancedDateTo" name="dateTo"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
                     </div>
                     <div class="md:col-span-2 flex gap-4">
-                        <button type="submit" id="advancedSearchSubmitBtn" class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
+                        <button type="submit" id="advancedSearchSubmitBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700">
                             <span id="advanced-search-button-text" data-translate="search">Пошук</span>
-                            <div id="advanced-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                            <div id="advanced-search-spinner"
+                                class="hidden w-5 h-5 border-2 border-white rounded-full ml-3"
+                                style="border-top-color: transparent;"></div>
                         </button>
-                        <button type="button" id="clearAdvancedSearchBtn" class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50" data-translate="clear">
+                        <button type="button" id="clearAdvancedSearchBtn"
+                            class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
+                            data-translate="clear">
                             Очистити
+                        </button>
+                        <button type="button" id="batchDownloadBtn"
+                            class="hidden w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700"
+                            data-translate="downloadArchive">
+                            Завантажити архів
+                        </button>
+                        <button type="button" id="analyzeDynamicsBtn"
+                            class="hidden w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                            data-translate="analyzeDynamics">
+                            Аналізувати динаміку
                         </button>
                     </div>
                 </form>
@@ -315,26 +460,67 @@
                     <div class="overflow-x-auto mt-4 border rounded-lg">
                         <table id="advancedResultsTable" class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
-                                <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderOrderDate">Дата замовлення</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderOrderNum">Номер замовлення</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="tableHeaderFullName">ПІБ</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="webCode">Веб-код</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" data-translate="status">Статус</th>
-                                </tr>
+                                <tr id="advanced-results-header"></tr>
                             </thead>
                             <tbody id="advancedResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
                         </table>
                     </div>
+                    <!-- Контейнер для графіка -->
+                    <div id="chartContainer" class="hidden mt-8 p-4 bg-gray-100 rounded-lg shadow-inner">
+                        <canvas id="dynamicsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Tab -->
+            <div id="reports-tab-content" class="hidden mt-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <!-- Ліва панель: вибір звіту -->
+                    <div class="md:col-span-1">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4" data-translate="availableReports">Доступні
+                            звіти</h3>
+                        <div id="reports-menu" class="space-y-2">
+                            <!-- Кнопки звітів будуть додані динамічно -->
+                        </div>
+                    </div>
+
+                    <!-- Права панель: фільтри та результати -->
+                    <div class="md:col-span-3">
+                        <!-- Контейнер для фільтрів звіту -->
+                        <div id="report-filters-container" class="p-4 bg-gray-50 rounded-lg mb-6 hidden">
+                            <h4 id="report-title" class="text-md font-bold text-gray-800 mb-4"></h4>
+                            <form id="report-filters-form" class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
+                                <div>
+                                    <label for="reportDateFrom" class="block text-sm font-medium text-gray-700"
+                                        data-translate="periodFrom">Період з</label>
+                                    <input type="date" id="reportDateFrom" name="dateFrom"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                </div>
+                                <div>
+                                    <label for="reportDateTo" class="block text-sm font-medium text-gray-700"
+                                        data-translate="periodTo">Період по</label>
+                                    <input type="date" id="reportDateTo" name="dateTo"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                </div>
+                                <button type="submit"
+                                    class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-600 hover:bg-sky-700"
+                                    data-translate="generateReport">Сформувати</button>
+                            </form>
+                        </div>
+
+                        <!-- Контейнер для відображення результатів звіту -->
+                        <div id="report-results-container" class="overflow-x-auto"></div>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
         <!-- File Upload Card -->
         <div id="file-upload-card" class="w-full mx-auto bg-white rounded-xl shadow-lg p-6 md:p-8">
             <div class="text-center mb-8">
                 <img id="clinic-logo" src="" alt="Логотип клініки" class="mx-auto mb-4">
-                <h1 id="page-title" class="text-2xl md:text-3xl font-bold text-gray-800" data-translate="uploadResults">Завантаження результатів</h1>
+                <h1 id="page-title" class="text-2xl md:text-3xl font-bold text-gray-800" data-translate="uploadResults">
+                    Завантаження результатів</h1>
                 <p id="selected-patient-info" class="text-indigo-600 font-semibold mt-2 h-6"></p>
             </div>
 
@@ -351,29 +537,46 @@
                 <input type="hidden" id="isEnglishVersion" name="isEnglishVersion" value="false">
                 <input type="hidden" id="partnerWebCode" name="partnerWebCode">
                 <div class="mb-6">
-                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2" data-translate="researchFileDocx">Файл дослідження (.docx)</label>
-                    <div id="file-drop-area" class="file-drop-area relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-600">
-                        <input type="file" id="file" name="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".docx,.pdf" multiple>
+                    <label for="file" class="block text-sm font-medium text-gray-700 mb-2"
+                        data-translate="researchFileDocx">Файл дослідження (.docx)</label>
+                    <div id="file-drop-area"
+                        class="file-drop-area relative border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-indigo-600">
+                        <input type="file" id="file" name="file"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept=".docx,.pdf"
+                            multiple>
                         <div class="flex flex-col items-center justify-center text-gray-500">
                             <img src="/draganddrop.png" alt="Перетягніть файли" class="w-16 h-16 mb-3 opacity-75">
-                            <p class="font-semibold"><span data-translate="dragOrClick">Перетягніть файл сюди або</span> <span class="text-indigo-600" data-translate="browse">натисніть для вибору</span></p>
+                            <p class="font-semibold"><span data-translate="dragOrClick">Перетягніть файл сюди або</span>
+                                <span class="text-indigo-600" data-translate="browse">натисніть для вибору</span>
+                            </p>
                             <p id="file-name" class="mt-2 text-sm text-gray-600"></p>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="mb-6">
-                    <label for="phoneNumber" class="block text-sm font-medium text-gray-700" data-translate="patientPhoneNumber">Номер телефону пацієнта</label>
+                    <label for="phoneNumber" class="block text-sm font-medium text-gray-700"
+                        data-translate="patientPhoneNumber">Номер телефону пацієнта</label>
                     <div class="flex items-center gap-2 mt-2">
                         <div class="relative flex-grow">
-                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><span class="text-gray-500 sm:text-sm">+38</span></div>
-                            <input type="tel" id="phoneNumber" name="phoneNumber" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm pl-12 p-3" placeholder="0501234567" required>
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><span
+                                    class="text-gray-500 sm:text-sm">+38</span></div>
+                            <input type="tel" id="phoneNumber" name="phoneNumber"
+                                class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm pl-12 p-3"
+                                placeholder="0501234567" required>
                         </div>
-                        <button type="button" id="open-custom-sms-modal-btn" class="p-3 bg-gray-200 text-gray-400 rounded-md cursor-not-allowed" disabled data-translate-title="selectPatientAndEnterPhone">
-                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path><path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path></svg>
+                        <button type="button" id="open-custom-sms-modal-btn"
+                            class="p-3 bg-gray-200 text-gray-400 rounded-md cursor-not-allowed" disabled
+                            data-translate-title="selectPatientAndEnterPhone">
+                            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"
+                                xmlns="http://www.w3.org/2000/svg">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"></path>
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"></path>
+                            </svg>
                         </button>
                     </div>
-                    <p id="sms-status-text" class="mt-2 text-sm text-red-600 hidden" data-translate="smsServiceUnavailable">
+                    <p id="sms-status-text" class="mt-2 text-sm text-red-600 hidden"
+                        data-translate="smsServiceUnavailable">
                         Увага! Сервіс відправки SMS тимчасово недоступний. Завантаження файлу дослідження неможливе.
                     </p>
                     <p id="phone-hint" class="mt-2 text-sm text-gray-500 hidden" data-translate="phoneHint">
@@ -382,9 +585,11 @@
                 </div>
 
                 <div>
-                    <button id="upload-button" type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
+                    <button id="upload-button" type="submit"
+                        class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed">
                         <span id="button-text" data-translate="uploadAndSendSms">Завантажити та надіслати SMS</span>
-                        <div id="spinner" class="hidden w-5 h-5 border-4 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+                        <div id="spinner" class="hidden w-5 h-5 border-4 border-white rounded-full ml-3"
+                            style="border-top-color: transparent;"></div>
                     </button>
                 </div>
             </form>
@@ -396,23 +601,56 @@
         <div class="modal-content">
             <h3 id="modalTitle" class="text-xl font-bold mb-4"></h3>
             <p id="modalMessage" class="text-gray-600 mb-6"></p>
-            <button id="closeModal" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none" data-translate="close">Закрити</button>
+            <button id="closeModal"
+                class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none"
+                data-translate="close">Закрити</button>
         </div>
     </div>
 
     <!-- Custom SMS Modal -->
     <div id="customSmsModal" class="modal-backdrop hidden">
         <div class="modal-content !text-left">
-            <h3 class="text-xl font-bold mb-4 text-gray-800" data-translate="sendCustomMessage">Надіслати довільне повідомлення</h3>
+            <h3 class="text-xl font-bold mb-4 text-gray-800" data-translate="sendCustomMessage">Надіслати довільне
+                повідомлення</h3>
             <form id="customSmsForm">
                 <div class="mb-4">
-                    <label for="customSmsText" class="block text-sm font-medium text-gray-700" data-translate="messageText">Текст повідомлення</label>
-                    <textarea id="customSmsText" name="customSmsText" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2" required></textarea>
+                    <label for="customSmsText" class="block text-sm font-medium text-gray-700"
+                        data-translate="messageText">Текст повідомлення</label>
+                    <textarea id="customSmsText" name="customSmsText" rows="4"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                        required></textarea>
                     <p id="char-counter" class="mt-1 text-sm text-gray-500 text-right">0 / 160</p>
                 </div>
                 <div class="flex justify-end gap-4">
-                    <button type="button" id="closeCustomSmsModal" class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300" data-translate="cancel">Скасувати</button>
-                    <button type="submit" id="sendCustomSmsBtn" class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700" data-translate="sendSms">Надіслати SMS</button>
+                    <button type="button" id="closeCustomSmsModal"
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        data-translate="cancel">Скасувати</button>
+                    <button type="submit" id="sendCustomSmsBtn"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        data-translate="sendSms">Надіслати SMS</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal for selecting analysis parameter -->
+    <div id="analysisModal" class="modal-backdrop hidden">
+        <div class="modal-content !text-left">
+            <h3 class="text-xl font-bold mb-4 text-gray-800" data-translate="selectIndicatorForAnalysis">Виберіть
+                показник для аналізу</h3>
+            <form id="analysisForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" data-translate="indicator">Показники</label>
+                    <div id="indicatorList"
+                        class="mt-2 max-h-60 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2"></div>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="closeAnalysisModal"
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        data-translate="cancel">Скасувати</button>
+                    <button type="submit" id="showChartBtn"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        data-translate="showChart">Показати графік</button>
                 </div>
             </form>
         </div>
@@ -424,6 +662,12 @@
             let config = {};
             let translations = {};
 
+            // Змінні для зберігання останніх результатів пошуку
+            let lastDocSearchResults = [];
+            let lastPartnerSearchResults = [];
+            let lastAdvancedSearchResults = [];
+            let dynamicsChart = null; // Змінна для зберігання екземпляру графіка
+
             const languageSelectorContainer = document.getElementById('language-selector');
 
             /**
@@ -433,6 +677,47 @@
              */
             function getLangHeader(lang) {
                 return lang === 'geo' ? 'ka' : lang;
+            }
+
+
+            /**
+             * @description Встановлює заголовки для таблиці розширеного пошуку залежно від типу БД.
+             */
+            function setAdvancedSearchHeaders() {
+                const headerRow = document.getElementById('advanced-results-header');
+                headerRow.innerHTML = ''; // Очищуємо поточні заголовки
+
+                let headersConfig;
+
+                if (config.dbType === 'sybase') {
+                    // Конфігурація заголовків для Sybase
+                    headersConfig = [
+                        { key: 'tableHeaderExamDate' },
+                        { key: 'tableHeaderExamNum' },
+                        { key: 'tableHeaderFullName', text: 'ПІБ' },
+                        { key: 'status', text: 'Статус' },
+                        { key: 'tableHeaderExamPDF', text: 'Дія', align: 'center' },
+                        { key: 'tableHeaderSelect', text: 'БЛАНК', align: 'center' }
+
+                    ];
+                } else {
+                    // Конфігурація заголовків для Oracle (та інших за замовчуванням)
+                    headersConfig = [
+                        { key: 'tableHeaderOrderDate' },
+                        { key: 'tableHeaderOrderNum' },
+                        { key: 'tableHeaderFullName', text: 'ПІБ' },
+                        { key: 'tableHeaderWebcode', text: 'Код доступу' },
+                        { key: 'status', text: 'Статус' }
+                    ];
+                }
+
+                headersConfig.forEach(header => {
+                    const th = document.createElement('th');
+                    th.className = `px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header.align ? `text-${header.align}` : ''}`;
+                    th.setAttribute('data-translate', header.key);
+                    th.textContent = translations[header.key] || header.key; // Використовуємо ключ як fallback
+                    headerRow.appendChild(th);
+                });
             }
 
             /**
@@ -488,7 +773,7 @@
                         element.placeholder = translations[key];
                     }
                 });
-                 document.querySelectorAll('[data-translate-title]').forEach(element => {
+                document.querySelectorAll('[data-translate-title]').forEach(element => {
                     const key = element.getAttribute('data-translate-title');
                     if (translations[key]) {
                         element.title = translations[key];
@@ -499,6 +784,27 @@
                 const clinicName = config.clinicName || '';
                 document.title = clinicName ? `${baseTitle} - ${clinicName}` : baseTitle;
             }
+
+            /**
+             * @description Повторно відображає результати пошуку після зміни мови.
+             */
+            function rerenderSearchResults() {
+                // Повторне відображення результатів пошуку по документу
+                if (lastDocSearchResults.length > 0) {
+                    displayDocSearchResults(lastDocSearchResults);
+                }
+                // Повторне відображення результатів пошуку по партнеру
+                if (lastPartnerSearchResults.length > 0) {
+                    displayPartnerSearchResults(lastPartnerSearchResults);
+                }
+                // Повторне відображення результатів розширеного пошуку
+                if (lastAdvancedSearchResults.length > 0) {
+                    // Потрібно перевірити тип БД, щоб знати, як рендерити
+                    const isSybase = config.dbType === 'sybase';
+                    displayAdvancedSearchResults(lastAdvancedSearchResults, isSybase);
+                }
+            }
+
 
             /**
              * @description Встановлює активну мову, завантажує переклади, оновлює UI та зберігає вибір у localStorage.
@@ -525,6 +831,9 @@
                     await initializePage(true);
                 }
 
+                // Примусово перекладаємо сторінку ще раз, щоб оновити динамічні елементи (напр. звіти)
+                translatePage();
+
                 // Примусово оновлюємо дані журналу, щоб застосувати нову мову
                 loadJournal(journalDatePicker.value);
 
@@ -534,8 +843,28 @@
                     searchJournal(journalSearchTerm);
                 }
 
+                // Повторно відображаємо результати пошуку з новою мовою
+                rerenderSearchResults();
+
                 // Оновлюємо текст вкладки створення пацієнта
                 updateCreateTabButtonText();
+
+                // --- ОНОВЛЕННЯ ЗВІТІВ ПРИ ЗМІНІ МОВИ ---
+                // Перевіряємо, чи активна вкладка звітів і чи є згенерований звіт
+                const currentReportKey = reportFiltersForm.dataset.currentReport;
+                if (currentReportKey && reportHandlers[currentReportKey]) {
+                    const reportTitleKey = reportHandlers[currentReportKey].titleKey;
+                    const reportTitleElement = document.getElementById('report-title');
+                    if (reportTitleElement && translations[reportTitleKey]) {
+                        reportTitleElement.textContent = translations[reportTitleKey];
+                    }
+                }
+
+
+                if (!reportsTabContent.classList.contains('hidden') && currentReportKey) {
+                    // Якщо так, імітуємо повторне відправлення форми, щоб перегенерувати звіт з новою мовою
+                    reportFiltersForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                }
             }
 
             /**
@@ -622,7 +951,7 @@
 
                 // Якщо журнал закритий, кнопка завжди непрозора
                 if (!isJournalOpen) {
-                    clearTimeout(opacityTimeout); 
+                    clearTimeout(opacityTimeout);
                     toggleJournalBtn.classList.remove('opacity-50');
                     return;
                 }
@@ -704,7 +1033,7 @@
                     const lang = localStorage.getItem('language') || 'uk';
                     const langHeader = getLangHeader(lang);
                     const response = await fetch(`/journal?date=${date}&depId=${config.depId}`, {
-                         headers: { 'Accept-Language': langHeader }
+                        headers: { 'Accept-Language': langHeader }
                     });
                     const entries = await response.json();
                     const allowedStatusCodes = [0, 1, 800, 801, 802, 803, 103, 104, 105, 106, 200, 201, 202, 203, 300, 301, 302, 303, 304, 305, 400, 401, 404, 405, 406, 412, 413, 415, 427, 503, 999];
@@ -712,7 +1041,7 @@
                     journalList.innerHTML = ''; // Очищуємо поточний список
                     entries.forEach(entry => {
                         const isSuccess = entry.isSuccess;
-                        addJournalEntry(entry.patientName, entry.phoneNumber, entry.smsStatus, isSuccess, entry.createdAt, entry.deliveryStatus);
+                        addJournalEntry(entry.patientName, entry.phoneNumber, entry.smsStatus, isSuccess, entry.created_at, entry.deliveryStatus);
                     });
                     const countedEntries = entries.filter(entry => allowedStatusCodes.includes(entry.smsStatusCode));
                     document.getElementById('journal-count').textContent = countedEntries.length;
@@ -945,6 +1274,12 @@
                         advancedSearchTabButton.classList.add('hidden');
                     }
 
+                    // Показуємо вкладку "Звіти" тільки якщо вона ввімкнена в конфігурації
+                    const reportsTabButton = document.getElementById('reports-tab-button');
+                    if (config.reports?.enabled) {
+                        reportsTabButton.classList.remove('hidden');
+                        buildReportsMenu(config.reports.available);
+                    }
 
                     // Примусово оновлюємо текст кнопки після зміни атрибута
                     translatePage();
@@ -988,7 +1323,9 @@
                     if (response.ok) {
                         indicator.classList.remove('text-red-500', 'text-gray-400');
                         indicator.classList.add('text-green-500');
-                        tooltipText.textContent = (translations.smsServiceActive || 'сервіс ТурбоСМС: активний. Баланс: {{balance}}').replace('{{balance}}', result.data.balance);
+                        let activeText = (translations.smsServiceActive || 'сервіс ТурбоСМС: активний. Відправник: {{sender}}. Баланс: {{balance}}');
+                        activeText = activeText.replace('{{sender}}', config.smsSender || 'N/A');
+                        tooltipText.textContent = activeText.replace('{{balance}}', result.data.balance);
                         statusText.classList.add('hidden');
                         uploadButton.disabled = false;
                         isOk = true;
@@ -1026,7 +1363,7 @@
             const modalTitle = document.getElementById('modalTitle');
             const modalMessage = document.getElementById('modalMessage');
             const closeModal = document.getElementById('closeModal');
-            
+
             /**
              * @description Показує модальне вікно з повідомленням.
              * @param {string} title - Заголовок вікна.
@@ -1056,7 +1393,7 @@
             const advancedSearchResultsDiv = document.getElementById('advancedSearchResults');
             const advancedResultsBody = document.getElementById('advancedResultsBody');
             const clearAdvancedSearchBtn = document.getElementById('clearAdvancedSearchBtn');
-             const docSearchForm = document.getElementById('docSearchForm');
+            const docSearchForm = document.getElementById('docSearchForm');
             const docResultsBody = document.getElementById('docResultsBody');
             const docSearchResultsDiv = document.getElementById('docSearchResults');
             const docSearchBtnText = document.getElementById('doc-search-button-text');
@@ -1073,6 +1410,9 @@
             const noResultsP = document.getElementById('no-results');
             const searchResultsDiv = document.getElementById('searchResults');
             const advancedSearchTabContent = document.getElementById('advanced-search-tab-content');
+            const reportsTabButton = document.getElementById('reports-tab-button');
+            const reportsTabContent = document.getElementById('reports-tab-content');
+
 
             // Встановлюємо поточну дату в поле "Період по" за замовчуванням
             document.getElementById('advancedDateTo').value = new Date().toISOString().split('T')[0];
@@ -1091,6 +1431,7 @@
                 docSearchTabButton.classList.remove('active');
                 partnerSearchTabButton.classList.remove('active');
                 advancedSearchTabButton.classList.remove('active');
+                reportsTabButton.classList.remove('active');
                 // Показуємо контент поточної вкладки.
                 searchTabContent.classList.remove('hidden');
                 // Ховаємо контент інших вкладок.
@@ -1098,8 +1439,9 @@
                 docSearchTabContent.classList.add('hidden');
                 advancedSearchTabContent.classList.add('hidden');
                 partnerSearchTabContent.classList.add('hidden');
+                reportsTabContent.classList.add('hidden');
             });
-            
+
 
             // Обробник кліку на вкладку "Створити нового пацієнта".
             createTabButton.addEventListener('click', () => {
@@ -1108,12 +1450,14 @@
                 docSearchTabButton.classList.remove('active');
                 partnerSearchTabButton.classList.remove('active');
                 advancedSearchTabButton.classList.remove('active');
+                reportsTabButton.classList.remove('active');
 
                 createTabContent.classList.remove('hidden');
                 searchTabContent.classList.add('hidden');
                 docSearchTabContent.classList.add('hidden');
                 partnerSearchTabContent.classList.add('hidden');
                 advancedSearchTabContent.classList.add('hidden');
+                reportsTabContent.classList.add('hidden');
             });
 
             // Обробник кліку на вкладку "Пошук по документу".
@@ -1123,12 +1467,14 @@
                 createTabButton.classList.remove('active');
                 partnerSearchTabButton.classList.remove('active');
                 advancedSearchTabButton.classList.remove('active');
+                reportsTabButton.classList.remove('active');
 
                 docSearchTabContent.classList.remove('hidden');
                 searchTabContent.classList.add('hidden');
                 createTabContent.classList.add('hidden');
                 partnerSearchTabContent.classList.add('hidden');
                 advancedSearchTabContent.classList.add('hidden');
+                reportsTabContent.classList.add('hidden');
             });
 
             // Обробник кліку на вкладку "Пошук по партнеру".
@@ -1138,19 +1484,41 @@
                 createTabButton.classList.remove('active');
                 docSearchTabButton.classList.remove('active');
                 advancedSearchTabButton.classList.remove('active');
+                reportsTabButton.classList.remove('active');
 
                 partnerSearchTabContent.classList.remove('hidden');
                 searchTabContent.classList.add('hidden');
                 createTabContent.classList.add('hidden');
                 docSearchTabContent.classList.add('hidden');
                 advancedSearchTabContent.classList.add('hidden');
+                reportsTabContent.classList.add('hidden');
+            });
+
+            advancedSearchTabButton.addEventListener('click', () => {
+                advancedSearchTabButton.classList.add('active');
+                searchTabButton.classList.remove('active');
+                createTabButton.classList.remove('active');
+                docSearchTabButton.classList.remove('active');
+                partnerSearchTabButton.classList.remove('active');
+                reportsTabButton.classList.remove('active');
+
+                advancedSearchTabContent.classList.remove('hidden');
+                searchTabContent.classList.add('hidden');
+                createTabContent.classList.add('hidden');
+                docSearchTabContent.classList.add('hidden');
+                partnerSearchTabContent.classList.add('hidden');
+                reportsTabContent.classList.add('hidden');
+
+                // Ховаємо блок завантаження файлів
+                fileUploadCard.classList.add('hidden');
+                mainBody.classList.remove('items-center');
             });
 
             // --- Єдина логіка перемикання вкладок ---
             const mainBody = document.getElementById('main-body');
             const fileUploadCard = document.getElementById('file-upload-card');
-            const allTabs = [searchTabButton, createTabButton, docSearchTabButton, partnerSearchTabButton, advancedSearchTabButton];
-            const allContents = [searchTabContent, createTabContent, docSearchTabContent, partnerSearchTabContent, advancedSearchTabContent];
+            const allTabs = [searchTabButton, createTabButton, docSearchTabButton, partnerSearchTabButton, advancedSearchTabButton, reportsTabButton];
+            const allContents = [searchTabContent, createTabContent, docSearchTabContent, partnerSearchTabContent, advancedSearchTabContent, reportsTabContent];
 
             allTabs.forEach((button, index) => {
                 button.addEventListener('click', () => {
@@ -1164,8 +1532,13 @@
                         allContents[index].classList.remove('hidden');
                     }
 
-                    // Керуємо видимістю блоку завантаження файлів
+                    // Якщо відкриваємо вкладку історії, встановлюємо правильні заголовки таблиці
                     if (button === advancedSearchTabButton) {
+                        setAdvancedSearchHeaders();
+                    }
+
+                    // Керуємо видимістю блоку завантаження файлів
+                    if (button === advancedSearchTabButton || button === reportsTabButton) {
                         // Якщо це вкладка "Історія пацієнта", ховаємо блок завантаження
                         fileUploadCard.classList.add('hidden');
                         mainBody.classList.remove('items-center'); // і прибираємо центрування
@@ -1178,6 +1551,217 @@
             });
             // --- Кінець єдиної логіки ---
 
+            // --- Логіка для вкладки "Звіти" ---
+            const reportsMenu = document.getElementById('reports-menu');
+            const reportFiltersContainer = document.getElementById('report-filters-container');
+            const reportFiltersForm = document.getElementById('report-filters-form');
+            const reportResultsContainer = document.getElementById('report-results-container');
+            const reportTitle = document.getElementById('report-title');
+
+            // Словник звітів, що містить логіку для отримання та відображення даних
+            const reportHandlers = {
+                customSmsLog: {
+                    titleKey: 'reportCustomSmsLog',
+                    fetch: async (params) => {
+                        const url = new URL(window.location.origin + '/api/reports/custom-sms-log');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) throw new Error('Failed to fetch custom SMS log');
+                        return response.json();
+                    },
+                    render: (data) => {
+                        let content = `<div class="font-mono text-xs bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto">`;
+                        if (data.length > 0) {
+                            content += data.join('<br>');
+                        } else {
+                            content += translations.noRecordsForPeriod || 'Записів за вибраний період не знайдено.';
+                        }
+                        content += `</div>`;
+                        reportResultsContainer.innerHTML = content;
+                    }
+                }
+                ,
+                clinicRegistrationStats: {
+                    titleKey: 'reportClinicRegistrationStats',
+                    fetch: async (params) => {
+                        // Додаємо ID філіалу до параметрів запиту
+                        params.branchdb = config.branchKey; // Використовуємо ключ, отриманий з конфігурації
+                        const url = new URL(window.location.origin + '/api/reports/clinic-registration-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити статистику реєстрацій');
+                        }
+                        return response.json();
+                    },
+                    render: (data) => {
+                        const headers = [translations.administrator || 'Адміністратор', translations.registrationsCount || 'Кількість реєстрацій'];
+                        let table = `<table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}</tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
+                        data.forEach(row => {
+                            table += `<tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.Адміністратор || ''} ${row.Фамілія || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.record_count}</td>
+                            </tr>`;
+                        });
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                },
+                examRegistrationStats: {
+                    titleKey: 'reportExamRegistrationStats',
+                    fetch: async (params) => {
+                        // Додаємо ID філіалу до параметрів запиту
+                        params.branchdb = config.branchKey; // Використовуємо ключ, отриманий з конфігурації
+                        const url = new URL(window.location.origin + '/api/reports/exam-registration-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити статистику реєстрацій');
+                        }
+                        return response.json();
+                    },
+                    render: (data) => {
+                        const headers = [translations.administrator || 'Адміністратор', translations.registrationsCount || 'Кількість реєстрацій'];
+                        let table = `<table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}</tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
+                        data.forEach(row => {
+                            table += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.Адміністратор || ''} ${row.Фамілія || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.record_count}</td></tr>`;
+                        });
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                },
+                administratorCashStats: {
+                    titleKey: 'reportAdministratorCashStats',
+                    fetch: async (params) => {
+                        params.branchdb = config.branchKey;
+                        const url = new URL(window.location.origin + '/api/reports/administrator-cash-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити звіт по касі');
+                        }
+                        return response.json();
+                    },
+                    render: (response) => {
+                        const { stats: data, totalSum } = response; // Отримуємо дані та загальну суму з відповіді
+                        const headers = [translations.administrator || 'Адміністратор', translations.orderAmount || 'Сума замовлень', translations.effectiveness || 'Ефективність'];
+                        let table = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+                        data?.forEach(row => {
+                            table += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row["Ім'я"] || ''} ${row.Фамілія || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.suma_zamovlen.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.effectiveness_percentage.toFixed(2)}%</td></tr>`;
+                        });
+
+                        // Додаємо рядок "Всього"
+                        if (data && data.length > 0) {
+                            table += `<tr class="bg-gray-100 font-bold">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${translations.total || 'Всього'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${totalSum.toFixed(2)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">100.00%</td>
+                                      </tr>`;
+                        }
+
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                },
+                administratorLabCashStats: {
+                    titleKey: 'reportAdministratorLabCashStats',
+                    fetch: async (params) => {
+                        params.branchdb = config.branchKey;
+                        const url = new URL(window.location.origin + '/api/reports/administrator-lab-cash-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити звіт по касі лабораторії');
+                        }
+                        return response.json();
+                    },
+                    render: (response) => {
+                        const { stats: data, totalSum } = response;
+                        const headers = [translations.administrator || 'Адміністратор', translations.orderAmount || 'Сума замовлень', translations.effectiveness || 'Ефективність'];
+                        let table = `<table class="min-w-full divide-y divide-gray-200"><thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}</tr></thead><tbody class="bg-white divide-y divide-gray-200">`;
+                        data?.forEach(row => {
+                            table += `<tr><td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row["Ім'я"] || ''} ${row.Фамілія || ''}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.suma_zamovlen.toFixed(2)}</td><td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.effectiveness_percentage.toFixed(2)}%</td></tr>`;
+                        });
+
+                        if (data && data.length > 0) {
+                            table += `<tr class="bg-gray-100 font-bold">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${translations.total || 'Всього'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${totalSum.toFixed(2)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">100.00%</td>
+                                      </tr>`;
+                        }
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                }
+            };
+
+            function buildReportsMenu(availableReports) {
+                reportsMenu.innerHTML = '';
+                availableReports.forEach(reportKey => {
+                    if (reportHandlers[reportKey]) {
+                        const handler = reportHandlers[reportKey];
+                        const button = document.createElement('button');
+                        button.className = 'w-full text-left px-4 py-2 text-sm font-medium text-gray-700 bg-white rounded-md hover:bg-gray-100 border border-gray-200 report-menu-btn';
+                        button.dataset.reportKey = reportKey;
+                        button.setAttribute('data-translate', handler.titleKey);
+                        button.textContent = translations[handler.titleKey] || reportKey;
+                        reportsMenu.appendChild(button);
+                    }
+                });
+            }
+
+            reportsMenu.addEventListener('click', (e) => {
+                const button = e.target.closest('.report-menu-btn');
+                if (button) {
+                    const reportKey = button.dataset.reportKey;
+
+                    // Знімаємо активний стан з усіх кнопок
+                    document.querySelectorAll('.report-menu-btn').forEach(btn => btn.classList.remove('active-report'));
+                    // Робимо активною натиснуту кнопку
+                    button.classList.add('active-report');
+
+                    reportTitle.textContent = button.textContent;
+                    reportFiltersContainer.classList.remove('hidden');
+                    reportFiltersForm.dataset.currentReport = reportKey;
+                    reportResultsContainer.innerHTML = ''; // Очищуємо результати
+
+                    // Встановлюємо дати за замовчуванням
+                    document.getElementById('reportDateTo').value = new Date().toISOString().split('T')[0];
+                    const dateFrom = new Date();
+                    dateFrom.setDate(dateFrom.getDate() - 7); // Мінус тиждень
+                    document.getElementById('reportDateFrom').value = dateFrom.toISOString().split('T')[0];
+                }
+            });
+
+            reportFiltersForm.addEventListener('submit', async (e) => {
+                e.preventDefault(); // Переміщуємо на самий початок
+                const handler = reportHandlers[e.currentTarget.dataset.currentReport];
+                const reportKey = e.currentTarget.dataset.currentReport;
+
+                if (!handler) return;
+
+                const formData = new FormData(reportFiltersForm);
+                const params = Object.fromEntries(formData.entries());
+
+                reportResultsContainer.innerHTML = `<p>${translations.loading}</p>`;
+
+                try {
+                    const data = await handler.fetch(params);
+                    handler.render(data);
+                } catch (error) {
+                    reportResultsContainer.innerHTML = `<p class="text-red-500">${error.message}</p>`;
+                }
+            });
+            // --- Кінець логіки для вкладки "Звіти" ---
 
             // Обробник відправки форми розширеного пошуку
             advancedSearchForm.addEventListener('submit', async (e) => {
@@ -1194,7 +1778,10 @@
                 const data = Object.fromEntries(formData.entries());
 
                 try {
-                    const response = await fetch('/advanced-search', {
+                    // Визначаємо, який API викликати, на основі типу БД
+                    const endpoint = config.dbType === 'sybase' ? '/api/patient-history' : '/advanced-search';
+
+                    const response = await fetch(endpoint, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
@@ -1205,72 +1792,10 @@
                         throw new Error(results.message || 'Помилка сервера');
                     }
 
-                    advancedResultsBody.innerHTML = '';
-                    if (results && results.length > 0) {
-                        // Сортуємо результати за ПІБ, а потім за датою замовлення
-                        results.sort((a, b) => {
-                            const nameA = a.FullName || '';
-                            const nameB = b.FullName || '';
-                            const nameCompare = nameA.localeCompare(nameB, 'uk');
-                            if (nameCompare !== 0) {
-                                return nameCompare;
-                            }
-                            // Якщо ПІБ однакові, сортуємо за датою замовлення (від новіших до старіших)
-                            const dateA = a.Date ? new Date(a.Date) : 0;
-                            const dateB = b.Date ? new Date(b.Date) : 0;
-                            return dateB - dateA;
-                        });
-                        results.forEach(p => {
-                            const row = document.createElement('tr');
-                            row.className = 'cursor-pointer hover:bg-indigo-50'; // Додаємо стилі для клікабельного рядка
-                            const orderDate = p.Date ? new Date(p.Date).toLocaleDateString() : '';
+                    lastAdvancedSearchResults = results; // Зберігаємо результати
+                    const isSybase = config.dbType === 'sybase';
+                    displayAdvancedSearchResults(results, isSybase);
 
-                            // Додаємо колір рядка залежно від статусу
-                            const status = p.Docstatus ? p.Docstatus.toLowerCase() : '';
-                            switch (status) {
-                                case 'перевірено':
-                                    row.classList.add('bg-blue-100');
-                                    break;
-                                case 'в роботі':
-                                    row.classList.add('bg-green-100');
-                                    break;
-                                case 'виконано':
-                                    row.classList.add('bg-green-200');
-                                    break;
-                                case 'відмінено':
-                                    row.classList.add('bg-red-100');
-                                    break;
-                            }
-
-                            const isCancelled = status === 'відмінено';
-
-                            // Формуємо гіперпосилання для веб-коду, якщо статус НЕ "відмінено"
-                            const webCodeLinkHtml = p.WebCode && config.labResultUrl && !isCancelled
-                                ? `<a href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.WebCode}</a>` 
-                                : (p.WebCode || '');
-
-                            row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${orderDate}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.Num || ''}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-gray-500' : ''}">${p.FullName || ''}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${webCodeLinkHtml}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-red-700 font-semibold' : ''}">${p.Docstatus || ''}</td>
-                            `;
-                            row.addEventListener('click', (event) => {
-                                // Якщо клік був не по посиланню, або якщо посилання з якоїсь причини не спрацювало,
-                                // ми все одно відкриваємо URL. Це запобігає подвійному відкриттю.
-                                if (event.target.tagName !== 'A' && p.WebCode && config.labResultUrl && !isCancelled) {
-                                    const url = `${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true`;
-                                    window.open(url, '_blank');
-                                }
-                            });
-                            advancedResultsBody.appendChild(row);
-                        });
-                        advancedSearchResultsDiv.classList.remove('hidden');
-                    } else {
-                        advancedSearchResultsDiv.classList.add('hidden');
-                        showModal(translations.searchResults || 'Результати пошуку', translations.patientsNotFound || 'Пацієнтів не знайдено.', true);
-                    }
                 } catch (error) {
                     showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
                 } finally {
@@ -1286,7 +1811,465 @@
                 document.getElementById('advancedPhone').value = '';
                 advancedSearchResultsDiv.classList.add('hidden');
                 advancedResultsBody.innerHTML = ''; // Також очищуємо тіло таблиці
+                document.getElementById('batchDownloadBtn').classList.add('hidden'); // Ховаємо кнопку завантаження архіву
+                document.getElementById('analyzeDynamicsBtn').classList.add('hidden'); // Ховаємо кнопку аналізу
+                document.getElementById('chartContainer').classList.add('hidden'); // Ховаємо графік
             });
+
+            function updateBatchDownloadButton() {
+                const selectedCheckboxes = advancedResultsBody.querySelectorAll('.exam-select-cb:checked');
+                const batchDownloadBtn = document.getElementById('batchDownloadBtn');
+                const analyzeDynamicsBtn = document.getElementById('analyzeDynamicsBtn');
+                // Кнопки з'являються, коли вибрано 2 або більше обстежень
+                if (selectedCheckboxes.length >= 2) {
+                    batchDownloadBtn.classList.remove('hidden');
+                    batchDownloadBtn.textContent = `${translations.downloadArchive || 'Завантажити архів'} (${selectedCheckboxes.length})`;
+                    analyzeDynamicsBtn.classList.remove('hidden');
+                    analyzeDynamicsBtn.textContent = `${translations.analyzeDynamics || 'Аналізувати динаміку'} (${selectedCheckboxes.length})`;
+                } else {
+                    batchDownloadBtn.classList.add('hidden');
+                    analyzeDynamicsBtn.classList.add('hidden');
+                }
+            }
+
+            advancedResultsBody.addEventListener('change', (event) => {
+                if (event.target.classList.contains('exam-select-cb')) {
+                    updateBatchDownloadButton();
+                }
+            });
+
+            function displayAdvancedSearchResults(results, isSybase) {
+                const batchDownloadBtn = document.getElementById('batchDownloadBtn');
+                advancedResultsBody.innerHTML = '';
+                if (results && results.length > 0) {
+                    if (isSybase) {
+                        // Сортуємо результати для Sybase за датою (від новіших до старіших)
+                        results.sort((a, b) => new Date(b.datodberu) - new Date(a.datodberu));
+
+                        results.forEach((p, rowIndex) => {
+                            const row = document.createElement('tr');
+                            // Додаємо чергування кольорів для рядків
+                            if (rowIndex % 2 === 0) {
+                                row.className = 'bg-white hover:bg-indigo-50';
+                            } else {
+                                row.className = 'bg-gray-50 hover:bg-indigo-50';
+                            }
+                            const examDate = p.datodberu ? new Date(p.datodberu).toLocaleDateString() : '';
+                            console.log(examDate);
+                            const fullName = `${p.priezvisko || ''} ${p.meno || ''}`.trim();
+
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${examDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.evidcis || ''}</td>
+                                <td class="hidden">${p.datodberu || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${fullName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-semibold">${translations.statusChecked || 'Перевірено'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                    <button class="download-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Завантажити PDF">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </button>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <input type="checkbox" class="exam-select-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                </td>
+                               
+                                
+                            `;
+
+                            // Обробник для іконки завантаження PDF
+                            row.querySelector('.download-pdf-btn').addEventListener('click', (event) => {
+                                const buttonElement = event.currentTarget;
+                                const rowElement = buttonElement.closest('tr');
+                                const checkbox = rowElement.querySelector('.exam-select-cb');
+                                const isBlankChecked = checkbox ? checkbox.checked : false;
+                                handleGenerateAndPrintPdf(p, isBlankChecked);
+                            });
+
+                            // Обробник подвійного кліку на рядок (зберігаємо для зручності)
+                            row.addEventListener('dblclick', (event) => {
+                                const checkbox = event.currentTarget.querySelector('.exam-select-cb');
+                                const isBlankChecked = checkbox ? checkbox.checked : false;
+                                handleGenerateAndPrintPdf(p, isBlankChecked);
+                            });
+                            advancedResultsBody.appendChild(row);
+                            updateBatchDownloadButton();
+                        });
+                    } else {
+                        // Існуюча логіка для Oracle та інших
+                        results.sort((a, b) => {
+                            const nameA = a.FullName || '';
+                            const nameB = b.FullName || '';
+                            const nameCompare = nameA.localeCompare(nameB, 'uk');
+                            if (nameCompare !== 0) return nameCompare;
+                            return new Date(b.Date) - new Date(a.Date);
+                        });
+
+                        results.forEach(p => {
+                            const row = document.createElement('tr');
+                            row.className = 'cursor-pointer hover:bg-indigo-50';
+                            const orderDate = p.Date ? new Date(p.Date).toLocaleDateString() : '';
+
+                            const status = p.Docstatus ? p.Docstatus.toLowerCase() : '';
+                            switch (status) {
+                                case 'перевірено': row.classList.add('bg-blue-100'); break;
+                                case 'в роботі': row.classList.add('bg-yellow-100'); break;
+                                case 'виконано': row.classList.add('bg-green-100'); break;
+                                case 'відмінено': row.classList.add('bg-red-100'); break;
+                            }
+
+                            const isCancelled = status === 'відмінено';
+                            const webCodeLinkHtml = p.WebCode && config.labResultUrl && !isCancelled
+                                ? `<a href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.WebCode}</a>`
+                                : (p.WebCode || '');
+
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${orderDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.Num || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-gray-500' : ''}">${p.FullName || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${webCodeLinkHtml}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-red-700 font-semibold' : ''}">${p.Docstatus || ''}</td>
+                            `;
+                            row.addEventListener('dblclick', (event) => {
+                                if (event.target.tagName !== 'A' && p.WebCode && config.labResultUrl && !isCancelled) {
+                                    window.open(`${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true`, '_blank');
+                                }
+                            });
+                            advancedResultsBody.appendChild(row);
+                        });
+                    }
+                    advancedSearchResultsDiv.classList.remove('hidden');
+                } else {
+                    advancedSearchResultsDiv.classList.add('hidden');
+                    showModal(translations.searchResults || 'Результати пошуку', translations.patientsNotFound || 'Пацієнтів не знайдено.', true);
+                }
+            }
+
+            const analyzeDynamicsBtn = document.getElementById('analyzeDynamicsBtn');
+            const analysisModal = document.getElementById('analysisModal');
+            const closeAnalysisModalBtn = document.getElementById('closeAnalysisModal');
+            const analysisForm = document.getElementById('analysisForm');
+            batchDownloadBtn.addEventListener('click', async () => {
+                const selectedRows = Array.from(advancedResultsBody.querySelectorAll('tr')).filter(row => row.querySelector('.exam-select-cb:checked'));
+
+                const examsToProcess = selectedRows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return {
+                        datodberu: cells[2].textContent, // Прихована колонка з точною датою
+                        datumnarod: document.getElementById('advancedDob').value,
+                        priezvisko: cells[3].textContent.split(' ')[0],
+                        isBlankChecked: row.querySelector('.exam-select-cb').checked
+                    };
+                });
+
+                if (examsToProcess.length === 0) {
+                    showModal(translations.error || 'Помилка', translations.noExamsSelected || 'Не вибрано жодного обстеження для архівування.', false);
+                    return;
+                }
+
+                try {
+                    batchDownloadBtn.textContent = translations.archiveCreating || 'Створення архіву...';
+                    batchDownloadBtn.disabled = true;
+
+                    const response = await fetch('/api/batch-generate-archive', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ exams: examsToProcess })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Помилка на сервері');
+                    }
+
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = response.headers.get('Content-Disposition').split('filename=')[1].replace(/"/g, '');
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(url);
+
+                    // Знімаємо всі прапорці після успішного завантаження
+                    const allCheckboxes = advancedResultsBody.querySelectorAll('.exam-select-cb:checked');
+                    allCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                    });
+                } catch (error) {
+                    showModal(translations.error || 'Помилка', `${translations.archiveCreationError || 'Не вдалося створити архів:'} ${error.message}`, false);
+                } finally {
+                    batchDownloadBtn.disabled = false;
+                    updateBatchDownloadButton(); // Оновити текст кнопки
+                }
+            });
+
+            // Обробник для кнопки "Аналізувати динаміку"
+            analyzeDynamicsBtn.addEventListener('click', async () => {
+                const selectedRows = Array.from(advancedResultsBody.querySelectorAll('tr')).filter(row => row.querySelector('.exam-select-cb:checked'));
+                const exams = selectedRows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return {
+                        datodberu: cells[2].textContent, // Прихована колонка з точною датою
+                        datumnarod: document.getElementById('advancedDob').value
+                    };
+                });
+
+                if (exams.length < 2) {
+                    showModal(translations.error || 'Помилка', 'Для аналізу динаміки потрібно вибрати щонайменше два обстеження.', false);
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/available-indicators-for-dynamics', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ exams })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Помилка на сервері');
+                    }
+
+                    const indicators = await response.json();
+                    const indicatorList = document.getElementById('indicatorList');
+                    indicatorList.innerHTML = ''; // Очищуємо список
+
+                    if (indicators.length === 0) {
+                        showModal('Показники не знайдені', 'У вибраних обстеженнях немає показників, що повторюються, для аналізу динаміки.', true);
+                        return;
+                    }
+
+                    indicators.forEach(indicator => {
+                        const label = document.createElement('label');
+                        label.className = 'flex items-center space-x-2 cursor-pointer';
+                        label.innerHTML = `<input type="checkbox" value="${indicator.skratka}" data-name="${indicator.nazov} (${indicator.skratka})" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"><span>${indicator.nazov} (${indicator.skratka})</span>`;
+                        indicatorList.appendChild(label);
+                    });
+                    analysisModal.classList.remove('hidden');
+                } catch (error) {
+                    showModal(translations.error || 'Помилка', `Не вдалося отримати список показників: ${error.message}`, false);
+                }
+            });
+
+            closeAnalysisModalBtn.addEventListener('click', () => {
+                analysisModal.classList.add('hidden');
+            });
+
+            analysisForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const selectedIndicators = Array.from(document.querySelectorAll('#indicatorList input[type="checkbox"]:checked'));
+                const indicatorCodes = selectedIndicators.map(cb => cb.value);
+                const indicatorNames = selectedIndicators.map(cb => cb.dataset.name);
+
+                if (indicatorCodes.length === 0) {
+                    showModal('Помилка', 'Будь ласка, виберіть хоча б один показник для аналізу.', false);
+                    return;
+                }
+
+                const selectedRows = Array.from(advancedResultsBody.querySelectorAll('tr')).filter(row => row.querySelector('.exam-select-cb:checked'));
+                const examIds = selectedRows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return {
+                        datodberu: cells[2].textContent, // Прихована колонка з точною датою
+                        datumnarod: document.getElementById('advancedDob').value
+                    };
+                });
+
+                try {
+                    const response = await fetch('/api/patient-exam-dynamics', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ exams: examIds, indicatorCodes: indicatorCodes })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Помилка на сервері');
+                    }
+
+                    const dynamicsData = await response.json();
+                    analysisModal.classList.add('hidden');
+                    // Отримуємо ім'я пацієнта з першого вибраного рядка
+                    const patientName = selectedRows[0].querySelectorAll('td')[3].textContent;
+
+                    displayChart(dynamicsData, indicatorNames, patientName);
+
+                } catch (error) {
+                    showModal(translations.error || 'Помилка', `Не вдалося отримати дані для графіка: ${error.message}`, false);
+                }
+            });
+
+            function displayChart(groupedData, indicatorNames, patientName) {
+                const chartContainer = document.getElementById('chartContainer');
+                const ctx = document.getElementById('dynamicsChart').getContext('2d');
+
+                if (dynamicsChart) {
+                    // Знищуємо попередній екземпляр графіка, якщо він існує
+                    dynamicsChart.destroy(); // Знищуємо попередній графік
+                }
+
+                if (!groupedData || Object.keys(groupedData).length === 0) {
+                    chartContainer.classList.add('hidden');
+                    showModal('Дані відсутні', `Не знайдено значень для обраних показників у вибраних обстеженнях.`, true);
+                    return;
+                }
+
+                // Створюємо плагін для додавання фону до самого канвасу
+                const backgroundPlugin = {
+                    id: 'customCanvasBackgroundColor',
+                    beforeDraw: (chart, args, options) => {
+                        const { ctx } = chart;
+                        ctx.save();
+                        // 'destination-over' гарантує, що фон малюється позаду всього іншого
+                        ctx.globalCompositeOperation = 'destination-over';
+                        // Колір #f3f4f6 відповідає Tailwind класу bg-gray-100
+                        ctx.fillStyle = options.backgroundColor || '#f3f4f6';
+                        ctx.fillRect(0, 0, chart.width, chart.height);
+                        ctx.restore();
+                    }
+                };
+
+                // Створюємо плагін для відображення значень на точках
+                const dataLabelsPlugin = {
+                    id: 'dataLabels',
+                    afterDatasetsDraw: (chart, args, options) => {
+                        const { ctx } = chart;
+                        ctx.save();
+
+                        chart.data.datasets.forEach((dataset, i) => {
+                            const meta = chart.getDatasetMeta(i);
+                            if (!meta.hidden) { // Не малювати для прихованих датасетів
+                                ctx.font = 'bold 12px Inter, sans-serif';
+                                ctx.fillStyle = dataset.borderColor; // Колір тексту такий самий, як і лінія
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'bottom';
+
+                                meta.data.forEach((element, index) => {
+                                    const value = dataset.data[index];
+                                    if (value !== null) {
+                                        ctx.fillText(value, element.x, element.y - 5); // Малюємо текст трохи вище точки
+                                    }
+                                });
+                            }
+                        });
+                        ctx.restore();
+                    }
+                };
+
+                // Збираємо всі унікальні дати і сортуємо їх
+                const allDates = new Set();
+                Object.values(groupedData).forEach(dataArray => {
+                    dataArray.forEach(d => allDates.add(d.datodberu));
+                });
+                const sortedDates = Array.from(allDates).sort((a, b) => new Date(a) - new Date(b));
+                const labels = sortedDates.map(d => new Date(d).toLocaleDateString('uk-UA'));
+
+                const colors = ['rgb(75, 192, 192)', 'rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)', 'rgb(153, 102, 255)'];
+
+                const datasets = Object.entries(groupedData).map(([code, dataArray], index) => {
+                    const dataMap = new Map(dataArray.map(d => [d.datodberu, d.vysledoknum]));
+                    const data = sortedDates.map(date => dataMap.get(date) || null); // null для пропущених значень
+
+                    return {
+                        label: indicatorNames[index] || code,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length].replace('rgb', 'rgba').replace(')', ', 0.2)'),
+                        tension: 0.1,
+                        fill: false,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        spanGaps: true // З'єднує точки через пропуски (null)
+                    };
+                });
+
+                chartContainer.classList.remove('hidden');
+
+                dynamicsChart = new Chart(ctx, {
+                    type: 'line',
+                    plugins: [backgroundPlugin, dataLabelsPlugin], // <-- РЕЄСТРУЄМО НАШІ ПЛАГІНИ
+                    data: {
+                        labels: labels,
+                        datasets: datasets
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    // Дозволяє приховувати/показувати лінії по кліку на легенду
+                                    usePointStyle: true,
+                                }
+                            },
+                            backgroundColor: { // Передаємо колір у плагін через опції
+                                backgroundColor: '#f3f4f6'
+                            },
+                            title: {
+                                display: true,
+                                text: `Динаміка обраних показників для пацієнта: ${patientName}`
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function (context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) { label += ': '; }
+                                        if (context.parsed.y !== null) { label += context.parsed.y; }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            /**
+             * @description Обробляє запит на генерацію та завантаження PDF для обстеження.
+             * @param {object} patientData - Дані пацієнта та обстеження (p).
+             * @param {boolean} isBlankChecked - Стан прапорця "БЛАНК".
+             */
+            async function handleGenerateAndPrintPdf(patientData, isBlankChecked = false) {
+                try {
+                    const response = await fetch('/api/patient-exam-details', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            datodberu: patientData.datodberu,
+                            datumnarod: patientData.datumnarod
+                        })
+                    });
+                    const details = await response.json();
+                    if (!response.ok) throw new Error(details.message || 'Помилка сервера');
+
+                    const pdfResponse = await fetch('/api/generate-exam-pdf', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ details: details, isBlankChecked: isBlankChecked })
+                    });
+                    if (!pdfResponse.ok) throw new Error((await pdfResponse.json()).message || 'Помилка генерації PDF');
+
+                    const blob = await pdfResponse.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+
+                    // Формуємо ім'я файлу з прізвища та дати
+                    const lastName = patientData.priezvisko || 'Unknown';
+                    const examDate = new Date(patientData.datodberu).toLocaleDateString('uk-UA');
+                    a.download = `Exam_${lastName}_${examDate}.pdf`;
+
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } catch (error) {
+                    console.error('Не вдалося отримати або згенерувати PDF:', error);
+                    showModal(translations.error || 'Помилка', `Не вдалося завантажити деталі обстеження: ${error.message}`, false);
+                }
+            }
 
             // Елементи керування пагінацією (перемикання сторінок).
             const paginationControls = document.getElementById('pagination-controls');
@@ -1301,6 +2284,11 @@
                 // Очищуємо поле вибору файлів, щоб уникнути випадкової відправки
                 fileInput.value = '';
                 updateFileNameDisplay(fileInput.files);
+                // Очищуємо збережені результати
+                lastDocSearchResults = [];
+                lastPartnerSearchResults = [];
+                lastAdvancedSearchResults = [];
+
                 searchForm.reset(); // Очищаємо поля форми
                 docSearchForm.reset(); // Очищуємо форму пошуку по документу
                 partnerSearchForm.reset(); // Очищуємо форму пошуку по партнеру
@@ -1336,7 +2324,7 @@
                     }
                 });
 
-                if (currentlySelected) {currentlySelected.classList.remove('selected-row');}
+                if (currentlySelected) { currentlySelected.classList.remove('selected-row'); }
                 updateSmsButtonState(); // Оновлюємо стан кнопки-конверта
 
             });
@@ -1360,6 +2348,11 @@
                 // Очищення результатів пошуку по партнеру
                 if (activeSearchType !== 'partner') {
                     partnerResultsBody.innerHTML = '';
+                    partnerSearchResultsDiv.classList.add('hidden');
+                    lastPartnerSearchResults = [];
+                }
+                if (activeSearchType !== 'advanced') {
+                    advancedResultsBody.innerHTML = '';
                     partnerSearchResultsDiv.classList.add('hidden');
                 }
 
@@ -1414,18 +2407,31 @@
                         throw new Error(results.message || 'Помилка сервера');
                     }
 
-                    docResultsBody.innerHTML = '';
-                    if (results && results.length > 0) {
-                        results.forEach((p, index) => {
-                            const row = document.createElement('tr');
-                            row.className = 'hover:bg-indigo-50';
-                            const patientFullName = `${p.priezvisko || ''} ${p.meno || ''}`.trim();
-                            // Форматуємо дату для кращого переносу на мобільних
-                            const formattedConfirmationDate = p.confirmationDatetime ? p.confirmationDatetime.replace(' ', '<br>') : '';
+                    lastDocSearchResults = results; // Зберігаємо результати
+                    displayDocSearchResults(results);
 
-                            const webCodeLinkHtml = p.webCode && config.labResultUrl ? `<a id="doc-webcode-link-${index}" href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` : (p.webCode || '');
+                } catch (error) {
+                    showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
+                } finally {
+                    docSearchBtnText.textContent = translations.search || 'Пошук';
+                    docSearchSpinner.classList.add('hidden');
+                    document.getElementById('docSearchSubmitBtn').disabled = false;
+                }
+            });
 
-                            row.innerHTML = `
+            function displayDocSearchResults(results) {
+                docResultsBody.innerHTML = '';
+                if (results && results.length > 0) {
+                    results.forEach((p, index) => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-indigo-50';
+                        const patientFullName = `${p.priezvisko || ''} ${p.meno || ''}`.trim();
+                        // Форматуємо дату для кращого переносу на мобільних
+                        const formattedConfirmationDate = p.confirmationDatetime ? p.confirmationDatetime.replace(' ', '<br>') : '';
+
+                        const webCodeLinkHtml = p.webCode && config.labResultUrl ? `<a id="doc-webcode-link-${index}" href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` : (p.webCode || '');
+
+                        row.innerHTML = `
                                 <td class="px-2 md:px-4 py-4 whitespace-normal break-words text-sm">${patientFullName}</td>
                                 <td class="px-2 md:px-4 py-4 whitespace-normal break-words text-sm">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
                                 <td class="px-2 md:px-4 py-4 whitespace-normal break-words text-sm">${webCodeLinkHtml}</td>
@@ -1438,67 +2444,60 @@
                                     <input type="checkbox" class="doc-english-version-cb h-4 w-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500 cursor-pointer" disabled>
                                 </td>
                             `;
-                            docResultsBody.appendChild(row);
+                        docResultsBody.appendChild(row);
 
-                            const checkbox = row.querySelector('.doc-select-patient-cb');
-                            checkbox.addEventListener('change', (e) => {
-                                // Знімаємо позначки з усіх інших чекбоксів
-                                docResultsBody.querySelectorAll('.doc-select-patient-cb').forEach(cb => {
-                                    if (cb !== e.target) cb.checked = false;
-                                });
-
-                                // Активуємо/деактивуємо чекбокс англійської версії
-                                const engCheckbox = row.querySelector('.doc-english-version-cb');
-                                engCheckbox.disabled = !e.target.checked;
-                                // Заповнюємо форму, якщо чекбокс обрано
-                                if (e.target.checked) {
-                                    document.getElementById('phoneNumber').value = p.tel || '';
-                                    document.getElementById('selected-patient-info').textContent = `${translations.patientSelected || 'Пацієнта обрано'}: ${patientFullName}`;
-                                    document.getElementById('patientName').value = patientFullName;
-                                    document.getElementById('isDocSearchChecked').value = 'true';
-                                    document.getElementById('webCode').value = p.webCode;
-                                    updateSmsButtonState();
-                                } else {
-                                    // Очищуємо лише відповідні поля
-                                    document.getElementById('isDocSearchChecked').value = 'false';
-                                    document.getElementById('webCode').value = '';
-                                    // Якщо інший чекбокс не обраний, очищуємо основні поля
-                                    engCheckbox.checked = false;
-                                    document.getElementById('isEnglishVersion').value = 'false';
-                                    console.log(`[DEBUG] isEnglishVersion set to 'false' because main doc checkbox was unchecked.`);
-                                    if (document.getElementById('isPartnerSearchChecked').value === 'false') clearSearchBtn.click();
-                                }
+                        const checkbox = row.querySelector('.doc-select-patient-cb');
+                        checkbox.addEventListener('change', (e) => {
+                            // Знімаємо позначки з усіх інших чекбоксів
+                            docResultsBody.querySelectorAll('.doc-select-patient-cb').forEach(cb => {
+                                if (cb !== e.target) cb.checked = false;
                             });
-                            row.querySelector('.doc-english-version-cb').addEventListener('change', (e) => {
-                                const isChecked = e.target.checked;
-                                document.getElementById('isEnglishVersion').value = isChecked;
-                                console.log(`[DEBUG] isEnglishVersion set to '${isChecked}' by English version checkbox.`);
 
-                                const webCodeLink = document.getElementById(`doc-webcode-link-${index}`);
-                                if (webCodeLink) {
-                                    if (isChecked && config.labResultUrlEng) {
-                                        // Якщо вибрано англ. версію, використовуємо URL з labResultUrlEng
-                                        webCodeLink.href = `${config.labResultUrlEng}?oid=${p.webCode}`;
-                                    } else {
-                                        // Повертаємо до стандартного URL
-                                        webCodeLink.href = `${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=true`;
-                                    }
-                                }
-                            });
+                            // Активуємо/деактивуємо чекбокс англійської версії
+                            const engCheckbox = row.querySelector('.doc-english-version-cb');
+                            engCheckbox.disabled = !e.target.checked;
+                            // Заповнюємо форму, якщо чекбокс обрано
+                            if (e.target.checked) {
+                                document.getElementById('phoneNumber').value = p.tel || '';
+                                document.getElementById('selected-patient-info').textContent = `${translations.patientSelected || 'Пацієнта обрано'}: ${patientFullName}`;
+                                document.getElementById('patientName').value = patientFullName;
+                                document.getElementById('isDocSearchChecked').value = 'true';
+                                document.getElementById('webCode').value = p.webCode;
+                                updateSmsButtonState();
+                            } else {
+                                // Очищуємо лише відповідні поля
+                                document.getElementById('isDocSearchChecked').value = 'false';
+                                document.getElementById('webCode').value = '';
+                                // Якщо інший чекбокс не обраний, очищуємо основні поля
+                                engCheckbox.checked = false;
+                                document.getElementById('isEnglishVersion').value = 'false';
+                                console.log(`[DEBUG] isEnglishVersion set to 'false' because main doc checkbox was unchecked.`);
+                                if (document.getElementById('isPartnerSearchChecked').value === 'false') clearSearchBtn.click();
+                            }
                         });
-                        docSearchResultsDiv.classList.remove('hidden');
-                    } else {
-                        docSearchResultsDiv.classList.add('hidden');
+                        row.querySelector('.doc-english-version-cb').addEventListener('change', (e) => {
+                            const isChecked = e.target.checked;
+                            document.getElementById('isEnglishVersion').value = isChecked;
+                            console.log(`[DEBUG] isEnglishVersion set to '${isChecked}' by English version checkbox.`);
+
+                            const webCodeLink = document.getElementById(`doc-webcode-link-${index}`);
+                            if (webCodeLink) {
+                                if (isChecked && config.labResultUrlEng) {
+                                    // Якщо вибрано англ. версію, використовуємо URL з labResultUrlEng
+                                    webCodeLink.href = `${config.labResultUrlEng}?oid=${p.webCode}`;
+                                } else {
+                                    // Повертаємо до стандартного URL
+                                    webCodeLink.href = `${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=true`;
+                                }
+                            }
+                        });
+                    });
+                    docSearchResultsDiv.classList.remove('hidden');
+                } else {
+                    docSearchResultsDiv.classList.add('hidden');
                     showModal(translations.searchResults || 'Результати пошуку', translations.documentNotFound || 'Документ не знайдено.', true);
-                    }
-                } catch (error) {
-                    showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
-                } finally {
-                    docSearchBtnText.textContent = translations.search || 'Пошук';
-                    docSearchSpinner.classList.add('hidden');
-                    document.getElementById('docSearchSubmitBtn').disabled = false;
                 }
-            });
+            }
 
             // Обробник для кнопки "Очистити" у формі пошуку по документу.
             clearDocSearchBtn.addEventListener('click', () => {
@@ -1544,55 +2543,9 @@
                         throw new Error(results.message || 'Помилка сервера');
                     }
 
-                    partnerResultsBody.innerHTML = '';
-                    if (results && results.length > 0) {
-                        results.forEach(p => {
-                            const row = document.createElement('tr');
-                            row.className = 'hover:bg-indigo-50';
-                            const patientFullName = `${p.priezvisko || ''} ${p.meno || ''}`;
-                            row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${patientFullName}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    ${p.webCode && config.partnerLabResultUrl ?
-                                        `<a href="${config.partnerLabResultUrl}?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` :
-                                        (p.webCode || '')}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.status || ''}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.confirmationDatetime || ''}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center">
-                                    <input type="checkbox" class="partner-select-patient-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
-                                </td>
-                            `;
-                            const checkbox = row.querySelector('.partner-select-patient-cb');
-                            checkbox.addEventListener('change', (e) => {
-                                partnerResultsBody.querySelectorAll('.partner-select-patient-cb').forEach(cb => {
-                                    if (cb !== e.target) cb.checked = false;
-                                });
+                    lastPartnerSearchResults = results; // Зберігаємо результати
+                    displayPartnerSearchResults(results);
 
-                                if (e.target.checked) {
-                                    document.getElementById('phoneNumber').value = p.tel || '';
-                                    document.getElementById('selected-patient-info').textContent = `${translations.patientSelected || 'Пацієнта обрано'}: ${patientFullName}`;
-                                    document.getElementById('patientName').value = patientFullName;
-                                    // Встановлюємо прапорець та веб-код для завантаження PDF з бекенду
-                                    document.getElementById('isPartnerSearchChecked').value = 'true';
-                                    document.getElementById('partnerWebCode').value = p.webCode;
-                                    updateSmsButtonState();
-                                } else {
-                                    // Очищуємо лише відповідні поля
-                                    document.getElementById('isPartnerSearchChecked').value = 'false';
-                                    document.getElementById('partnerWebCode').value = '';
-                                    // Якщо інший чекбокс не обраний, очищуємо основні поля
-                                    if (document.getElementById('isDocSearchChecked').value === 'false') clearSearchBtn.click();
-                                }
-                            });
-                            partnerResultsBody.appendChild(row);
-                        });
-                        partnerSearchResultsDiv.classList.remove('hidden');
-                    } else {
-                        partnerSearchResultsDiv.classList.add('hidden');
-                        showModal(translations.searchResults || 'Результати пошуку', translations.documentNotFound || 'Документ не знайдено.', true);
-                    }
                 } catch (error) {
                     showModal(translations.searchError || 'Помилка пошуку', `😭 ${error.message}`, false);
                 } finally {
@@ -1601,6 +2554,58 @@
                     document.getElementById('partnerSearchSubmitBtn').disabled = false;
                 }
             });
+
+            function displayPartnerSearchResults(results) {
+                partnerResultsBody.innerHTML = '';
+                if (results && results.length > 0) {
+                    results.forEach(p => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-indigo-50';
+                        const patientFullName = `${p.priezvisko || ''} ${p.meno || ''}`;
+                        row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${patientFullName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    ${p.webCode && config.partnerLabResultUrl ?
+                                `<a href="${config.partnerLabResultUrl}?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` :
+                                (p.webCode || '')}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.status || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.confirmationDatetime || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center">
+                                    <input type="checkbox" class="partner-select-patient-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                                </td>
+                            `;
+                        const checkbox = row.querySelector('.partner-select-patient-cb');
+                        checkbox.addEventListener('change', (e) => {
+                            partnerResultsBody.querySelectorAll('.partner-select-patient-cb').forEach(cb => {
+                                if (cb !== e.target) cb.checked = false;
+                            });
+
+                            if (e.target.checked) {
+                                document.getElementById('phoneNumber').value = p.tel || '';
+                                document.getElementById('selected-patient-info').textContent = `${translations.patientSelected || 'Пацієнта обрано'}: ${patientFullName}`;
+                                document.getElementById('patientName').value = patientFullName;
+                                // Встановлюємо прапорець та веб-код для завантаження PDF з бекенду
+                                document.getElementById('isPartnerSearchChecked').value = 'true';
+                                document.getElementById('partnerWebCode').value = p.webCode;
+                                updateSmsButtonState();
+                            } else {
+                                // Очищуємо лише відповідні поля
+                                document.getElementById('isPartnerSearchChecked').value = 'false';
+                                document.getElementById('partnerWebCode').value = '';
+                                // Якщо інший чекбокс не обраний, очищуємо основні поля
+                                if (document.getElementById('isDocSearchChecked').value === 'false') clearSearchBtn.click();
+                            }
+                        });
+                        partnerResultsBody.appendChild(row);
+                    });
+                    partnerSearchResultsDiv.classList.remove('hidden');
+                } else {
+                    partnerSearchResultsDiv.classList.add('hidden');
+                    showModal(translations.searchResults || 'Результати пошуку', translations.documentNotFound || 'Документ не знайдено.', true);
+                }
+            }
 
             // Обробник для кнопки "Очистити" у формі пошуку по партнеру.
             clearPartnerSearchBtn.addEventListener('click', () => {
@@ -1614,7 +2619,7 @@
                 // Викликаємо клік на основній кнопці очищення, щоб скинути ВСІ поля.
                 clearSearchBtn.click();
             });
-            
+
             // Логіка для кнопки "х" (очищення) всередині поля вводу "Номер документа".
             const docNumberInput = document.getElementById('docNumber');
             const clearDocNumberBtn = document.getElementById('clearDocNumberBtn');
@@ -1767,15 +2772,15 @@
 
                 const formData = new FormData(createForm);
                 const data = Object.fromEntries(formData.entries());
-                
+
                 try {
                     const response = await fetch('/pacientcreate', {
-                         method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(data)
                     });
                     const result = await response.json();
-                    
+
                     // Універсальна перевірка успіху для Sybase, Oracle та MongoDB
                     const isSuccess = response.ok && result && result.length > 0 && (result[0].status === 'Patient created' || result[0].status === 'Patient already exists');
                     const errorMessage = result && result.length > 0 ? (result[0]['Помилка'] || result[0].status) : 'Невідома помилка';
@@ -1792,7 +2797,7 @@
                     } else {
                         throw new Error(errorMessage);
                     }
-                } catch(error) {
+                } catch (error) {
                     showModal(translations.creationError || 'Помилка створення', error.message, false);
                 } finally {
                     createBtnText.textContent = translations.createPatientBtn || 'Створити пацієнта';
@@ -1886,7 +2891,7 @@
                     const patientInfo = formData.get('patientName'); // <-- ВИПРАВЛЕНО: Беремо чисте ім'я з форми
                     const phoneNumber = formData.get('phoneNumber');
 
-                    const lang = localStorage.getItem('language') || 'uk'; 
+                    const lang = localStorage.getItem('language') || 'uk';
                     const langHeader = getLangHeader(lang);
                     const response = await fetch('/upload', { method: 'POST', body: formData, headers: { 'Accept-Language': langHeader } });
 
@@ -1899,7 +2904,7 @@
                         document.getElementById('selected-patient-info').textContent = '';
                         document.getElementById('patientName').value = '';
                         if (config && config.smsText) {
-                             document.getElementById('smsText').value = config.smsText;
+                            document.getElementById('smsText').value = config.smsText;
                         }
                         // Знімаємо позначки з усіх чекбоксів у таблицях результатів
                         document.querySelectorAll('.doc-select-patient-cb, .partner-select-patient-cb').forEach(cb => {
@@ -1933,7 +2938,7 @@
             const charCounter = document.getElementById('char-counter');
             const phoneNumberInput = document.getElementById('phoneNumber');
             const phoneHint = document.getElementById('phone-hint');
- 
+
             /**
              * @description Оновлює стан кнопки відправки довільного SMS (іконка конверта) залежно від валідності номера телефону.
              */
@@ -2037,4 +3042,5 @@
         });
     </script>
 </body>
+
 </html>

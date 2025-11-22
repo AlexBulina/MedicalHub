@@ -1,6 +1,7 @@
 // storage/ftpAdapter.js
 import ftp from 'basic-ftp';
-import { promises as fsPromises, createWriteStream } from 'fs';
+import { createWriteStream } from 'fs';
+import path from 'path';
 
 
 class FtpAdapter {
@@ -15,10 +16,16 @@ class FtpAdapter {
         return client;
     }
 
+    _normalizePath(remotePath) {
+        // Замінюємо всі зворотні слеші на прямі та забезпечуємо, щоб шлях починався з /
+        const normalized = remotePath.replace(/\\/g, '/');
+        return normalized.startsWith('/') ? normalized : `/${normalized}`;
+    }
+
     async ensureDir(path) {
         const client = await this._getClient();
         try {
-            await client.ensureDir(path);
+            await client.ensureDir(this._normalizePath(path));
         } finally {
             client.close();
         }
@@ -27,7 +34,7 @@ class FtpAdapter {
     async uploadFrom(localPath, remotePath) {
         const client = await this._getClient();
         try {
-            await client.uploadFrom(localPath, remotePath);
+            await client.uploadFrom(localPath, this._normalizePath(remotePath));
         } finally {
             client.close();
         }
@@ -40,14 +47,15 @@ class FtpAdapter {
      */
     async list(remotePath) {
         const client = await this._getClient();
+        const normalizedPath = this._normalizePath(remotePath);
         try {
-            await client.cd(remotePath);
-            const files = await client.list();
+            // Використовуємо list з повним шляхом, а не cd + list
+            const files = await client.list(normalizedPath);
             // Фільтруємо файли, залишаючи тільки .docx та .pdf
             return files.filter(file => {
                 if (file.isDirectory) return false;
-                const fileExtension = file.name.split('.').pop().toLowerCase();
-                return ['docx', 'pdf'].includes(fileExtension);
+                const fileExtension = path.extname(file.name).toLowerCase();
+                return ['.docx', '.pdf'].includes(fileExtension);
             });
         } finally {
             client.close();
@@ -61,7 +69,7 @@ class FtpAdapter {
      */
     async downloadTo(remotePath, localPath) {
         return new Promise(async (resolve, reject) => {
-            const client = await this._getClient();
+            const client = await this._getClient(); // _getClient() is called inside the promise
             const writeStream = createWriteStream(localPath);
 
             writeStream.on('finish', () => {
@@ -74,7 +82,7 @@ class FtpAdapter {
                 reject(err);
             });
 
-            client.downloadTo(writeStream, remotePath).catch(reject);
+            client.downloadTo(writeStream, this._normalizePath(remotePath)).catch(reject);
         });
     }
 
@@ -86,7 +94,7 @@ class FtpAdapter {
     async checkDirectory(directoryName) {
         const client = await this._getClient();
         try {
-            const fileInfo = await client.list(directoryName);
+            const fileInfo = await client.list(this._normalizePath(directoryName));
             return fileInfo;
         } catch (error) {
             if (error.code === 550) { // Код помилки "File not found"
@@ -109,10 +117,10 @@ class FtpAdapter {
     async uploadAndEnsureDir(localPath, remoteDir, remoteFileName) {
         const client = await this._getClient();
         try {
-            // Переконуємось, що директорія існує
-            await client.ensureDir(remoteDir);
+            const normalizedDir = this._normalizePath(remoteDir);
+            await client.ensureDir(normalizedDir);
             // Завантажуємо файл
-            const remotePath = `${remoteDir}/${remoteFileName}`;
+            const remotePath = this._normalizePath(path.join(normalizedDir, remoteFileName));
             await client.uploadFrom(localPath, remotePath);
             console.log(`Файл ${localPath} успішно завантажено в ${remotePath}`);
         } catch (err) {

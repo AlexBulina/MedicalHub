@@ -72,6 +72,95 @@ class GoogleDriveAdapter {
         }
     }
 
+    /**
+     * @description Гарантує існування підпапки для філіалу та папки для результату всередині неї.
+     * @param {string} branchDirName - Назва папки філіалу (напр., 'rd', 'ct').
+     * @param {string} resultDirName - Назва папки для результату (унікальний ID).
+     * @returns {Promise<string>} - ID кінцевої папки для завантаження файлів.
+     */
+    async ensureSubDir(branchDirName, resultDirName) {
+        try {
+            // Крок 1: Знайти або створити папку філіалу
+            let branchFolderId;
+            const branchSearchResponse = await this.drive.files.list({
+                q: `mimeType='application/vnd.google-apps.folder' and name='${branchDirName}' and '${this.rootFolderId}' in parents and trashed=false`,
+                fields: 'files(id)',
+                spaces: 'drive',
+            });
+
+            if (branchSearchResponse.data.files.length > 0) {
+                branchFolderId = branchSearchResponse.data.files[0].id;
+                console.log(`Google Drive: Папка філіалу '${branchDirName}' вже існує. ID: ${branchFolderId}`);
+            } else {
+                const branchMetadata = {
+                    name: branchDirName,
+                    mimeType: 'application/vnd.google-apps.folder',
+                    parents: [this.rootFolderId],
+                };
+                const branchFile = await this.drive.files.create({ resource: branchMetadata, fields: 'id' });
+                branchFolderId = branchFile.data.id;
+                console.log(`Google Drive: Створено папку філіалу '${branchDirName}'. ID: ${branchFolderId}`);
+            }
+
+            // Крок 2: Створити папку для результату всередині папки філіалу
+            const resultMetadata = {
+                name: resultDirName,
+                mimeType: 'application/vnd.google-apps.folder',
+                parents: [branchFolderId],
+            };
+            const resultFile = await this.drive.files.create({
+                resource: resultMetadata,
+                fields: 'id',
+            });
+            console.log(`Google Drive: Створено папку результату '${resultDirName}'. ID: ${resultFile.data.id}`);
+            return resultFile.data.id;
+
+        } catch (err) {
+            console.error('Помилка при створенні структури папок в Google Drive', err);
+            throw err;
+        }
+    }
+
+    /**
+     * @description Знаходить ID кінцевої папки з результатами за структурою: /branchDirName/resultDirName.
+     * @param {string} branchDirName - Назва папки філіалу (напр., 'rd', 'ct').
+     * @param {string} resultDirName - Назва папки для результату (унікальний ID).
+     * @returns {Promise<string|null>} - ID кінцевої папки або null, якщо не знайдено.
+     */
+    async findRemoteFolderId(branchDirName, resultDirName) {
+        try {
+            // Крок 1: Знайти папку філіалу
+            const branchSearchResponse = await this.drive.files.list({
+                q: `mimeType='application/vnd.google-apps.folder' and name='${branchDirName}' and '${this.rootFolderId}' in parents and trashed=false`,
+                fields: 'files(id)',
+                spaces: 'drive',
+            });
+
+            if (branchSearchResponse.data.files.length === 0) {
+                console.warn(`Google Drive: Папку філіалу '${branchDirName}' не знайдено.`);
+                return null;
+            }
+            const branchFolderId = branchSearchResponse.data.files[0].id;
+
+            // Крок 2: Знайти папку результату всередині папки філіалу
+            const resultSearchResponse = await this.drive.files.list({
+                q: `mimeType='application/vnd.google-apps.folder' and name='${resultDirName}' and '${branchFolderId}' in parents and trashed=false`,
+                fields: 'files(id)',
+                spaces: 'drive',
+            });
+
+            if (resultSearchResponse.data.files.length === 0) {
+                console.warn(`Google Drive: Папку результату '${resultDirName}' не знайдено всередині '${branchDirName}'.`);
+                return null;
+            }
+            return resultSearchResponse.data.files[0].id;
+
+        } catch (err) {
+            console.error('Помилка при пошуку структури папок в Google Drive', err);
+            throw err;
+        }
+    }
+
     async uploadFrom(localPath, remoteFolderId) {
         // remoteFolderId тут буде ID папки, куди завантажувати
         const fileName = path.basename(localPath);

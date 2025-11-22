@@ -10,41 +10,50 @@ const __dirname = path.dirname(__filename);
 // Використовуємо повний шлях до libreoffice
 const libreOfficePath = '"C:\\Program Files\\LibreOffice\\program\\soffice.exe"'; // Замінити на  шлях до LibreOffice
 
+// Глобальна черга для послідовної конвертації (щоб не перевантажити сервер)
+let conversionQueue = Promise.resolve();
+
 // Універсальна функція для обробки помилок
 export function handleError(context, error) {
     console.error(`[${context}]`, error.message || error);
 }
 
-// Конвертація DOCX у PDF
+// Конвертація DOCX у PDF (з чергою та таймаутом)
 export async function convertDocxToPdf(docxPath, outputPdfPath) {
-    return new Promise((resolve, reject) => {
-        // Перетворюємо шляхи на абсолютні, щоб уникнути проблем з відносними шляхами в LibreOffice
-        const absoluteDocxPath = path.resolve(docxPath);
-        const absoluteOutDir = path.resolve(path.dirname(outputPdfPath));
+    // Додаємо задачу в кінець черги
+    const currentTask = conversionQueue.then(async () => {
+        return new Promise((resolve, reject) => {
+            // Перетворюємо шляхи на абсолютні
+            const absoluteDocxPath = path.resolve(docxPath);
+            const absoluteOutDir = path.resolve(path.dirname(outputPdfPath));
 
-        const command = `${libreOfficePath} --headless --convert-to pdf --outdir "${absoluteOutDir}" "${absoluteDocxPath}"`;
-        exec(command, (error, stdout, stderr) => {
-            if (error) return reject(new Error(`Помилка при конвертації: ${error.message}. Stderr: ${stderr}`));
-            
-            // LibreOffice може виводити попередження в stderr, але все одно успішно конвертувати.
-            // Перевіряємо, чи stderr містить явні ознаки помилки.
-            if (stderr && (stderr.toLowerCase().includes('error') || stderr.toLowerCase().includes('failed'))) {
-                return reject(new Error(`Сталася помилка під час конвертації: ${stderr}`));
-            }
+            const command = `${libreOfficePath} --headless --convert-to pdf --outdir "${absoluteOutDir}" "${absoluteDocxPath}"`;
 
-            // Важлива перевірка: переконуємось, що вихідний PDF файл дійсно існує
-            fs.access(outputPdfPath)
-                .then(() => resolve(`Конвертація завершена! PDF збережено за адресою: ${outputPdfPath}`))
-                .catch(() => reject(new Error(`Конвертація завершилась, але вихідний PDF файл ${outputPdfPath} не знайдено.`)));
+            // Додаємо таймаут 60 секунд (60000 мс)
+            exec(command, { timeout: 60000 }, (error, stdout, stderr) => {
+                if (error) {
+                    if (error.killed) {
+                        return reject(new Error(`Конвертація перервана через таймаут (60с).`));
+                    }
+                    return reject(new Error(`Помилка при конвертації: ${error.message}. Stderr: ${stderr}`));
+                }
 
-            
+                // Перевіряємо наявність файлу. Ігноруємо stderr, якщо файл успішно створено (LibreOffice часто пише warning в stderr)
+                fs.access(outputPdfPath)
+                    .then(() => resolve(`Конвертація завершена! PDF збережено за адресою: ${outputPdfPath}`))
+                    .catch(() => {
+                        // Якщо файлу немає, тоді помилка в stderr є критичною
+                        reject(new Error(`Конвертація завершилась, але вихідний PDF файл не знайдено. Output: ${stderr || stdout}`));
+                    });
+            });
         });
     });
+
+    // Оновлюємо чергу. Catch потрібен, щоб помилка в одному файлі не блокувала наступні.
+    conversionQueue = currentTask.catch(() => { });
+
+    return currentTask;
 }
-
-
-
-
 
 // Очищення метаданих з PDF
 export async function removePdfMetadata(pdfPath) {
@@ -60,8 +69,6 @@ export async function removePdfMetadata(pdfPath) {
         pdfDoc.setProducer('');
         pdfDoc.setCreator('');
 
-
-
         // Зберігаємо оновлений PDF
         const pdfBytesCleaned = await pdfDoc.save();
         await fs.writeFile(pdfPath, pdfBytesCleaned);
@@ -70,7 +77,6 @@ export async function removePdfMetadata(pdfPath) {
         handleError(`Очищення метаданих ${pdfPath}`, error);
     }
 }
-
 
 // Зміна розширення файлу на .pdf
 export function changeExtensionToPdf(filePath) {

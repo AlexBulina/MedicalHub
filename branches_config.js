@@ -6,21 +6,77 @@
  */
 
 const BRANCHES = {
+	ad: {
+        path: '/hmuadmin',
+        resultPath: '/ad',
+        depId: 'ad',
+        hasAdvancedPatientSearch: true,
+        hasPartnerLab: false, // Наявність лабораторії партнера
+       // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
+        publicUrl: 'http://85.159.5.112:1090/ad',
+        //labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
+        titleKey: "branchTitle_ad",
+        clinicNameKey: "branchClinicName_ad",
+        smsTextKey: "branchSmsText_ad",
+        isEnglishReport: true,
+         "reports": { // <-- НОВИЙ БЛОК
+        "enabled": true,
+        "available": [
+            "clinicRegistrationStats",
+            "examRegistrationStats",
+            "administratorCashStats",
+            "administratorLabCashStats"
+        ]
+    },  channel: 'sms',
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        auth: { user: process.env.AUTH_USER_AD, pass: process.env.AUTH_PASS_AD },
+        sms: { token: process.env.SMS_TOKEN_MRT, sender: process.env.SMS_SENDER_MRT },
+        
+        db: { dsn: process.env.DB_DSN_SYBASE , type : 'sybase'} ,// DSN для Sybase
+        // Конфігурація для Oracle
+        /*db: {
+            type: 'oracle',
+            user: process.env.DB_USER_ORA_MRT, // Рекомендую створити окремі змінні для MRT
+            password: process.env.DB_PASSWORD_ORA_MRT,
+            connectString: process.env.DB_CONNECT_STRING_ORA_MRT
+        },*/
+
+        storage: {
+            type: 'ftp', 
+            config: { 
+                host: process.env.FTP_HOST,
+                user: process.env.FTP_USER,
+                password: process.env.FTP_PASS
+            }
+        },
+    },
     mrt: {
-        path: '/tomogmrt',
-        depId: 'mrt',
-        hasPartnerLab: true, // Наявність лабораторії партнера
-        partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
-        labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
+        path: '/hmureception',
+        resultPath: '/rc',
+        depId: 'rc',
+        hasAdvancedPatientSearch: true,
+        hasPartnerLab: false, // Наявність лабораторії партнера
+       // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
+        publicUrl: 'http://85.159.5.112:1090/rc',
+        //labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
         titleKey: "branchTitle_mrt",
         clinicNameKey: "branchClinicName_mrt",
         smsTextKey: "branchSmsText_mrt",
+        isEnglishReport: true,
+         "reports": { // <-- НОВИЙ БЛОК
+        "enabled": false,
+        "available": [
+            "clinicRegistrationStats",
+            "examRegistrationStats",
+            "administratorCashStats"
+        ]
+    },
         channel: 'sms',
-        messagingEnabled: false, // true - відправляти повідомлення, false - імітувати відправку
-        auth: { user: process.env.AUTH_USER_MRT, pass: process.env.AUTH_PASS_MRT },
+        messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
+        auth: { user: process.env.AUTH_USER_RC, pass: process.env.AUTH_PASS_RC },
         sms: { token: process.env.SMS_TOKEN_MRT, sender: process.env.SMS_SENDER_MRT },
         
-        db: { dsn: process.env.DB_DSN_SYBASE } ,// DSN для Sybase
+        db: { dsn: process.env.DB_DSN_SYBASE , type : 'sybase'} ,// DSN для Sybase
         // Конфігурація для Oracle
         /*db: {
             type: 'oracle',

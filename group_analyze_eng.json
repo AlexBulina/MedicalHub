@@ -1,0 +1,4250 @@
+[
+    {
+        "kodvys_text": "2",
+        "skratka": "РТ%",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Протромбіновий індекс (PT%)",
+        "nazov_eng": "Prothrombin index (PT%)",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "3",
+        "skratka": "INR",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "МНВ (INR)",
+        "nazov_eng": "INR",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "4",
+        "skratka": "ТТ",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Тромбіновий час (ТТ)",
+        "nazov_eng": "Thrombin time (TT)",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "5",
+        "skratka": "АРТТ",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "АЧТЧ (PTT)",
+        "nazov_eng": "APTT (PTT)",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "6",
+        "skratka": "Fbg",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Фібриноген (Fbg)",
+        "nazov_eng": "Fibrinogen (Fbg)",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "7",
+        "skratka": "DDi",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Д-димер",
+        "nazov_eng": "D-dimer",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "8",
+        "skratka": "АТ3",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Антитромбін 3",
+        "nazov_eng": "Antithrombin 3",
+        "cena": 530
+    },
+    {
+        "kodvys_text": "11",
+        "skratka": "LA",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Вовчаковий антикоагулянт (підтверджуючий) співвідношення",
+        "nazov_eng": "Lupus anticoagulant (confirmatory) ratio",
+        "cena": 470
+    },
+    {
+        "kodvys_text": "14",
+        "skratka": "Цитологія",
+        "nazovskup": "Цитологічні дослідження",
+        "nazovskup_eng": "Cytological studies",
+        "nazov": "Цитологічне дослідження виділень з грудної залози",
+        "nazov_eng": "Cytological examination of breast discharge",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "15",
+        "skratka": "пунктат",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Пунктат підшлункової",
+        "nazov_eng": "Pancreatic punctate",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "16",
+        "skratka": "COVID-19M",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Експрес-тест 2019 n-CoV IgM",
+        "nazov_eng": "Express test 2019 n-CoV IgM",
+        "cena": 650
+    },
+    {
+        "kodvys_text": "18",
+        "skratka": "COV19IgG",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла G до COVID19 імуноферментним методом",
+        "nazov_eng": "Antibodies G to COVID19 by ELISA",
+        "cena": 320
+    },
+    {
+        "kodvys_text": "19",
+        "skratka": "vitamin D",
+        "nazovskup": "Вітаміни",
+        "nazovskup_eng": "Vitamins",
+        "nazov": "Вітамін D (25-OH, D3)",
+        "nazov_eng": "Vitamin D (25-OH, D3)",
+        "cena": 540
+    },
+    {
+        "kodvys_text": "20",
+        "skratka": "M5",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Аллерген плісневого грибка Aspergillus IgG",
+        "nazov_eng": "Aspergillus mold allergen IgG",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "21",
+        "skratka": "COV19IgМ",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла М до COVID19 імуноферментним методом",
+        "nazov_eng": "Antibodies M to COVID19 by ELISA",
+        "cena": 320
+    },
+    {
+        "kodvys_text": "22",
+        "skratka": "CA-U",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Кальцій сечі",
+        "nazov_eng": "Urine calcium",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "23",
+        "skratka": "MG-U",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Магній добової сечі",
+        "nazov_eng": "24-hour urine magnesium",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "33",
+        "skratka": "K",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Калій K",
+        "nazov_eng": "Potassium K",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "34",
+        "skratka": "K-U",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Калій добової сечі",
+        "nazov_eng": "24-hour urine potassium",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "35",
+        "skratka": "CL",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Хлор CL",
+        "nazov_eng": "Chloride CL",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "37",
+        "skratka": "MG",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Магній MG",
+        "nazov_eng": "Magnesium MG",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "31",
+        "skratka": "NA",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Натрій NA",
+        "nazov_eng": "Sodium NA",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "32",
+        "skratka": "NA-U",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Натрій добової сечі",
+        "nazov_eng": "24-hour urine sodium",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "38",
+        "skratka": "PHOS-U",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Фосфор сечі",
+        "nazov_eng": "Urine phosphorus",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "39",
+        "skratka": "PHOS",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Фосфор PHOS",
+        "nazov_eng": "Phosphorus PHOS",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "40",
+        "skratka": "CA",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Кальцій загальний CA",
+        "nazov_eng": "Total calcium CA",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "36",
+        "skratka": "CL-U",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Хлор добової сечі",
+        "nazov_eng": "24-hour urine chloride",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "42",
+        "skratka": "IRON",
+        "nazovskup": "Діагностика анемії",
+        "nazovskup_eng": "Anemia diagnostics",
+        "nazov": "Залізо IRON",
+        "nazov_eng": "Iron IRON",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "47",
+        "skratka": "AST",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Аспартаттрансаміназа (AST)",
+        "nazov_eng": "Aspartate transaminase (AST)",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "49",
+        "skratka": "GGT",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Гама-глутамилтрансфераза GGT",
+        "nazov_eng": "Gamma-glutamyltransferase GGT",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "52",
+        "skratka": "AMY-U",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Амілаза добовоі сечі",
+        "nazov_eng": "24-hour urine amylase",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "48",
+        "skratka": "ALTI",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Аланінтрансаміназа (ALT)",
+        "nazov_eng": "Alanine transaminase (ALT)",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "50",
+        "skratka": "ALPI",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Лужна фосфатаза (ALP)",
+        "nazov_eng": "Alkaline phosphatase (ALP)",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "51",
+        "skratka": "AMY",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Амілаза (Amilase)",
+        "nazov_eng": "Amylase",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "53",
+        "skratka": "PAM",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Aмілаза ранковоі сечі ",
+        "nazov_eng": "Morning urine amylase",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "54",
+        "skratka": "LDI",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Лактатдегідрогеназа (LDH)",
+        "nazov_eng": "Lactate dehydrogenase (LDH)",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "55",
+        "skratka": "LIP",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Ліпаза",
+        "nazov_eng": "Lipase",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "56",
+        "skratka": "CKI",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Креатинфосфокіназа",
+        "nazov_eng": "Creatine phosphokinase",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "57",
+        "skratka": "CKMB",
+        "nazovskup": "Кардіоваскулярний ризик",
+        "nazovskup_eng": "Cardiovascular risk",
+        "nazov": "Креатинфосфокіназа МВ фракція",
+        "nazov_eng": "Creatine phosphokinase MB fraction",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "69",
+        "skratka": "CREA-U",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Креатинін добової сечі",
+        "nazov_eng": "24-hour urine creatinine",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "70",
+        "skratka": "URCA",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Сечова кислота (Uric Acid)",
+        "nazov_eng": "Uric Acid",
+        "cena": 70
+    },
+    {
+        "kodvys_text": "75",
+        "skratka": "hsC (CRP)",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "С-реактивний білок високочутливий CRP",
+        "nazov_eng": "C-reactive protein high-sensitivity CRP",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "84",
+        "skratka": "AHDL",
+        "nazovskup": "Ліпідний обмін",
+        "nazovskup_eng": "Lipid metabolism",
+        "nazov": "Ліпопротеїди високої щільності (AHDL)",
+        "nazov_eng": "High-density lipoproteins (AHDL)",
+        "cena": 110
+    },
+    {
+        "kodvys_text": "76",
+        "skratka": "RF",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Ревмофактор RF",
+        "nazov_eng": "Rheumatoid factor RF",
+        "cena": 160
+    },
+    {
+        "kodvys_text": "110",
+        "skratka": "RTH",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Тиреотропний гормон (TSH)",
+        "nazov_eng": "Thyroid-stimulating hormone (TSH)",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "77",
+        "skratka": "ASS",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Антистрептолізин О (ASO)",
+        "nazov_eng": "Antistreptolysin O (ASO)",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "113",
+        "skratka": "Мідь",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Мідь (Сu)",
+        "nazov_eng": "Copper (Cu)",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "114",
+        "skratka": "FT3",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Трийодтиронін вільний (FT3)",
+        "nazov_eng": "Free triiodothyronine (FT3)",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "116",
+        "skratka": "FT4",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Тироксин вільний (FT4)",
+        "nazov_eng": "Free thyroxine (FT4)",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "83",
+        "skratka": "CHOL",
+        "nazovskup": "Ліпідний обмін",
+        "nazovskup_eng": "Lipid metabolism",
+        "nazov": "Холестерин загальний (CHOL)",
+        "nazov_eng": "Total cholesterol (CHOL)",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "91",
+        "skratka": "GLUC",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Глюкоза натще (GLUC)",
+        "nazov_eng": "Fasting glucose (GLUC)",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "92",
+        "skratka": "A1C",
+        "nazovskup": "Вуглеводний обмін",
+        "nazovskup_eng": "Carbohydrate metabolism",
+        "nazov": "Глікозильований гемоглобін (A1C)",
+        "nazov_eng": "Glycated hemoglobin (A1C)",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "93",
+        "skratka": "INS",
+        "nazovskup": "Вуглеводний обмін",
+        "nazovskup_eng": "Carbohydrate metabolism",
+        "nazov": "Інсулін (Insulin)",
+        "nazov_eng": "Insulin",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "94",
+        "skratka": "CpS",
+        "nazovskup": "Вуглеводний обмін",
+        "nazovskup_eng": "Carbohydrate metabolism",
+        "nazov": "С-пептид (C-peptide)",
+        "nazov_eng": "C-peptide",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "117",
+        "skratka": "aTPO",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Антитіла до тиреопероксидази",
+        "nazov_eng": "Anti-thyroid peroxidase antibodies",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "100",
+        "skratka": "VB",
+        "nazovskup": "Діагностика анемії",
+        "nazovskup_eng": "Anemia diagnostics",
+        "nazov": "Вітамін В12",
+        "nazov_eng": "Vitamin B12",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "118",
+        "skratka": "aTG",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Антитіла до тиреоглобулінів",
+        "nazov_eng": "Anti-thyroglobulin antibodies",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "140",
+        "skratka": "LH",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Лютеїнізуючий гормон LH",
+        "nazov_eng": "Luteinizing hormone LH",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "141",
+        "skratka": "FSH",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Фолікулостимулюючий гормон FSH",
+        "nazov_eng": "Follicle-stimulating hormone FSH",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "101",
+        "skratka": "FER",
+        "nazovskup": "Діагностика анемії",
+        "nazovskup_eng": "Anemia diagnostics",
+        "nazov": "Феритин (ferritin)",
+        "nazov_eng": "Ferritin",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "102",
+        "skratka": "FOL",
+        "nazovskup": "Діагностика анемії",
+        "nazovskup_eng": "Anemia diagnostics",
+        "nazov": "Фолієва кислота FOL",
+        "nazov_eng": "Folic acid FOL",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "142",
+        "skratka": "PRL",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Пролактин PRL",
+        "nazov_eng": "Prolactin PRL",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "143",
+        "skratka": "PRGE",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Прогестерон",
+        "nazov_eng": "Progesterone",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "144",
+        "skratka": "еЕ2",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Естрадіол Estradiol",
+        "nazov_eng": "Estradiol",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "147",
+        "skratka": "TES",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Тестостерон TES",
+        "nazov_eng": "Testosterone TES",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "150",
+        "skratka": "SBG",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Сексзв'язуючий глобулін SBG",
+        "nazov_eng": "Sex hormone-binding globulin SBG",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "200",
+        "skratka": "HCG",
+        "nazovskup": "Пренатальна діагностика",
+        "nazovskup_eng": "Prenatal diagnostics",
+        "nazov": "Хоріонічний гонадотропін загальний HCG",
+        "nazov_eng": "Total chorionic gonadotropin HCG",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "210",
+        "skratka": "COR",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Кортизол",
+        "nazov_eng": "Cortisol",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "250",
+        "skratka": "CA15-3",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "Онкомаркер молочної залози СА 15-3",
+        "nazov_eng": "Breast cancer marker CA 15-3",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "251",
+        "skratka": "CA125II",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "СА 125",
+        "nazov_eng": "CA 125",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "252",
+        "skratka": "CA199",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "Онкомаркер підшлункової залози СА 19-9",
+        "nazov_eng": "Pancreatic cancer marker CA 19-9",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "253",
+        "skratka": "tPSA",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "ПСА загальний (tPSA)",
+        "nazov_eng": "Total PSA (tPSA)",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "255",
+        "skratka": "FreePSA",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "ПСА вільний",
+        "nazov_eng": "Free PSA",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "257",
+        "skratka": "CEA",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "Раково-ембріональний антиген (CEA)",
+        "nazov_eng": "Carcinoembryonic antigen (CEA)",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "258",
+        "skratka": "AFP",
+        "nazovskup": "Пренатальна діагностика",
+        "nazovskup_eng": "Prenatal diagnostics",
+        "nazov": "АФП ",
+        "nazov_eng": "AFP",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "300",
+        "skratka": "aHAVM",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Антитіла IgM до HAV",
+        "nazov_eng": "Antibodies IgM to HAV",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "310",
+        "skratka": "HBsAg",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "HBsAg (австралійський антиген, скринінгове дослідження)",
+        "nazov_eng": "HBsAg (Australian antigen, screening test)",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "320",
+        "skratka": "BcM",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Антитіла IgM до HBcAg",
+        "nazov_eng": "Antibodies IgM to HBcAg",
+        "cena": 260
+    },
+    {
+        "kodvys_text": "321",
+        "skratka": "HBcT",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Сумарні антитіла до HbcAg (HBcT), Anti-HB core total",
+        "nazov_eng": "Total antibodies to HBcAg (HBcT), Anti-HB core total",
+        "cena": 260
+    },
+    {
+        "kodvys_text": "330",
+        "skratka": "HBe Ag",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "HBeAg, е-антиген вірусу гепатиту В",
+        "nazov_eng": "HBeAg, e-antigen of hepatitis B virus",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "331",
+        "skratka": "aHBe",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Сумарні антитіла до HBeAg",
+        "nazov_eng": "Total antibodies to HBeAg",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "340",
+        "skratka": "aHCV",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Aнтитіла до HCV (anti HCV IgG)",
+        "nazov_eng": "Antibodies to HCV (anti HCV IgG)",
+        "cena": 290
+    },
+    {
+        "kodvys_text": "400",
+        "skratka": "CMV IgG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до цитомегаловіруса",
+        "nazov_eng": "IgG to cytomegalovirus",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "401",
+        "skratka": "CMV IgM",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgM до цитомегаловіруса",
+        "nazov_eng": "IgM to cytomegalovirus",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "420",
+        "skratka": "VCG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до капсидного антигена ЕBV",
+        "nazov_eng": "IgG to EBV capsid antigen",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "421",
+        "skratka": "EBNA IgG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до нуклеарного антигена  EBV",
+        "nazov_eng": "IgG to EBV nuclear antigen",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "422",
+        "skratka": "EA IgG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до ранніх антигенів EBV",
+        "nazov_eng": "IgG to EBV early antigens",
+        "cena": 140
+    },
+    {
+        "kodvys_text": "430",
+        "skratka": "TOXO IgG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до Toxoplasma gondii",
+        "nazov_eng": "IgG to Toxoplasma gondii",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "431",
+        "skratka": "TOXO IgM",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgM до Toxoplasma gondii",
+        "nazov_eng": "IgM to Toxoplasma gondii",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "440",
+        "skratka": "RUB IgG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до віруса краснухи",
+        "nazov_eng": "IgG to rubella virus",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "441",
+        "skratka": "RUB IgM",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgM до віруса краснухи",
+        "nazov_eng": "IgM to rubella virus",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "500",
+        "skratka": "ChlTr IgG",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgG до Chlamydia trachomatis",
+        "nazov_eng": "IgG to Chlamydia trachomatis",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "501",
+        "skratka": "ChlTr IgM",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgM до Chlamydia trachomatis",
+        "nazov_eng": "IgM to Chlamydia trachomatis",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "502",
+        "skratka": "ChlTr IgA",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgA до Chlamydia trachomatis",
+        "nazov_eng": "IgA to Chlamydia trachomatis",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "510",
+        "skratka": "SYPH",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Сумарні антитіла (IgM+IgG) до Treponema pallidum (скринінг)",
+        "nazov_eng": "Total antibodies (IgM+IgG) to Treponema pallidum (screening)",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "520",
+        "skratka": "Ur ur IgA",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgA до Ureaplasma urealiticum",
+        "nazov_eng": "IgA to Ureaplasma urealyticum",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "530",
+        "skratka": "UreaU IgG",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgG до Ureaplasma urealyticum",
+        "nazov_eng": "IgG to Ureaplasma urealyticum",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "540",
+        "skratka": "TrichV IgG",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgG до Trichomonas vaginalis",
+        "nazov_eng": "IgG to Trichomonas vaginalis",
+        "cena": 280
+    },
+    {
+        "kodvys_text": "550",
+        "skratka": "HelP IgG",
+        "nazovskup": "Дослідження крові: антитіла до інфекційних збудників ",
+        "nazovskup_eng": "Blood tests: antibodies to infectious agents",
+        "nazov": "Антитіла IgG до Helic. pylori",
+        "nazov_eng": "Antibodies IgG to Helicobacter pylori",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "560",
+        "skratka": "InfA IgG",
+        "nazovskup": "Аналіз калу на я/г та найпростіших",
+        "nazovskup_eng": "Stool analysis for helminth eggs and protozoa",
+        "nazov": "IgG до Influensa A",
+        "nazov_eng": "IgG to Influenza A",
+        "cena": 70
+    },
+    {
+        "kodvys_text": "561",
+        "skratka": "InfA IgA",
+        "nazovskup": "Аналіз калу на я/г та найпростіших",
+        "nazovskup_eng": "Stool analysis for helminth eggs and protozoa",
+        "nazov": "IgA до Influensa A",
+        "nazov_eng": "IgA to Influenza A",
+        "cena": 70
+    },
+    {
+        "kodvys_text": "600",
+        "skratka": "TIE",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Заг. імуноглобулін Е (Total IgE)",
+        "nazov_eng": "Total immunoglobulin E (Total IgE)",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "601",
+        "skratka": "IGA",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Сироватковий імуноглобулін А",
+        "nazov_eng": "Serum immunoglobulin A",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "602",
+        "skratka": "IGG",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Сироватковий імуноглобулін G",
+        "nazov_eng": "Serum immunoglobulin G",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "603",
+        "skratka": "IGM",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Сироватковий імуноглобулін М",
+        "nazov_eng": "Serum immunoglobulin M",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "820",
+        "skratka": "KET-U",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Кетони (Ketones)",
+        "nazov_eng": "Ketones",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "824",
+        "skratka": "PRO-U",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Білок (Protein)",
+        "nazov_eng": "Protein",
+        "cena": 55
+    },
+    {
+        "kodvys_text": "519",
+        "skratka": " MycH  IgG",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgG до Mycoplasma hominis",
+        "nazov_eng": "IgG to Mycoplasma hominis",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "313",
+        "skratka": "aHBs",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Сумарні антитіла до HBsAg ",
+        "nazov_eng": "Total antibodies to HBsAg",
+        "cena": 260
+    },
+    {
+        "kodvys_text": "996",
+        "skratka": null,
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові",
+        "nazov_eng": "Blood collection",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "997",
+        "skratka": "HIV",
+        "nazovskup": "Дослідження крові: антитіла до інфекційних збудників ",
+        "nazovskup_eng": "Blood tests: antibodies to infectious agents",
+        "nazov": "Антитіла до ВІЛ",
+        "nazov_eng": "Antibodies to HIV",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "998",
+        "skratka": "гр крові",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Група крові та резус фактор",
+        "nazov_eng": "Blood group and Rh factor",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "211",
+        "skratka": "COR",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Кортизол крові у 15,00-17,00 год",
+        "nazov_eng": "Blood cortisol at 15:00-17:00",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "212",
+        "skratka": "DHEA-S",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Дегідроепіандростерон-сульфат DHEA-S",
+        "nazov_eng": "Dehydroepiandrosterone sulfate DHEA-S",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "156",
+        "skratka": "IgM Borrel",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "IgM до Borrelia burgd",
+        "nazov_eng": "IgM to Borrelia burgdorferi",
+        "cena": 410
+    },
+    {
+        "kodvys_text": "157",
+        "skratka": "IgG Borrel",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "IgG до Borrelia burgd",
+        "nazov_eng": "IgG to Borrelia burgdorferi",
+        "cena": 410
+    },
+    {
+        "kodvys_text": "160",
+        "skratka": "PRGE-OH",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "17-ОН-оксипрогестерон",
+        "nazov_eng": "17-OH-progesterone",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "161",
+        "skratka": "Кліренс",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Кліренс креатиніну (CKD-EPI)",
+        "nazov_eng": "Creatinine clearance (CKD-EPI)",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "162",
+        "skratka": "Prot ur",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Білок добової сечі",
+        "nazov_eng": "24-hour urine protein",
+        "cena": 110
+    },
+    {
+        "kodvys_text": "163",
+        "skratka": "Conc pr-ur",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Білок сечі",
+        "nazov_eng": "Urine protein",
+        "cena": 40
+    },
+    {
+        "kodvys_text": "165",
+        "skratka": "AMG",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Антимюлеровий гормон (AMG)",
+        "nazov_eng": "Anti-Müllerian hormone (AMH)",
+        "cena": 700
+    },
+    {
+        "kodvys_text": "63",
+        "skratka": "ALB",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Альбумін ALB",
+        "nazov_eng": "Albumin ALB",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "65",
+        "skratka": "DBI",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Білірубін прямий (Direct bilirubin)",
+        "nazov_eng": "Direct bilirubin",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "67",
+        "skratka": "BUN",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Сечовина (Urea)",
+        "nazov_eng": "Urea",
+        "cena": 70
+    },
+    {
+        "kodvys_text": "301",
+        "skratka": "aHAVT",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Сумарні антитіла до HAV",
+        "nazov_eng": "Total antibodies to HAV",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "90",
+        "skratka": "GLUC-Ur",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Глюкоза добової сечі",
+        "nazov_eng": "24-hour urine glucose",
+        "cena": 110
+    },
+    {
+        "kodvys_text": "450",
+        "skratka": "Candid IgG",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgG до Candida albicans",
+        "nazov_eng": "IgG to Candida albicans",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "452",
+        "skratka": "Gardnarela",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Гарднарели",
+        "nazov_eng": "Gardnerella",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "896",
+        "skratka": "ШОЕ",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "ШОЕ (Sediment) по Вестернгрену-еталонний метод, рекоменд. Міжнар. ком. стандартизації гематології",
+        "nazov_eng": "ESR (Sediment) by Westergren - reference method, recommended by the International Committee for Standardization in Hematology",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "220",
+        "skratka": "iPTH",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Паратгормон PTH",
+        "nazov_eng": "Parathyroid hormone PTH",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "1001",
+        "skratka": "CA B-хгч",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "Хоріонічний гонадотропін",
+        "nazov_eng": "Chorionic gonadotropin",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "62",
+        "skratka": "TP",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Загальний білок (Total Protein)",
+        "nazov_eng": "Total Protein",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "64",
+        "skratka": "MALB",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Мікроальбумін ",
+        "nazov_eng": "Microalbumin",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "66",
+        "skratka": "TBIL",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Білірубін загальний (Total bilirubin)",
+        "nazov_eng": "Total bilirubin",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1002",
+        "skratka": "IgG XHG",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла до ХГЧ IgG",
+        "nazov_eng": "Antibodies to hCG IgG",
+        "cena": 125
+    },
+    {
+        "kodvys_text": "1003",
+        "skratka": "IgM XHG",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла до ХГЧ IgM",
+        "nazov_eng": "Antibodies to hCG IgM",
+        "cena": 125
+    },
+    {
+        "kodvys_text": "68",
+        "skratka": "CRE2",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Креатинін (Creatinin)",
+        "nazov_eng": "Creatinine",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "1006",
+        "skratka": "EBV/CMV/HV",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "ДНК вірусу Епштейна-Барр, цитомегаловірусу і вірусу герпесу 6 типу (ПЛР, якісне визначення)",
+        "nazov_eng": "DNA of Epstein-Barr virus, cytomegalovirus and herpes virus type 6 (PCR, qualitative determination)",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "254",
+        "skratka": "cPSA",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "ПСА звя'заний",
+        "nazov_eng": "Bound PSA",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "1010",
+        "skratka": "мікроск",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Мікроскопія мазка",
+        "nazov_eng": "Smear microscopy",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1011",
+        "skratka": "забір+",
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові на дому (за межі міста) + транспортні витрати",
+        "nazov_eng": "Home blood collection (outside the city) + transportation costs",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1020",
+        "skratka": "ADNA1",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла до денатурованої ДНК (ADNA1)",
+        "nazov_eng": "Antibodies to denatured DNA (ADNA1)",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "85",
+        "skratka": "ALDL",
+        "nazovskup": "Ліпідний обмін",
+        "nazovskup_eng": "Lipid metabolism",
+        "nazov": "Ліпопротеїди низької щільності (ALDL)",
+        "nazov_eng": "Low-density lipoproteins (ALDL)",
+        "cena": 110
+    },
+    {
+        "kodvys_text": "570",
+        "skratka": "Ascarida_G",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "IgG до Ascaris lumbricoides",
+        "nazov_eng": "IgG to Ascaris lumbricoides",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "213",
+        "skratka": "ACT",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "АКТГ",
+        "nazov_eng": "ACTH",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "575",
+        "skratka": "Echinoc_G",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "Антитіла IgG до Echinococcus",
+        "nazov_eng": "Antibodies IgG to Echinococcus",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "580",
+        "skratka": "Toxocara_G",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "Антитіла IgG до Toxocara canis",
+        "nazov_eng": "Antibodies IgG to Toxocara canis",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "585",
+        "skratka": "Opistor_G",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "IgG до Opisthorchis felineus",
+        "nazov_eng": "IgG to Opisthorchis felineus",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "590",
+        "skratka": "Trichin_G",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "IgG до Trichinella spiralis",
+        "nazov_eng": "IgG to Trichinella spiralis",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "86",
+        "skratka": "TGL",
+        "nazovskup": "Ліпідний обмін",
+        "nazovskup_eng": "Lipid metabolism",
+        "nazov": "Тригліцериди TGL",
+        "nazov_eng": "Triglycerides TGL",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "565",
+        "skratka": "Lambliya_S",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "Сумарні антитіла до лямблії",
+        "nazov_eng": "Total antibodies to Giardia",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "201",
+        "skratka": "FBC",
+        "nazovskup": "Пренатальна діагностика",
+        "nazovskup_eng": "Prenatal diagnostics",
+        "nazov": "Вільний бета-хоріон. гонадотропін",
+        "nazov_eng": "Free beta-chorionic gonadotropin",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "225",
+        "skratka": "GRH",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Гормон росту",
+        "nazov_eng": "Growth hormone",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "202",
+        "skratka": "UE3",
+        "nazovskup": "Пренатальна діагностика",
+        "nazovskup_eng": "Prenatal diagnostics",
+        "nazov": "Естріол вільний",
+        "nazov_eng": "Free estriol",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "203",
+        "skratka": "PAPP-A",
+        "nazovskup": "Пренатальна діагностика",
+        "nazovskup_eng": "Prenatal diagnostics",
+        "nazov": "ПАПП-А",
+        "nazov_eng": "PAPP-A",
+        "cena": 280
+    },
+    {
+        "kodvys_text": "119",
+        "skratka": "TG",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Тиреоглобулін",
+        "nazov_eng": "Thyroglobulin",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "226",
+        "skratka": "AND",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Андростендіон",
+        "nazov_eng": "Androstenedione",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "229",
+        "skratka": "IGF-1",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Інсуліноподібний фактор росту 1 (соматомедин)",
+        "nazov_eng": "Insulin-like growth factor 1 (somatomedin)",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "230",
+        "skratka": "OCN",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Остеокальцин",
+        "nazov_eng": "Osteocalcin",
+        "cena": 320
+    },
+    {
+        "kodvys_text": "231",
+        "skratka": "CAL",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Кальцитонін",
+        "nazov_eng": "Calcitonin",
+        "cena": 390
+    },
+    {
+        "kodvys_text": "232",
+        "skratka": "АнтигенCov",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "АНТИГЕН COVID-19",
+        "nazov_eng": "ANTIGEN COVID-19",
+        "cena": 370
+    },
+    {
+        "kodvys_text": "233",
+        "skratka": "CREA-U",
+        "nazovskup": "Додаткові дослідження сечі",
+        "nazovskup_eng": "Additional urine tests",
+        "nazov": "Креатинін сечі",
+        "nazov_eng": "Urine creatinine",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "259",
+        "skratka": "BMG",
+        "nazovskup": "Патологічні протеїни",
+        "nazovskup_eng": "Pathological proteins",
+        "nazov": "Бета-2-мікроглобулін крові",
+        "nazov_eng": "Beta-2-microglobulin blood",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "260",
+        "skratka": "BMG-U",
+        "nazovskup": "Патологічні протеїни",
+        "nazovskup_eng": "Pathological proteins",
+        "nazov": "Бета-2-мікроглобулін сечі (білок Бенс-Джонса)",
+        "nazov_eng": "Beta-2-microglobulin urine (Bence-Jones protein)",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "423",
+        "skratka": "VCA IgМ",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgМ до капсидного антигена ЕBV",
+        "nazov_eng": "IgM to EBV capsid antigen",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "412",
+        "skratka": "HVG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до віруса герпесу 1+2 типу",
+        "nazov_eng": "IgG to herpes virus type 1+2",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "209",
+        "skratka": "COR-U",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Кортизол добової сечі",
+        "nazov_eng": "24-hour urine cortisol",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "71",
+        "skratka": "URCA-U",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Сечова кислота добової сечі",
+        "nazov_eng": "24-hour urine uric acid",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "72",
+        "skratka": "TP-F",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Білок в трансудаті",
+        "nazov_eng": "Protein in transudate",
+        "cena": 40
+    },
+    {
+        "kodvys_text": "995",
+        "skratka": null,
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові на дому в межах міста",
+        "nazov_eng": "Home blood collection within the city",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "43",
+        "skratka": "IBCT",
+        "nazovskup": "Діагностика анемії",
+        "nazovskup_eng": "Anemia diagnostics",
+        "nazov": "Залізозв'яз. здат. сироватки",
+        "nazov_eng": "Serum iron-binding capacity",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "303",
+        "skratka": "ПЛР HBVmon",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Виявлення ДНК вірусу гепатиту В (метод ПЛР, кількісне визначення,  аналітична чутливість 30 МО/мл)",
+        "nazov_eng": "Detection of hepatitis B virus DNA (PCR method, quantitative determination, analytical sensitivity 30 IU/ml)",
+        "cena": 800
+    },
+    {
+        "kodvys_text": "333",
+        "skratka": "ПЛР HBV",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Виявлення ДНК вірусу гепатиту В (метод ПЛР, якісне визначення, аналітична чутливість 30 МО/мл)",
+        "nazov_eng": "Detection of hepatitis B virus DNA (PCR method, qualitative determination, analytical sensitivity 30 IU/ml)",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "342",
+        "skratka": "ПЛР HCV",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Виявлення РНК вірусу гепатиту С (метод ПЛР, якісне визначення,  аналітична чутливість 15 МО/мл)",
+        "nazov_eng": "Detection of hepatitis C virus RNA (PCR method, qualitative determination, analytical sensitivity 15 IU/ml)",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "343",
+        "skratka": "ПЛР HCVmon",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Виявлення РНК вірусу гепатиту С (метод ПЛР, кількісне визначення, аналітична чутливість 15 МО/мл)",
+        "nazov_eng": "Detection of hepatitis C virus RNA (PCR method, quantitative determination, analytical sensitivity 15 IU/ml)",
+        "cena": 830
+    },
+    {
+        "kodvys_text": "344",
+        "skratka": "ПЛР HCVgen",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Визначення генотипу вірусу гепатиту С (HCV) (кров, метод ПЛР, генотипи: 1, 2, 3 чутливість 15 МО ДНК",
+        "nazov_eng": "Determination of hepatitis C virus (HCV) genotype (blood, PCR method, genotypes: 1, 2, 3 sensitivity 15 IU DNA",
+        "cena": 770
+    },
+    {
+        "kodvys_text": "413",
+        "skratka": "VPG-M1+2 ",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgМ до віруса герпесу 1+2 типу",
+        "nazov_eng": "IgM to herpes virus type 1+2",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "425",
+        "skratka": "ПЛР EBV",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "Epstein-Barr virus (ПЛР, якісне визначення)",
+        "nazov_eng": "Epstein-Barr virus (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "408",
+        "skratka": "HSV 1 IgG",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgG до віруса герпесу 1 типу",
+        "nazov_eng": "IgG to herpes virus type 1",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "409",
+        "skratka": "HSV 1 IgM",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "IgM до віруса герпесу 1 типу",
+        "nazov_eng": "IgM to herpes virus type 1",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "414",
+        "skratka": "ПЛР HSV",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "Herpes simplex virus types 1and 2 (ПЛР, якісне визначення)",
+        "nazov_eng": "Herpes simplex virus types 1 and 2 (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "864",
+        "skratka": "RETIC",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Ретикулоцити (RETIC)",
+        "nazov_eng": "Reticulocytes (RETIC)",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "866",
+        "skratka": "BASO",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Базофіли (BASO%)",
+        "nazov_eng": "Basophils (BASO%)",
+        "cena": 35
+    },
+    {
+        "kodvys_text": "442",
+        "skratka": "Авід.красн",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Авідність. Вірус краснухи",
+        "nazov_eng": "Avidity. Rubella virus",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "402",
+        "skratka": "ПЛР CMV",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Cytomegalovirus (ПЛР, якісне визначення)",
+        "nazov_eng": "Cytomegalovirus (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "432",
+        "skratka": "ПЛР TOXO",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Toxoplasma gondii (ПЛР, якісне визначення)",
+        "nazov_eng": "Toxoplasma gondii (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "451",
+        "skratka": "Candid IgM",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgM до Candіda albicans",
+        "nazov_eng": "IgM to Candida albicans",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "453",
+        "skratka": "ПЛР Candid",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "ПЛР, Candida albicans (у/г зішкріб, якісне визнвчення)",
+        "nazov_eng": "PCR, Candida albicans (u/g scraping, qualitative determination)",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "454",
+        "skratka": "ПЛР N.gon",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Neisseria gonorrhoeae (ПЛР, якісне визначення)",
+        "nazov_eng": "Neisseria gonorrhoeae (PCR, qualitative determination)",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "503",
+        "skratka": "ПЛР Ch.tr",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Chlamydia trachomatis (ПЛР, якісне визначення)",
+        "nazov_eng": "Chlamydia trachomatis (PCR, qualitative determination)",
+        "cena": 270
+    },
+    {
+        "kodvys_text": "542",
+        "skratka": "ПЛР Tr.vag",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Trichomonas vaginalis, Neisseria gonorrhoeae (ПЛР, якісне визначення)",
+        "nazov_eng": "Trichomonas vaginalis, Neisseria gonorrhoeae (PCR, qualitative determination)",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "521",
+        "skratka": "ПЛР M.hom",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Mycoplasma hominis (ПЛР, якісне визначення)",
+        "nazov_eng": "Mycoplasma hominis (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "545",
+        "skratka": "ВПЛ 16/18",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "HPV 16, 18 types (ПЛР, якісне визначення)",
+        "nazov_eng": "HPV 16, 18 types (PCR, qualitative determination)",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "546",
+        "skratka": "ВПЛ скрин",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "HPV HCR (12 типів без генотипування, ПЛР, якісне визначення)",
+        "nazov_eng": "HPV HCR (12 types without genotyping, PCR, qualitative determination)",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "551",
+        "skratka": "IgM MycH",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgM до Mycoplasma hominis",
+        "nazov_eng": "IgM to Mycoplasma hominis",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "552",
+        "skratka": "HelP IgA",
+        "nazovskup": "Аналіз калу на я/г та найпростіших",
+        "nazovskup_eng": "Stool analysis for helminth eggs and protozoa",
+        "nazov": "IgA до Helicobacter pylori",
+        "nazov_eng": "IgA to Helicobacter pylori",
+        "cena": 65
+    },
+    {
+        "kodvys_text": "591",
+        "skratka": "забір 2 м/",
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові на дому дитині до трьох років (виїзд двох медсестер, в межах міста)",
+        "nazov_eng": "Home blood collection for a child under three years old (visit by two nurses, within the city)",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "592",
+        "skratka": "забір ",
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові на дому в обумовлений пацієнтом час (в межах міста) ",
+        "nazov_eng": "Home blood collection at a time agreed with the patient (within the city)",
+        "cena": 400
+    },
+    {
+        "kodvys_text": "562",
+        "skratka": "ПЛР Трихо",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Trichomonas vaginalis (ПЛР, якісне визначення) ",
+        "nazov_eng": "Trichomonas vaginalis (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "564",
+        "skratka": "ПЛР HDV",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Виявлення РНК вірусу гепатиту Дельта (метод ПЛР, якісне визначення,  аналітична чутливість 100 МО/м)",
+        "nazov_eng": "Detection of hepatitis Delta virus RNA (PCR method, qualitative determination, analytical sensitivity 100 IU/m)",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "593",
+        "skratka": "забір +",
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові на дому (за межі міста) ",
+        "nazov_eng": "Home blood collection (outside the city)",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "700",
+        "skratka": null,
+        "nazovskup": "Забір матеріалу",
+        "nazovskup_eng": "Material collection",
+        "nazov": "Забір крові системою \"метелик\" ",
+        "nazov_eng": "Blood collection with a \"butterfly\" system",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "702",
+        "skratka": "A/R ratio",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Альдостерон-ренінове співвідношення",
+        "nazov_eng": "Aldosterone-renin ratio",
+        "cena": 1200
+    },
+    {
+        "kodvys_text": "703",
+        "skratka": "HLA-B-27",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Експресія антигену НLA-B-27 на лейкоцитах периферичної крові",
+        "nazov_eng": "Expression of HLA-B-27 antigen on peripheral blood leukocytes",
+        "cena": 750
+    },
+    {
+        "kodvys_text": "704",
+        "skratka": "Renin",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Ренін",
+        "nazov_eng": "Renin",
+        "cena": 850
+    },
+    {
+        "kodvys_text": "705",
+        "skratka": "Aldosteron",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Альдостерон",
+        "nazov_eng": "Aldosterone",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "708",
+        "skratka": "creat/ur",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Креатинін сечі",
+        "nazov_eng": "Urine creatinine",
+        "cena": 70
+    },
+    {
+        "kodvys_text": "709",
+        "skratka": "m-a/ur",
+        "nazovskup": "Загальний аналіз сечі (Urinalysis)",
+        "nazovskup_eng": "Urinalysis",
+        "nazov": "Мікроальбумін сечі",
+        "nazov_eng": "Urine microalbumin",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "103",
+        "skratka": "TRNF",
+        "nazovskup": "Діагностика анемії",
+        "nazovskup_eng": "Anemia diagnostics",
+        "nazov": "Трансферрин TRNF",
+        "nazov_eng": "Transferrin TRNF",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "261",
+        "skratka": "HE4",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "Ранній онкомаркер яєчників НЕ4",
+        "nazov_eng": "Early ovarian cancer marker HE4",
+        "cena": 530
+    },
+    {
+        "kodvys_text": "1050",
+        "skratka": "сік прост",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Аналіз секрету передміхурової залози",
+        "nazov_eng": "Prostatic secretion analysis",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "1056",
+        "skratka": "aHBs",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "HBsAg cito test",
+        "nazov_eng": "HBsAg cito test",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "1057",
+        "skratka": "aHCV",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Антитіла до HCV cito test",
+        "nazov_eng": "Antibodies to HCV cito test",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "1058",
+        "skratka": "aHAV",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Антитіла IgM до HAV cito test",
+        "nazov_eng": "Antibodies IgM to HAV cito test",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "1059",
+        "skratka": "Gliadyn А",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Гліадин, антитіла IgA",
+        "nazov_eng": "Gliadin, antibodies IgA",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "1060",
+        "skratka": "Gliadyn G",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Гліадин, антитіла IgG",
+        "nazov_eng": "Gliadin, antibodies IgG",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "1061",
+        "skratka": "тканин тра",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Тканинна трансглутаміназа, антитіла IgA",
+        "nazov_eng": "Tissue transglutaminase, antibodies IgA",
+        "cena": 290
+    },
+    {
+        "kodvys_text": "1062",
+        "skratka": "трансглута",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Тканинна трансглутаміназа, антитіла IgG",
+        "nazov_eng": "Tissue transglutaminase, antibodies IgG",
+        "cena": 290
+    },
+    {
+        "kodvys_text": "1074",
+        "skratka": "F78 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген казеїну (термостабільного білку молока) IgE",
+        "nazov_eng": "Casein allergen (thermostable milk protein) IgE",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1075",
+        "skratka": "F78 SP4",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алерген казеїну",
+        "nazov_eng": "Casein allergen",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1085",
+        "skratka": "Андростенд",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Андростендіон",
+        "nazov_eng": "Androstenedione",
+        "cena": 370
+    },
+    {
+        "kodvys_text": "1100",
+        "skratka": "F247 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген меду",
+        "nazov_eng": "Honey allergen",
+        "cena": 400
+    },
+    {
+        "kodvys_text": "1101",
+        "skratka": "F247 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алерген меду",
+        "nazov_eng": "Honey allergen",
+        "cena": 140
+    },
+    {
+        "kodvys_text": "1102",
+        "skratka": "F105 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген шоколаду",
+        "nazov_eng": "Chocolate allergen",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1103",
+        "skratka": "F105 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алерген шоколаду",
+        "nazov_eng": "Chocolate allergen",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1104",
+        "skratka": "F93 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген какао IgE",
+        "nazov_eng": "Cocoa allergen IgE",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "1105",
+        "skratka": "F93 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алерген какао IgG",
+        "nazov_eng": "Cocoa allergen IgG",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1250",
+        "skratka": "T14 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген пилку тополі",
+        "nazov_eng": "Poplar pollen allergen",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1254",
+        "skratka": "T19 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген пилку акації",
+        "nazov_eng": "Acacia pollen allergen",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1258",
+        "skratka": "T208 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген пилку липи",
+        "nazov_eng": "Linden pollen allergen",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1300",
+        "skratka": "K20 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген шерстяного волокна (овечої шерсті)",
+        "nazov_eng": "Wool fiber allergen (sheep's wool)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1304",
+        "skratka": "H6  SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген домашнього пилу h6",
+        "nazov_eng": "House dust allergen h6",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1310",
+        "skratka": "M202 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген пліснявого грибка Cephalosporium acremonium",
+        "nazov_eng": "Cephalosporium acremonium mold allergen",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1355",
+        "skratka": "альбумін ",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "альбумін сечі",
+        "nazov_eng": "urine albumin",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "1360",
+        "skratka": "білок сечі",
+        "nazovskup": "Аналіз біохімічний добової сечі",
+        "nazovskup_eng": "24-hour urine biochemical analysis",
+        "nazov": "Білок_сечі",
+        "nazov_eng": "Urine_protein",
+        "cena": 50
+    },
+    {
+        "kodvys_text": "1400",
+        "skratka": "EP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени шерсті та епітелію кота, собаки, коня,корови",
+        "nazov_eng": "Allergens of cat, dog, horse, cow wool and epithelium",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1401",
+        "skratka": "EP1 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени шерсті та епітелію кота, собаки, коня, корови",
+        "nazov_eng": "Allergens of cat, dog, horse, cow wool and epithelium",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1402",
+        "skratka": "EP70 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени шерсті та епітелію морської свинки, кролика, хом'яка, щура, миші",
+        "nazov_eng": "Allergens of guinea pig, rabbit, hamster, rat, mouse wool and epithelium",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1403",
+        "skratka": "EP70 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени шерсті та епітелію морської свинки, кролика, хом'яка, щура, миші",
+        "nazov_eng": "Allergens of guinea pig, rabbit, hamster, rat, mouse wool and epithelium",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1404",
+        "skratka": "EP71 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени пір'я гуски, курки, качки, індика",
+        "nazov_eng": "Allergens of goose, chicken, duck, turkey feathers",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1405",
+        "skratka": "EP71 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени пір'я гуски, курки, качки, індика",
+        "nazov_eng": "Allergens of goose, chicken, duck, turkey feathers",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "1406",
+        "skratka": "EP72 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени пір'я папуги, хвилястого папуги, канарки",
+        "nazov_eng": "Allergens of parrot, budgerigar, canary feathers",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1407",
+        "skratka": "EP72 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени пір'я папуги, хвилястого папуги, канарки",
+        "nazov_eng": "Allergens of parrot, budgerigar, canary feathers",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1414",
+        "skratka": "FP7 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени харчових продуктів: молоко, пшениця, яєчний білок, соя, арахіс, рис",
+        "nazov_eng": "Food allergens: milk, wheat, egg white, soy, peanuts, rice",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1415",
+        "skratka": "FP7 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени харчових продуктів: молоко, пшениця, яєчний білок, соя, арахіс, рис",
+        "nazov_eng": "Food allergens: milk, wheat, egg white, soy, peanuts, rice",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1418",
+        "skratka": "FP15 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени харчових продуктів: апельсин, банан, персик, яблуко",
+        "nazov_eng": "Food allergens: orange, banana, peach, apple",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1419",
+        "skratka": "FP15 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени харчових продуктів: апельсин, банан, персик, яблуко",
+        "nazov_eng": "Food allergens: orange, banana, peach, apple",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1422",
+        "skratka": "FP51 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени харчових продуктів: помідор, картопля, морква, часник, гірчиця",
+        "nazov_eng": "Food allergens: tomato, potato, carrot, garlic, mustard",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1423",
+        "skratka": "FP51 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени харчових продуктів: помідор, картопля, морква, часник, гірчиця",
+        "nazov_eng": "Food allergens: tomato, potato, carrot, garlic, mustard",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1424",
+        "skratka": "FP73 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени харчових продуктів: свинина, говядина, курятина, баранина",
+        "nazov_eng": "Food allergens: pork, beef, chicken, lamb",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1425",
+        "skratka": "FP73 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени харчових продуктів: свинина, говядина, курятина, баранина",
+        "nazov_eng": "Food allergens: pork, beef, chicken, lamb",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1426",
+        "skratka": "IP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени пилку полину, амброзії голометельчатої, тимофіївки, газонної трави",
+        "nazov_eng": "Allergens of wormwood, ragweed, timothy grass, lawn grass pollen",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1430",
+        "skratka": "KP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени побутові: епітелій-шерсть кота і собаки, перо курки і гуски",
+        "nazov_eng": "Household allergens: cat and dog epithelium-wool, chicken and goose feathers",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "1431",
+        "skratka": "KP1 SP4",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени побутові: епітелій-шерсть кота і собаки, перо курки і гуски",
+        "nazov_eng": "Household allergens: cat and dog epithelium-wool, chicken and goose feathers",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1434",
+        "skratka": "TP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени пилку дерев: клен, дуб, береза, горіх волоський, в'яз",
+        "nazov_eng": "Tree pollen allergens: maple, oak, birch, walnut, elm",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1435",
+        "skratka": "TP1 SP4",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени пилку дерев: клен, дуб, береза, горіх волоський, в'яз",
+        "nazov_eng": "Tree pollen allergens: maple, oak, birch, walnut, elm",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1436",
+        "skratka": "TP4 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени пилку дерев: тополя, верба, явір, в'яз, дуб",
+        "nazov_eng": "Tree pollen allergens: poplar, willow, sycamore, elm, oak",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1440",
+        "skratka": "WP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени трав'яного пилку: амброзія, полин, чортополох, подорожник, конюшина",
+        "nazov_eng": "Grass pollen allergens: ragweed, wormwood, thistle, plantain, clover",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1441",
+        "skratka": "WP1 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени трав'яного пилку: амброзія, полин, чортополох, подорожник, конюшина",
+        "nazov_eng": "Grass pollen allergens: ragweed, wormwood, thistle, plantain, clover",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "1446",
+        "skratka": "HP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени побутові: домашній пил h1. кліщі: Dermatophagoides farinae та pteronyssinus, тарган IgE",
+        "nazov_eng": "Household allergens: house dust h1. mites: Dermatophagoides farinae and pteronyssinus, cockroach IgE",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1447",
+        "skratka": "HP1 SPG",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Алергени побутові: домашній пил Green labs. кліщі: Dermatophagoides farinae та pteronyssinus IgG",
+        "nazov_eng": "Household allergens: Green labs house dust. mites: Dermatophagoides farinae and pteronyssinus IgG",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "1448",
+        "skratka": "H2 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени домашнього пилу h2 (Hollister-Stier Labs.)",
+        "nazov_eng": "House dust allergens h2 (Hollister-Stier Labs.)",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "1450",
+        "skratka": "KP1 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алергени шерсті та епітелію кота і собаки, пір'я гуски та курки",
+        "nazov_eng": "Allergens of cat and dog wool and epithelium, goose and chicken feathers",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "547",
+        "skratka": "ВПЛ ген.",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "HPV HCR (14 типів з генотипуванням, ПЛР, якісне визначення)",
+        "nazov_eng": "HPV HCR (14 types with genotyping, PCR, qualitative determination)",
+        "cena": 750
+    },
+    {
+        "kodvys_text": "548",
+        "skratka": "ПЛРUr.spec",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Ureaplasma species (ПЛР, якісне визначення)",
+        "nazov_eng": "Ureaplasma species (PCR, qualitative determination)",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "549",
+        "skratka": "ПЛР M.gen",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Mycoplasma genitalium (ПЛР, якісне визначення) ",
+        "nazov_eng": "Mycoplasma genitalium (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "596",
+        "skratka": "TUB_S",
+        "nazovskup": "Дослідження крові: антитіла до збудників глистних інавазій",
+        "nazovskup_eng": "Blood tests: antibodies to helminthic invasion agents",
+        "nazov": "Сумарні антитіла до Mycobacterium tuberculosis",
+        "nazov_eng": "Total antibodies to Mycobacterium tuberculosis",
+        "cena": 80
+    },
+    {
+        "kodvys_text": "1044",
+        "skratka": "VALP",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Вальпроєва кислота",
+        "nazov_eng": "Valproic acid",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "304",
+        "skratka": "HCV sum",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Антитіла сумаpні (IgM, IgG) до HCV",
+        "nazov_eng": "Total antibodies (IgM, IgG) to HCV",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "306",
+        "skratka": "AvGT",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Авідність IgG к Toxoplasma gondii",
+        "nazov_eng": "Avidity of IgG to Toxoplasma gondii",
+        "cena": 340
+    },
+    {
+        "kodvys_text": "307",
+        "skratka": "AviGR",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Авидность IgG к вірусу червенички (рубеоли)",
+        "nazov_eng": "Avidity of IgG to rubella virus",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "214",
+        "skratka": "РЦ",
+        "nazovskup": "Наднирникові показники",
+        "nazovskup_eng": "Adrenal indicators",
+        "nazov": "Рідинна цитологія",
+        "nazov_eng": "Liquid cytology",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "1830",
+        "skratka": "SCC",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Антиген плоскоклітинної карциноми SCC",
+        "nazov_eng": "Squamous cell carcinoma antigen SCC",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "1832",
+        "skratka": "M3 SPE",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Алерген Aspergillus fumigatus",
+        "nazov_eng": "Aspergillus fumigatus allergen",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "1840",
+        "skratka": "NT-pro-BNP",
+        "nazovskup": "Кардіоваскулярний ризик",
+        "nazovskup_eng": "Cardiovascular risk",
+        "nazov": "N-термінальний мозковий натрійуретичний пропептид",
+        "nazov_eng": "N-terminal pro-brain natriuretic peptide",
+        "cena": 700
+    },
+    {
+        "kodvys_text": "1149",
+        "skratka": "Spike-біл.",
+        "nazovskup": "Алергологічна панель IgG",
+        "nazovskup_eng": "Allergy panel IgG",
+        "nazov": "Антитіла IgG до Spike-білку коронавірусу SARS-CoV-2 (кількісне визначення)",
+        "nazov_eng": "Antibodies IgG to Spike-protein of coronavirus SARS-CoV-2 (quantitative determination)",
+        "cena": 410
+    },
+    {
+        "kodvys_text": "2002",
+        "skratka": "Zn",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Цинк (Zn) у крові",
+        "nazov_eng": "Zinc (Zn) in blood",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "2004",
+        "skratka": "PL ster",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Посів ліквору на стерильність",
+        "nazov_eng": "CSF culture for sterility",
+        "cena": 550
+    },
+    {
+        "kodvys_text": "1193",
+        "skratka": "DTS",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Дигідротестостерон",
+        "nazov_eng": "Dihydrotestosterone",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "1042",
+        "skratka": "CARB",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "карбамазепин",
+        "nazov_eng": "carbamazepine",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "2102",
+        "skratka": "LPBN",
+        "nazovskup": "Кардіоваскулярний ризик",
+        "nazovskup_eng": "Cardiovascular risk",
+        "nazov": "Мозковий Na уретичний пептид",
+        "nazov_eng": "Brain Na uretic peptide",
+        "cena": 330
+    },
+    {
+        "kodvys_text": "2103",
+        "skratka": "MYO",
+        "nazovskup": "Кардіоваскулярний ризик",
+        "nazovskup_eng": "Cardiovascular risk",
+        "nazov": "Міоглобін",
+        "nazov_eng": "Myoglobin",
+        "cena": 75
+    },
+    {
+        "kodvys_text": "2104",
+        "skratka": "HCY",
+        "nazovskup": "Репродуктивна панель",
+        "nazovskup_eng": "Reproductive panel",
+        "nazov": "Гомоцистеїн",
+        "nazov_eng": "Homocysteine",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "2151",
+        "skratka": "PK+A",
+        "nazovskup": "Аналіз калу на я/г та найпростіших",
+        "nazovskup_eng": "Stool analysis for helminth eggs and protozoa",
+        "nazov": "Аналіз калу на дисбіоз + антибіотикограмма",
+        "nazov_eng": "Stool analysis for dysbiosis + antibiogram",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "2152",
+        "skratka": "PO+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів з вуха + антибіотикограмма",
+        "nazov_eng": "Bacteriological culture from the ear + antibiogram",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2153",
+        "skratka": "PN+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів з носа + антибіотикограмма",
+        "nazov_eng": "Bacteriological culture from the nose + antibiogram",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2154",
+        "skratka": "POK+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів з ока + антибіотикограмма",
+        "nazov_eng": "Bacteriological culture from the eye + antibiogram",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2155",
+        "skratka": "PV+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів з піхви + антибіотикограма",
+        "nazov_eng": "Bacteriological culture from the vagina + antibiogram",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2156",
+        "skratka": "PU+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів сечі + антибіотикограма",
+        "nazov_eng": "Urine bacteriological culture + antibiogram",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2157",
+        "skratka": "PF+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів із зіву + антибіотикограма",
+        "nazov_eng": "Bacteriological culture from the pharynx + antibiogram",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2158",
+        "skratka": "Uacet",
+        "nazovskup": "Додаткові дослідження сечі",
+        "nazovskup_eng": "Additional urine tests",
+        "nazov": "Аналіз сечі на кетонові тіла",
+        "nazov_eng": "Urine test for ketone bodies",
+        "cena": 15
+    },
+    {
+        "kodvys_text": "2159",
+        "skratka": "KNH",
+        "nazovskup": "Аналіз калу на я/г та найпростіших",
+        "nazovskup_eng": "Stool analysis for helminth eggs and protozoa",
+        "nazov": "Аналіз калу на я/г та найпростіших (Ova&Parasite)",
+        "nazov_eng": "Stool analysis for helminth eggs and protozoa (Ova&Parasite)",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "2160",
+        "skratka": "KAgHP",
+        "nazovskup": "Дослідження калу на збудники інфецій",
+        "nazovskup_eng": "Stool tests for infectious agents",
+        "nazov": "Виявлення антигенів Helicobacter pylori у зразках фекалій",
+        "nazov_eng": "Detection of Helicobacter pylori antigens in fecal samples",
+        "cena": 340
+    },
+    {
+        "kodvys_text": "2161",
+        "skratka": "KAgL",
+        "nazovskup": "Дослідження калу на збудники інфецій",
+        "nazovskup_eng": "Stool tests for infectious agents",
+        "nazov": "Виявлення антигенів лямблій у зразках фекалій",
+        "nazov_eng": "Detection of Giardia antigens in fecal samples",
+        "cena": 340
+    },
+    {
+        "kodvys_text": "2162",
+        "skratka": "Agsalm",
+        "nazovskup": "Дослідження калу на збудники інфецій",
+        "nazovskup_eng": "Stool tests for infectious agents",
+        "nazov": "Виявлення антигенів сальмонел у зразках фекалій",
+        "nazov_eng": "Detection of Salmonella antigens in fecal samples",
+        "cena": 330
+    },
+    {
+        "kodvys_text": "2163",
+        "skratka": "Entvir",
+        "nazovskup": "Дослідження калу на збудники інфецій",
+        "nazovskup_eng": "Stool tests for infectious agents",
+        "nazov": "Виявлення адено-, ротавірусу у фекаліях",
+        "nazov_eng": "Detection of adeno-, rotavirus in feces",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "2164",
+        "skratka": "KHb",
+        "nazovskup": "Інші дослідження калу",
+        "nazovskup_eng": "Other stool tests",
+        "nazov": "Визначення прихованої крові у фекаліях (ниж. від.кишківника)",
+        "nazov_eng": "Detection of occult blood in feces (lower intestine)",
+        "cena": 340
+    },
+    {
+        "kodvys_text": "2166",
+        "skratka": "Fl ",
+        "nazovskup": "Цитологічні дослідження",
+        "nazovskup_eng": "Cytological studies",
+        "nazov": "Аналіз мазка на мікрофлору (матеріал - виділення)",
+        "nazov_eng": "Smear analysis for microflora (material - discharge)",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "2167",
+        "skratka": "CIN",
+        "nazovskup": "Цитологічні дослідження",
+        "nazovskup_eng": "Cytological studies",
+        "nazov": "Аналіз мазка на цитологію",
+        "nazov_eng": "Smear analysis for cytology",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "2168",
+        "skratka": "dsDNA-G",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "ADNA-2: антитіла IgG до двоспіральної ДНК",
+        "nazov_eng": "ADNA-2: antibodies IgG to double-stranded DNA",
+        "cena": 110
+    },
+    {
+        "kodvys_text": "2170",
+        "skratka": "LAC",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Лактат",
+        "nazov_eng": "Lactate",
+        "cena": 30
+    },
+    {
+        "kodvys_text": "204",
+        "skratka": "CA FBC",
+        "nazovskup": "Онкологічна панель",
+        "nazovskup_eng": "Oncology panel",
+        "nazov": "Вільний  В- ХГЧ",
+        "nazov_eng": "Free B-hCG",
+        "cena": 160
+    },
+    {
+        "kodvys_text": "270",
+        "skratka": "proCAL",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Прокальцитонін",
+        "nazov_eng": "Procalcitonin",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "403",
+        "skratka": "aIgGCMV",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Авідність IgG до цитомегаловірусу",
+        "nazov_eng": "Avidity of IgG to cytomegalovirus",
+        "cena": 340
+    },
+    {
+        "kodvys_text": "404",
+        "skratka": "av HSV",
+        "nazovskup": "TORCH-інфекції",
+        "nazovskup_eng": "TORCH infections",
+        "nazov": "Авiднiсть IgG до HSV1/2",
+        "nazov_eng": "Avidity of IgG to HSV1/2",
+        "cena": 330
+    },
+    {
+        "kodvys_text": "1040",
+        "skratka": "Prot-gr",
+        "nazovskup": "Протеїнограма ",
+        "nazovskup_eng": "Proteinogram",
+        "nazov": "Білкові фракції (протеїнограма)",
+        "nazov_eng": "Protein fractions (proteinogram)",
+        "cena": 330
+    },
+    {
+        "kodvys_text": "1487",
+        "skratka": "М304 SP4",
+        "nazovskup": "Алергологічна панель IgE",
+        "nazovskup_eng": "Allergy panel IgE",
+        "nazov": "Аллерген плісневого грибка Aspergillus IgG",
+        "nazov_eng": "Aspergillus mold allergen IgG",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "1491",
+        "skratka": "М309 SP4",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Аллерген плесневого грибка Aspergillus  IgG",
+        "nazov_eng": "Aspergillus mold allergen IgG",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "1844",
+        "skratka": "Висновок",
+        "nazovskup": "Цитологічні дослідження",
+        "nazovskup_eng": "Cytological studies",
+        "nazov": "Висновок за системою Bethesda 2014:",
+        "nazov_eng": "Conclusion according to the Bethesda 2014 system:",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "2150",
+        "skratka": "P ster",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Посів крові на стерильність",
+        "nazov_eng": "Blood culture for sterility",
+        "cena": 550
+    },
+    {
+        "kodvys_text": "543",
+        "skratka": "IgM T.pall",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "IgM до Treponema pallidum",
+        "nazov_eng": "IgM to Treponema pallidum",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "541",
+        "skratka": "ПЛР Ur.ur",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "Виявлення ДНК Ureaplasma  urealyticum (ПЛР, якісне визначення)",
+        "nazov_eng": "Detection of Ureaplasma urealyticum DNA (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "2171",
+        "skratka": "ANA-Sc",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "ANAscreen: АТ до ядених антигенів ",
+        "nazov_eng": "ANAscreen: AT to nuclear antigens",
+        "cena": 470
+    },
+    {
+        "kodvys_text": "2173",
+        "skratka": "dsDNA",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "ADNA: сумарні антитіла класу IgA, IgM, IgG до двоспіральної (нативної) ДНК dsDNA, nDNA",
+        "nazov_eng": "ADNA: total antibodies of IgA, IgM, IgG class to double-stranded (native) DNA dsDNA, nDNA",
+        "cena": 520
+    },
+    {
+        "kodvys_text": "2174",
+        "skratka": "anti CCP",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла IgG до циклічного цитрулінового пептиду",
+        "nazov_eng": "Antibodies IgG to cyclic citrullinated peptide",
+        "cena": 400
+    },
+    {
+        "kodvys_text": "2175",
+        "skratka": "Anti-MCV",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла IgG до модифікованого цитрулінованого віментину",
+        "nazov_eng": "Antibodies IgG to modified citrullinated vimentin",
+        "cena": 460
+    },
+    {
+        "kodvys_text": "2176",
+        "skratka": "AMA-M2",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла до мітохондрій AMA-M2",
+        "nazov_eng": "Antibodies to mitochondria AMA-M2",
+        "cena": 520
+    },
+    {
+        "kodvys_text": "2177",
+        "skratka": "Free T",
+        "nazovskup": "Інші гормони",
+        "nazovskup_eng": "Other hormones",
+        "nazov": "Вільний тестостерон",
+        "nazov_eng": "Free testosterone",
+        "cena": 340
+    },
+    {
+        "kodvys_text": "2400",
+        "skratka": "Білок лікв",
+        "nazovskup": "Дослідження ліквору",
+        "nazovskup_eng": "CSF studies",
+        "nazov": "Білок ліквору",
+        "nazov_eng": "CSF protein",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "2401",
+        "skratka": "Глюкоза лі",
+        "nazovskup": "Дослідження ліквору",
+        "nazovskup_eng": "CSF studies",
+        "nazov": "Глюкоза ліквору",
+        "nazov_eng": "CSF glucose",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "2402",
+        "skratka": "Цитоз лікв",
+        "nazovskup": "Дослідження ліквору",
+        "nazovskup_eng": "CSF studies",
+        "nazov": "Цитоз ліквору",
+        "nazov_eng": "CSF cytosis",
+        "cena": 40
+    },
+    {
+        "kodvys_text": "2405",
+        "skratka": "Aльб лікв",
+        "nazovskup": "Дослідження ліквору",
+        "nazovskup_eng": "CSF studies",
+        "nazov": "Альбумін ліквору",
+        "nazov_eng": "CSF albumin",
+        "cena": 40
+    },
+    {
+        "kodvys_text": "2409",
+        "skratka": "MMG",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "IgG до вірусу кору",
+        "nazov_eng": "IgG to measles virus",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "2412",
+        "skratka": "BP+A",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів матеріалу з чутливістю до АБ ",
+        "nazov_eng": "Bacteriological culture of material with sensitivity to AB",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2425",
+        "skratka": "citoStrA",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Швидкий тест для визначення Str. групи А",
+        "nazov_eng": "Rapid test for the determination of Str. group A",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "2433",
+        "skratka": "ВРнігті+пр",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів з шкіри та придатків (нігті, волосся) на дерматофіти + антибіотикограма",
+        "nazov_eng": "Bacteriological culture from skin and appendages (nails, hair) for dermatophytes + antibiogram",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "2442",
+        "skratka": "ProtStotal",
+        "nazovskup": "Коагулограма ",
+        "nazovskup_eng": "Coagulogram",
+        "nazov": "Протеїн S",
+        "nazov_eng": "Protein S",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "2444",
+        "skratka": "Кал на вір",
+        "nazovskup": "Інші дослідження калу",
+        "nazovskup_eng": "Other stool tests",
+        "nazov": "Швидкий тест на виявлення  рота-, адено-, астроноровірусів у калі",
+        "nazov_eng": "Rapid test for the detection of rota-, adeno-, astro-noroviruses in feces",
+        "cena": 280
+    },
+    {
+        "kodvys_text": "2473",
+        "skratka": "GLU-U",
+        "nazovskup": "Додаткові дослідження сечі",
+        "nazovskup_eng": "Additional urine tests",
+        "nazov": "Глюкоза (Glucose) ",
+        "nazov_eng": "Glucose",
+        "cena": 60
+    },
+    {
+        "kodvys_text": "2480",
+        "skratka": "EBVb кільк",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "Epstein-Barr virus (ПЛР кількісне визначення: слина, кров, лейкоцити крові, біоптати, ін.)",
+        "nazov_eng": "Epstein-Barr virus (PCR quantitative determination: saliva, blood, blood leukocytes, biopsies, etc.)",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "2488",
+        "skratka": "BP",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів матеріалу",
+        "nazov_eng": "Bacteriological culture of material",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "2489",
+        "skratka": "ВРДерм",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на дерматофіти",
+        "nazov_eng": "Bacteriological culture for dermatophytes",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "2490",
+        "skratka": "ВРДерм+АБ",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на дерматофіти з антибіотикограмою",
+        "nazov_eng": "Bacteriological culture for dermatophytes with antibiogram",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "2491",
+        "skratka": "ВР C.diph",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на збудника дифтерії (Corynebacterium diphtheriae)",
+        "nazov_eng": "Bacteriological culture for the causative agent of diphtheria (Corynebacterium diphtheriae)",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "2492",
+        "skratka": "ВР гриби",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на грибкову флору",
+        "nazov_eng": "Bacteriological culture for fungal flora",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "2493",
+        "skratka": "ВР гриби+ч",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на грибкову флору з визначенням чутливості до протигрибкових препатарів",
+        "nazov_eng": "Bacteriological culture for fungal flora with determination of sensitivity to antifungal drugs",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "2494",
+        "skratka": "ВР стрепто",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на бета-гемолітичний стрептокок",
+        "nazov_eng": "Bacteriological culture for beta-hemolytic streptococcus",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "2495",
+        "skratka": "ВР стр+АБ",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на бета-гемолітичний стрептокок з антибіотикограмою",
+        "nazov_eng": "Bacteriological culture for beta-hemolytic streptococcus with antibiogram",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "2496",
+        "skratka": "ВР анаероб",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів біоматеріалу на анаеробну флору",
+        "nazov_eng": "Bacteriological culture of biomaterial for anaerobic flora",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "2497",
+        "skratka": "ВР ентероб",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на патогенні ентеробактерії (сальмонельоз, дизентерія)",
+        "nazov_eng": "Bacteriological culture for pathogenic enterobacteria (salmonellosis, dysentery)",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "2498",
+        "skratka": "ВР ент+АБ",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів на патогенні ентеробактерії (сальмонельоз, дизентерія) + антибіотикограма",
+        "nazov_eng": "Bacteriological culture for pathogenic enterobacteria (salmonellosis, dysentery) + antibiogram",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "2499",
+        "skratka": "Чутливість",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Визначення чутливості до антибіотиків та протигрибкових препатарів",
+        "nazov_eng": "Determination of sensitivity to antibiotics and antifungal drugs",
+        "cena": 70
+    },
+    {
+        "kodvys_text": "2500",
+        "skratka": "БП+ЧБФ",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів біоматеріалу з визначенням чутливості до бактеріофагу",
+        "nazov_eng": "Bacteriological culture of biomaterial with determination of sensitivity to bacteriophage",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "2501",
+        "skratka": "ВР ана+АБ",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів біоматеріалу на анаеробну флору + антибіотикограма",
+        "nazov_eng": "Bacteriological culture of biomaterial for anaerobic flora + antibiogram",
+        "cena": 280
+    },
+    {
+        "kodvys_text": "2502",
+        "skratka": "БП гемофіл",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів біоматеріалу на гемофільну палочку (Haemophilus influenzae)",
+        "nazov_eng": "Bacteriological culture of biomaterial for Haemophilus influenzae",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "2503",
+        "skratka": "2503",
+        "nazovskup": "Бактеріологічні дослідження",
+        "nazovskup_eng": "Bacteriological studies",
+        "nazov": "Бактеріологічний посів біоматеріалу на гемофільну палочку (Haemophilus influenzae) + антибіотикограм",
+        "nazov_eng": "Bacteriological culture of biomaterial for Haemophilus influenzae + antibiogram",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "2539",
+        "skratka": "2539",
+        "nazovskup": "Урогенітальні інфекції",
+        "nazovskup_eng": "Urogenital infections",
+        "nazov": "ПЦР Токсоплазма (сеча)",
+        "nazov_eng": "PCR Toxoplasma (urine)",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "2559",
+        "skratka": "AFL-IgG",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антифосфоліпідні антитіла (скринінг): IgG до кардіоліпіну, b2-глікопротеїну, ін. фосфоліпідів",
+        "nazov_eng": "Antiphospholipid antibodies (screening): IgG to cardiolipin, b2-glycoprotein, other phospholipids",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "2560",
+        "skratka": "AFL-IgM",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Aнтифосфоліпідні антитіла (скринінг): IgM до кардіоліпіну, b2-глікопротеїну, ін. фосфоліпідів",
+        "nazov_eng": "Antiphospholipid antibodies (screening): IgM to cardiolipin, b2-glycoprotein, other phospholipids",
+        "cena": 440
+    },
+    {
+        "kodvys_text": "2561",
+        "skratka": "b2-gp",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Антитіла Ig до B-2 гліпротеїдів",
+        "nazov_eng": "Antibodies Ig to B-2 glycoproteins",
+        "cena": 140
+    },
+    {
+        "kodvys_text": "2567",
+        "skratka": "2567",
+        "nazovskup": "Мікроскопічні дослідження:",
+        "nazovskup_eng": "Microscopic studies:",
+        "nazov": "Посткоіт. тест неактивно. Код 2571",
+        "nazov_eng": "Postcoital test inactive. Code 2571",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "2571",
+        "skratka": "Посткоїт",
+        "nazovskup": "Посткоїтальний тест",
+        "nazovskup_eng": "Postcoital test",
+        "nazov": "Посткоїтальний тест",
+        "nazov_eng": "Postcoital test",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "2573",
+        "skratka": "ПЛРGardner",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "ПЛР Gardnerela vaginalis, якісне визначення",
+        "nazov_eng": "PCR Gardnerella vaginalis, qualitative determination",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "2588",
+        "skratka": "Anti ABO",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Визначення антитіл до еритроцитів за системою АВ0 ",
+        "nazov_eng": "Determination of antibodies to erythrocytes by the AB0 system",
+        "cena": 380
+    },
+    {
+        "kodvys_text": "2593",
+        "skratka": "RUS",
+        "nazovskup": "Клінічна хімія (Clinical chemistry)",
+        "nazovskup_eng": "Clinical chemistry",
+        "nazov": "Натрій разової порції сечі",
+        "nazov_eng": "Sodium in a single portion of urine",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "2598",
+        "skratka": "HCV ultra",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту С (кров, якісне  визначення, ультрачутливий метод)",
+        "nazov_eng": "PCR Hepatitis C virus (blood, qualitative determination, ultrasensitive method)",
+        "cena": 740
+    },
+    {
+        "kodvys_text": "2599",
+        "skratka": "HBVUl",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту В (кров, якісне визначення, ультрачутливий метод)",
+        "nazov_eng": "PCR Hepatitis B virus (blood, qualitative determination, ultrasensitive method)",
+        "cena": 750
+    },
+    {
+        "kodvys_text": "2600",
+        "skratka": "HCVmonUltr",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту С (кров, кількісне визначення, ультрачутливий метод) ",
+        "nazov_eng": "PCR Hepatitis C virus (blood, quantitative determination, ultrasensitive method)",
+        "cena": 1350
+    },
+    {
+        "kodvys_text": "2601",
+        "skratka": "HCVmUlCITO",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту С (кров, кількісне визначення, ультрачутливий метод, термінове виконання)",
+        "nazov_eng": "PCR Hepatitis C virus (blood, quantitative determination, ultrasensitive method, urgent execution)",
+        "cena": 1960
+    },
+    {
+        "kodvys_text": "2602",
+        "skratka": "HCVgenCito",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту С (кров, генотипування, термінове виконання)",
+        "nazov_eng": "PCR Hepatitis C virus (blood, genotyping, urgent execution)",
+        "cena": 840
+    },
+    {
+        "kodvys_text": "2603",
+        "skratka": "HBVmonUltr",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту В (кров, кількісне визначення, ультрачутливий метод)",
+        "nazov_eng": "PCR Hepatitis B virus (blood, quantitative determination, ultrasensitive method)",
+        "cena": 1100
+    },
+    {
+        "kodvys_text": "2604",
+        "skratka": "HBVmUIT",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "ПЛР Вірус гепатиту В (кількісне визначення,ультрачутливий метод)",
+        "nazov_eng": "PCR Hepatitis B virus (quantitative determination, ultrasensitive method)",
+        "cena": 1100
+    },
+    {
+        "kodvys_text": "2702",
+        "skratka": "cito HA",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Швидкий тест на визначення вірусу геп. А",
+        "nazov_eng": "Rapid test for the detection of hepatitis A virus",
+        "cena": 50
+    },
+    {
+        "kodvys_text": "2704",
+        "skratka": "cito HC",
+        "nazovskup": "Гепатити",
+        "nazovskup_eng": "Hepatitis",
+        "nazov": "Швидкий тест на визначення вірусу геп С",
+        "nazov_eng": "Rapid test for the detection of hepatitis C virus",
+        "cena": 50
+    },
+    {
+        "kodvys_text": "2705",
+        "skratka": "Gl1год.",
+        "nazovskup": "Вуглеводний обмін",
+        "nazovskup_eng": "Carbohydrate metabolism",
+        "nazov": "Глюкоза через 1 годину після навантаження",
+        "nazov_eng": "Glucose 1 hour after load",
+        "cena": 30
+    },
+    {
+        "kodvys_text": "2706",
+        "skratka": "Gl 3год",
+        "nazovskup": "Вуглеводний обмін",
+        "nazovskup_eng": "Carbohydrate metabolism",
+        "nazov": "Глюкоза через 3 години після навантаження",
+        "nazov_eng": "Glucose 3 hours after load",
+        "cena": 20
+    },
+    {
+        "kodvys_text": "2713",
+        "skratka": "ВПЛ 6/11",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "HPV 6,11 types (ПЛР, якісне визначення)",
+        "nazov_eng": "HPV 6,11 types (PCR, qualitative determination)",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "2717",
+        "skratka": "Грип А/В",
+        "nazovskup": "Швидкі тести",
+        "nazovskup_eng": "Rapid tests",
+        "nazov": "Швидкий тест на визначення грипу А та В",
+        "nazov_eng": "Rapid test for the detection of influenza A and B",
+        "cena": 460
+    },
+    {
+        "kodvys_text": "2720",
+        "skratka": "IL-B-1",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Інтерлейкін В-1",
+        "nazov_eng": "Interleukin B-1",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "2726",
+        "skratka": "ENA sc",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "ENA screen cito :  IgG  до антигенів SS-A,SS-B, Sm,RNP/Sm,Scl-70,Jo-1",
+        "nazov_eng": "ENA screen cito: IgG to antigens SS-A, SS-B, Sm, RNP/Sm, Scl-70, Jo-1",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "2730",
+        "skratka": "PCNA",
+        "nazovskup": "Імунологічні дослідження",
+        "nazovskup_eng": "Immunological studies",
+        "nazov": "Ядерний антиген проліферуючих клітин PCNA",
+        "nazov_eng": "Proliferating cell nuclear antigen PCNA",
+        "cena": 820
+    },
+    {
+        "kodvys_text": "3100",
+        "skratka": "Йод сечі",
+        "nazovskup": "Додаткові дослідження сечі",
+        "nazovskup_eng": "Additional urine tests",
+        "nazov": "Йод в сечі ",
+        "nazov_eng": "Iodine in urine",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "3111",
+        "skratka": "a recTTG",
+        "nazovskup": "Тиреоїдна панель",
+        "nazovskup_eng": "Thyroid panel",
+        "nazov": "Антитіла до рецепторів ТТГ",
+        "nazov_eng": "Antibodies to TSH receptors",
+        "cena": 390
+    },
+    {
+        "kodvys_text": "3112",
+        "skratka": "Gardner",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "ДНК Gardnerella vaginalis",
+        "nazov_eng": "DNA Gardnerella vaginalis",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "3118",
+        "skratka": "Фемофлор",
+        "nazovskup": "Молекулярно-біологічні дослідження",
+        "nazovskup_eng": "Molecular biological studies",
+        "nazov": "Дослідження біоценозу урогенітального тракту (ПЛР, кількісне визначення)",
+        "nazov_eng": "Study of the urogenital tract biocenosis (PCR, quantitative determination)",
+        "cena": 750
+    },
+    {
+        "kodvys_text": "3123",
+        "skratka": "Demodex",
+        "nazovskup": "Мікроскопічні дослідження:",
+        "nazovskup_eng": "Microscopic studies:",
+        "nazov": "Дослідження матеріалу (мікроскопія) на кліщі роду Demodex",
+        "nazov_eng": "Examination of material (microscopy) for Demodex mites",
+        "cena": 280
+    },
+    {
+        "kodvys_text": "3126",
+        "skratka": "cTnI",
+        "nazovskup": "Кардіоваскулярний ризик",
+        "nazovskup_eng": "Cardiovascular risk",
+        "nazov": "Якісне виявлення тропоніну І в цільній крові швидким тестом",
+        "nazov_eng": "Qualitative detection of troponin I in whole blood by rapid test",
+        "cena": 240
+    },
+    {
+        "kodvys_text": "3133",
+        "skratka": "micro D",
+        "nazovskup": "Мікроскопічні дослідження:",
+        "nazovskup_eng": "Microscopic studies:",
+        "nazov": "Мікроскопія матеріалу на наявність міцелію грибка",
+        "nazov_eng": "Microscopy of material for the presence of fungal mycelium",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "3134",
+        "skratka": "Місro",
+        "nazovskup": "Мікроскопічні дослідження:",
+        "nazovskup_eng": "Microscopic studies:",
+        "nazov": "Мікроскопія (бактеріоскопія) матеріалу",
+        "nazov_eng": "Microscopy (bacterioscopy) of material",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "3137",
+        "skratka": "назоцитогр",
+        "nazovskup": "Назоцитограма",
+        "nazovskup_eng": "Nasal smear",
+        "nazov": "Мазок з носа: мікроскопія",
+        "nazov_eng": "Nasal smear: microscopy",
+        "cena": 190
+    },
+    {
+        "kodvys_text": "3148",
+        "skratka": "забір",
+        "nazovskup": "Аналіз калу на я/г та найпростіших",
+        "nazovskup_eng": "Stool analysis for helminth eggs and protozoa",
+        "nazov": "Забір калу на я/г",
+        "nazov_eng": "Stool collection for helminth eggs",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "3149",
+        "skratka": "Анти-Резус",
+        "nazovskup": "Загальний аналіз крові (Complete blood count)",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Антирезусні антитіла (непряма проба Кумбса)",
+        "nazov_eng": "Anti-Rh antibodies (indirect Coombs test)",
+        "cena": 460
+    },
+    {
+        "kodvys_text": "2",
+        "skratka": "Заг. аналіз сечі",
+        "nazovskup": "Заг. аналіз сечі",
+        "nazovskup_eng": "General urinalysis",
+        "nazov": "Заг. аналіз сечі",
+        "nazov_eng": "General urinalysis",
+        "cena": 160
+    },
+    {
+        "kodvys_text": "1",
+        "skratka": "Загальний ан. крові",
+        "nazovskup": "Загальний ан. крові",
+        "nazovskup_eng": "Complete blood count",
+        "nazov": "Загальний ан. крові",
+        "nazov_eng": "Complete blood count",
+        "cena": 170
+    },
+    {
+        "kodvys_text": "П1",
+        "skratka": "Тиреоїдний  ",
+        "nazovskup": "Тиреоїдний  ",
+        "nazovskup_eng": "Thyroid",
+        "nazov": "Тиреоїдний  ",
+        "nazov_eng": "Thyroid",
+        "cena": 470
+    },
+    {
+        "kodvys_text": "95",
+        "skratka": "Індекс НОМА",
+        "nazovskup": "Індекс НОМА",
+        "nazovskup_eng": "HOMA Index",
+        "nazov": "Індекс НОМА",
+        "nazov_eng": "HOMA Index",
+        "cena": 280
+    },
+    {
+        "kodvys_text": "П3",
+        "skratka": "Печінкові проби",
+        "nazovskup": "Печінкові проби",
+        "nazovskup_eng": "Liver function tests",
+        "nazov": "Печінкові проби",
+        "nazov_eng": "Liver function tests",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "П4",
+        "skratka": "Ниркові проби",
+        "nazovskup": "Ниркові проби",
+        "nazovskup_eng": "Kidney function tests",
+        "nazov": "Ниркові проби",
+        "nazov_eng": "Kidney function tests",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "04",
+        "skratka": "ревмопроби",
+        "nazovskup": "ревмопроби",
+        "nazovskup_eng": "rheumatic tests",
+        "nazov": "ревмопроби",
+        "nazov_eng": "rheumatic tests",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "П11",
+        "skratka": "Діабетичний пакет",
+        "nazovskup": "Діабетичний пакет",
+        "nazovskup_eng": "Diabetic package",
+        "nazov": "Діабетичний пакет",
+        "nazov_eng": "Diabetic package",
+        "cena": 600
+    },
+    {
+        "kodvys_text": "Р1",
+        "skratka": "ЗАК+ретикулоцити",
+        "nazovskup": "ЗАК+ретикулоцити",
+        "nazovskup_eng": "CBC+reticulocytes",
+        "nazov": "ЗАК+ретикулоцити",
+        "nazov_eng": "CBC+reticulocytes",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "Л",
+        "skratka": "Аналіз ліквору",
+        "nazovskup": "Аналіз ліквору",
+        "nazovskup_eng": "CSF analysis",
+        "nazov": "Аналіз ліквору",
+        "nazov_eng": "CSF analysis",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "У1",
+        "skratka": "Сеча по-Нечипоренко",
+        "nazovskup": "Сеча по-Нечипоренко",
+        "nazovskup_eng": "Nechiporenko urine test",
+        "nazov": "Сеча по-Нечипоренко",
+        "nazov_eng": "Nechiporenko urine test",
+        "cena": 180
+    },
+    {
+        "kodvys_text": "НХ",
+        "skratka": "ЗАК без ШОЕ",
+        "nazovskup": "ЗАК без ШОЕ",
+        "nazovskup_eng": "CBC without ESR",
+        "nazov": "ЗАК без ШОЕ",
+        "nazov_eng": "CBC without ESR",
+        "cena": 130
+    },
+    {
+        "kodvys_text": "КВС",
+        "skratka": "КВР скринінг",
+        "nazovskup": "КВР скринінг",
+        "nazovskup_eng": "CVR screening",
+        "nazov": "КВР скринінг",
+        "nazov_eng": "CVR screening",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "ППЗ",
+        "skratka": "Педіат.панель",
+        "nazovskup": "Педіат.панель",
+        "nazovskup_eng": "Pediatric panel",
+        "nazov": "Педіат.панель",
+        "nazov_eng": "Pediatric panel",
+        "cena": 2340
+    },
+    {
+        "kodvys_text": "П17",
+        "skratka": "Пренат. скринінг І ",
+        "nazovskup": "Пренат. скринінг І ",
+        "nazovskup_eng": "Prenatal screening I",
+        "nazov": "Пренат. скринінг І ",
+        "nazov_eng": "Prenatal screening I",
+        "cena": 310
+    },
+    {
+        "kodvys_text": "П18",
+        "skratka": "Пренат. скринінг ІІ ",
+        "nazovskup": "Пренат. скринінг ІІ ",
+        "nazovskup_eng": "Prenatal screening II",
+        "nazov": "Пренат. скринінг ІІ ",
+        "nazov_eng": "Prenatal screening II",
+        "cena": 420
+    },
+    {
+        "kodvys_text": "Б 1",
+        "skratka": "Пакет для Metab.bal.",
+        "nazovskup": "Пакет для Metab.bal.",
+        "nazovskup_eng": "Package for Metab.bal.",
+        "nazov": "Пакет для Metab.bal.",
+        "nazov_eng": "Package for Metab.bal.",
+        "cena": 650
+    },
+    {
+        "kodvys_text": "19А",
+        "skratka": "TORCH IgМ+G",
+        "nazovskup": "TORCH IgМ+G",
+        "nazovskup_eng": "TORCH IgM+G",
+        "nazov": "TORCH IgМ+G",
+        "nazov_eng": "TORCH IgM+G",
+        "cena": 1250
+    },
+    {
+        "kodvys_text": "25",
+        "skratka": "пакет cPSA+tPSA",
+        "nazovskup": "пакет cPSA+tPSA",
+        "nazovskup_eng": "package cPSA+tPSA",
+        "nazov": "пакет cPSA+tPSA",
+        "nazov_eng": "package cPSA+tPSA",
+        "cena": 250
+    },
+    {
+        "kodvys_text": "ТРАВ",
+        "skratka": "Цвітіння трав",
+        "nazovskup": "Цвітіння трав",
+        "nazovskup_eng": "Grass flowering",
+        "nazov": "Цвітіння трав",
+        "nazov_eng": "Grass flowering",
+        "cena": 740
+    },
+    {
+        "kodvys_text": "07",
+        "skratka": "біохімія11",
+        "nazovskup": "біохімія11",
+        "nazovskup_eng": "biochemistry11",
+        "nazov": "біохімія11",
+        "nazov_eng": "biochemistry11",
+        "cena": 420
+    },
+    {
+        "kodvys_text": "06",
+        "skratka": "ліпопротеїди",
+        "nazovskup": "ліпопротеїди",
+        "nazovskup_eng": "lipoproteins",
+        "nazov": "ліпопротеїди",
+        "nazov_eng": "lipoproteins",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "02",
+        "skratka": "електроліти",
+        "nazovskup": "електроліти",
+        "nazovskup_eng": "electrolytes",
+        "nazov": "електроліти",
+        "nazov_eng": "electrolytes",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "05",
+        "skratka": "коагулограма",
+        "nazovskup": "коагулограма",
+        "nazovskup_eng": "coagulogram",
+        "nazov": "коагулограма",
+        "nazov_eng": "coagulogram",
+        "cena": 300
+    },
+    {
+        "kodvys_text": "03",
+        "skratka": "пакет fPSA+tPSA",
+        "nazovskup": "пакет fPSA+tPSA",
+        "nazovskup_eng": "package fPSA+tPSA",
+        "nazov": "пакет fPSA+tPSA",
+        "nazov_eng": "package fPSA+tPSA",
+        "cena": 400
+    },
+    {
+        "kodvys_text": "08",
+        "skratka": "Пакет_біох 14",
+        "nazovskup": "Пакет_біох 14",
+        "nazovskup_eng": "Package_biochem 14",
+        "nazov": "Пакет_біох 14",
+        "nazov_eng": "Package_biochem 14",
+        "cena": 460
+    },
+    {
+        "kodvys_text": "09",
+        "skratka": "Пакет анемії",
+        "nazovskup": "Пакет анемії",
+        "nazovskup_eng": "Anemia package",
+        "nazov": "Пакет анемії",
+        "nazov_eng": "Anemia package",
+        "cena": 850
+    },
+    {
+        "kodvys_text": "10",
+        "skratka": "горм.пакет№2  ",
+        "nazovskup": "горм.пакет№2  ",
+        "nazovskup_eng": "hormone package #2",
+        "nazov": "горм.пакет№2  ",
+        "nazov_eng": "hormone package #2",
+        "cena": 650
+    },
+    {
+        "kodvys_text": "11",
+        "skratka": "горм.пакет№3",
+        "nazovskup": "горм.пакет№3",
+        "nazovskup_eng": "hormone package #3",
+        "nazov": "горм.пакет№3",
+        "nazov_eng": "hormone package #3",
+        "cena": 650
+    },
+    {
+        "kodvys_text": "12",
+        "skratka": "тиреоїдний №2",
+        "nazovskup": "тиреоїдний №2",
+        "nazovskup_eng": "thyroid #2",
+        "nazov": "тиреоїдний №2",
+        "nazov_eng": "thyroid #2",
+        "cena": 480
+    },
+    {
+        "kodvys_text": "13",
+        "skratka": "TORCH IgGперед вагіт",
+        "nazovskup": "TORCH IgGперед вагіт",
+        "nazovskup_eng": "TORCH IgG before pregnancy",
+        "nazov": "TORCH IgGперед вагіт",
+        "nazov_eng": "TORCH IgG before pregnancy",
+        "cena": 650
+    },
+    {
+        "kodvys_text": "14",
+        "skratka": "TORCH IgGперед вагіт",
+        "nazovskup": "TORCH IgGперед вагіт",
+        "nazovskup_eng": "TORCH IgG before pregnancy",
+        "nazov": "TORCH IgGперед вагіт",
+        "nazov_eng": "TORCH IgG before pregnancy",
+        "cena": 520
+    },
+    {
+        "kodvys_text": "15",
+        "skratka": "TORCH IgМпри вагітно",
+        "nazovskup": "TORCH IgМпри вагітно",
+        "nazovskup_eng": "TORCH IgM during pregnancy",
+        "nazov": "TORCH IgМпри вагітно",
+        "nazov_eng": "TORCH IgM during pregnancy",
+        "cena": 570
+    },
+    {
+        "kodvys_text": "16",
+        "skratka": "TORCH IgМпри вагітно",
+        "nazovskup": "TORCH IgМпри вагітно",
+        "nazovskup_eng": "TORCH IgM during pregnancy",
+        "nazov": "TORCH IgМпри вагітно",
+        "nazov_eng": "TORCH IgM during pregnancy",
+        "cena": 460
+    },
+    {
+        "kodvys_text": "19",
+        "skratka": "TORCH IgМ+G",
+        "nazovskup": "TORCH IgМ+G",
+        "nazovskup_eng": "TORCH IgM+G",
+        "nazov": "TORCH IgМ+G",
+        "nazov_eng": "TORCH IgM+G",
+        "cena": 1320
+    },
+    {
+        "kodvys_text": "20",
+        "skratka": "Гельмінти",
+        "nazovskup": "Гельмінти",
+        "nazovskup_eng": "Helminths",
+        "nazov": "Гельмінти",
+        "nazov_eng": "Helminths",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "21",
+        "skratka": "урогенітальна панель",
+        "nazovskup": "урогенітальна панель",
+        "nazovskup_eng": "urogenital panel",
+        "nazov": "урогенітальна панель",
+        "nazov_eng": "urogenital panel",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "22",
+        "skratka": "горм.пакет№1",
+        "nazovskup": "горм.пакет№1",
+        "nazovskup_eng": "hormone package #1",
+        "nazov": "горм.пакет№1",
+        "nazov_eng": "hormone package #1",
+        "cena": 480
+    },
+    {
+        "kodvys_text": "005",
+        "skratka": "К/Г+Д.ДИМЕР",
+        "nazovskup": "К/Г+Д.ДИМЕР",
+        "nazovskup_eng": "C/G+D.DIMER",
+        "nazov": "К/Г+Д.ДИМЕР",
+        "nazov_eng": "C/G+D.DIMER",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "ДОМА",
+        "skratka": "Алергія:домашній пил",
+        "nazovskup": "Алергія:домашній пил",
+        "nazovskup_eng": "Allergy:house dust",
+        "nazov": "Алергія:домашній пил",
+        "nazov_eng": "Allergy:house dust",
+        "cena": 1460
+    },
+    {
+        "kodvys_text": "0",
+        "skratka": "MNO",
+        "nazovskup": "MNO",
+        "nazovskup_eng": "INR",
+        "nazov": "MNO",
+        "nazov_eng": "INR",
+        "cena": 90
+    },
+    {
+        "kodvys_text": "006",
+        "skratka": "ліпопротеїди",
+        "nazovskup": "ліпопротеїди",
+        "nazovskup_eng": "lipoproteins",
+        "nazov": "ліпопротеїди",
+        "nazov_eng": "lipoproteins",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "УЛЮБ",
+        "skratka": "Алергія:дом.тварин",
+        "nazovskup": "Алергія:дом.тварин",
+        "nazovskup_eng": "Allergy:pets",
+        "nazov": "Алергія:дом.тварин",
+        "nazov_eng": "Allergy:pets",
+        "cena": 1300
+    },
+    {
+        "kodvys_text": "ЇДА",
+        "skratka": "Харчовa алергія",
+        "nazovskup": "Харчовa алергія",
+        "nazovskup_eng": "Food allergy",
+        "nazov": "Харчовa алергія",
+        "nazov_eng": "Food allergy",
+        "cena": 1860
+    },
+    {
+        "kodvys_text": "ДЕРЕ",
+        "skratka": "Респір.алергія:дерев",
+        "nazovskup": "Респір.алергія:дерев",
+        "nazovskup_eng": "Respiratory allergy:trees",
+        "nazov": "Респір.алергія:дерев",
+        "nazov_eng": "Respiratory allergy:trees",
+        "cena": 1220
+    },
+    {
+        "kodvys_text": "Г1",
+        "skratka": "ПЛР-пакет урогеніт.",
+        "nazovskup": "ПЛР-пакет урогеніт.",
+        "nazovskup_eng": "PCR-package urogenital",
+        "nazov": "ПЛР-пакет урогеніт.",
+        "nazov_eng": "PCR-package urogenital",
+        "cena": 470
+    },
+    {
+        "kodvys_text": "ПД2",
+        "skratka": "Антитіла5 гельмінтів",
+        "nazovskup": "Антитіла5 гельмінтів",
+        "nazovskup_eng": "Antibodies5 helminths",
+        "nazov": "Антитіла5 гельмінтів",
+        "nazov_eng": "Antibodies5 helminths",
+        "cena": 800
+    },
+    {
+        "kodvys_text": "К1",
+        "skratka": "Рут панель(к/г)№3",
+        "nazovskup": "Рут панель(к/г)№3",
+        "nazovskup_eng": "Routine panel(c/g)#3",
+        "nazov": "Рут панель(к/г)№3",
+        "nazov_eng": "Routine panel(c/g)#3",
+        "cena": 900
+    },
+    {
+        "kodvys_text": "К2",
+        "skratka": "П-т д-ка тромбофілій",
+        "nazovskup": "П-т д-ка тромбофілій",
+        "nazovskup_eng": "Thrombophilia diagnostics package",
+        "nazov": "П-т д-ка тромбофілій",
+        "nazov_eng": "Thrombophilia diagnostics package",
+        "cena": 1450
+    },
+    {
+        "kodvys_text": "ПР1",
+        "skratka": "PRISCA I ",
+        "nazovskup": "PRISCA I ",
+        "nazovskup_eng": "PRISCA I",
+        "nazov": "PRISCA I ",
+        "nazov_eng": "PRISCA I",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "ПР2",
+        "skratka": "PRISCA II",
+        "nazovskup": "PRISCA II",
+        "nazovskup_eng": "PRISCA II",
+        "nazov": "PRISCA II",
+        "nazov_eng": "PRISCA II",
+        "cena": 550
+    },
+    {
+        "kodvys_text": "ХНН",
+        "skratka": "с/в креа/м.альб/с.к",
+        "nazovskup": "с/в креа/м.альб/с.к",
+        "nazovskup_eng": "s/v crea/m.alb/s.c",
+        "nazov": "с/в креа/м.альб/с.к",
+        "nazov_eng": "s/v crea/m.alb/s.c",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "К3",
+        "skratka": "Д-ка тромбофілій №2",
+        "nazovskup": "Д-ка тромбофілій №2",
+        "nazovskup_eng": "Thrombophilia diagnostics #2",
+        "nazov": "Д-ка тромбофілій №2",
+        "nazov_eng": "Thrombophilia diagnostics #2",
+        "cena": 1550
+    },
+    {
+        "kodvys_text": "417",
+        "skratka": "П-т обст.вагітних І ",
+        "nazovskup": "П-т обст.вагітних І ",
+        "nazovskup_eng": "Pregnancy examination package I",
+        "nazov": "П-т обст.вагітних І ",
+        "nazov_eng": "Pregnancy examination package I",
+        "cena": 290
+    },
+    {
+        "kodvys_text": "417+",
+        "skratka": "П-т обст.вагітних ІІ",
+        "nazovskup": "П-т обст.вагітних ІІ",
+        "nazovskup_eng": "Pregnancy examination package II",
+        "nazov": "П-т обст.вагітних ІІ",
+        "nazov_eng": "Pregnancy examination package II",
+        "cena": 350
+    },
+    {
+        "kodvys_text": "ГТТ3",
+        "skratka": "Глюкозо-толер.тест-3",
+        "nazovskup": "Глюкозо-толер.тест-3",
+        "nazovskup_eng": "Glucose tolerance test-3",
+        "nazov": "Глюкозо-толер.тест-3",
+        "nazov_eng": "Glucose tolerance test-3",
+        "cena": 660
+    },
+    {
+        "kodvys_text": "К4",
+        "skratka": "Д-ка Тромбофілій №3",
+        "nazovskup": "Д-ка Тромбофілій №3",
+        "nazovskup_eng": "Thrombophilia diagnostics #3",
+        "nazov": "Д-ка Тромбофілій №3",
+        "nazov_eng": "Thrombophilia diagnostics #3",
+        "cena": 2100
+    },
+    {
+        "kodvys_text": "ОЦ",
+        "skratka": "Комплексна біохімія ",
+        "nazovskup": "Комплексна біохімія ",
+        "nazovskup_eng": "Comprehensive biochemistry",
+        "nazov": "Комплексна біохімія ",
+        "nazov_eng": "Comprehensive biochemistry",
+        "cena": 210
+    },
+    {
+        "kodvys_text": "ЛГ",
+        "skratka": "Перв.госпіталізація",
+        "nazovskup": "Перв.госпіталізація",
+        "nazovskup_eng": "Primary hospitalization",
+        "nazov": "Перв.госпіталізація",
+        "nazov_eng": "Primary hospitalization",
+        "cena": 1250
+    },
+    {
+        "kodvys_text": "НХБХ",
+        "skratka": "Біохімія  н/х",
+        "nazovskup": "Біохімія  н/х",
+        "nazovskup_eng": "Biochemistry n/a",
+        "nazov": "Біохімія  н/х",
+        "nazov_eng": "Biochemistry n/a",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "НВ",
+        "skratka": "П- т Надлишкова вага",
+        "nazovskup": "П- т Надлишкова вага",
+        "nazovskup_eng": "Overweight package",
+        "nazov": "П- т Надлишкова вага",
+        "nazov_eng": "Overweight package",
+        "cena": 770
+    },
+    {
+        "kodvys_text": "ГЛ3",
+        "skratka": "Глюкотолер.тест(3кр)",
+        "nazovskup": "Глюкотолер.тест(3кр)",
+        "nazovskup_eng": "Glucose tolerance test(3cr)",
+        "nazov": "Глюкотолер.тест(3кр)",
+        "nazov_eng": "Glucose tolerance test(3cr)",
+        "cena": 220
+    },
+    {
+        "kodvys_text": "АНА",
+        "skratka": "ANA17 Pro(імуноблот)",
+        "nazovskup": "ANA17 Pro(імуноблот)",
+        "nazovskup_eng": "ANA17 Pro(immunoblot)",
+        "nazov": "ANA17 Pro(імуноблот)",
+        "nazov_eng": "ANA17 Pro(immunoblot)",
+        "cena": 820
+    },
+    {
+        "kodvys_text": "52",
+        "skratka": "П-т госпіталіз №3",
+        "nazovskup": "П-т госпіталіз №3",
+        "nazovskup_eng": "Hospitalization package #3",
+        "nazov": "П-т госпіталіз №3",
+        "nazov_eng": "Hospitalization package #3",
+        "cena": 450
+    },
+    {
+        "kodvys_text": "С2",
+        "skratka": "Кардіоваск ризик  №2",
+        "nazovskup": "Кардіоваск ризик  №2",
+        "nazovskup_eng": "Cardiovascular risk #2",
+        "nazov": "Кардіоваск ризик  №2",
+        "nazov_eng": "Cardiovascular risk #2",
+        "cena": 770
+    },
+    {
+        "kodvys_text": "КВР",
+        "skratka": "КВР розширений",
+        "nazovskup": "КВР розширений",
+        "nazovskup_eng": "Extended CVR",
+        "nazov": "КВР розширений",
+        "nazov_eng": "Extended CVR",
+        "cena": 1500
+    },
+    {
+        "kodvys_text": "ЛП",
+        "skratka": "LDL/HDL/TG",
+        "nazovskup": "LDL/HDL/TG",
+        "nazovskup_eng": "LDL/HDL/TG",
+        "nazov": "LDL/HDL/TG",
+        "nazov_eng": "LDL/HDL/TG",
+        "cena": 100
+    },
+    {
+        "kodvys_text": "БАК",
+        "skratka": "Бак посів з зіву+АБ",
+        "nazovskup": "Бак посів з зіву+АБ",
+        "nazovskup_eng": "Bacterial culture from pharynx+AB",
+        "nazov": "Бак посів з зіву+АБ",
+        "nazov_eng": "Bacterial culture from pharynx+AB",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "ДИЗ",
+        "skratka": "Посів на дизбіоз",
+        "nazovskup": "Посів на дизбіоз",
+        "nazovskup_eng": "Culture for dysbiosis",
+        "nazov": "Посів на дизбіоз",
+        "nazov_eng": "Culture for dysbiosis",
+        "cena": 200
+    },
+    {
+        "kodvys_text": "ЕТ",
+        "skratka": "П-т метабол. панель",
+        "nazovskup": "П-т метабол. панель",
+        "nazovskup_eng": "Metabolic panel package",
+        "nazov": "П-т метабол. панель",
+        "nazov_eng": "Metabolic panel package",
+        "cena": 230
+    },
+    {
+        "kodvys_text": "ЕТ2",
+        "skratka": "П-т мет.панель+альб",
+        "nazovskup": "П-т мет.панель+альб",
+        "nazovskup_eng": "Metabolic panel package+alb",
+        "nazov": "П-т мет.панель+альб",
+        "nazov_eng": "Metabolic panel package+alb",
+        "cena": 255
+    },
+    {
+        "kodvys_text": "ВАГ",
+        "skratka": "П-т вагітністьІ тр.",
+        "nazovskup": "П-т вагітністьІ тр.",
+        "nazovskup_eng": "Pregnancy package I tr.",
+        "nazov": "П-т вагітністьІ тр.",
+        "nazov_eng": "Pregnancy package I tr.",
+        "cena": 1650
+    },
+    {
+        "kodvys_text": "ВАГ2",
+        "skratka": "П-т вагітністьІІ тр.",
+        "nazovskup": "П-т вагітністьІІ тр.",
+        "nazovskup_eng": "Pregnancy package II tr.",
+        "nazov": "П-т вагітністьІІ тр.",
+        "nazov_eng": "Pregnancy package II tr.",
+        "cena": 1430
+    },
+    {
+        "kodvys_text": "ПАП",
+        "skratka": "П-т Папіломавірус",
+        "nazovskup": "П-т Папіломавірус",
+        "nazovskup_eng": "Papillomavirus package",
+        "nazov": "П-т Папіломавірус",
+        "nazov_eng": "Papillomavirus package",
+        "cena": 880
+    },
+    {
+        "kodvys_text": "ГІС",
+        "skratka": "Досл. пунктату ЩЗ",
+        "nazovskup": "Досл. пунктату ЩЗ",
+        "nazovskup_eng": "Thyroid punctate examination",
+        "nazov": "Досл. пунктату ЩЗ",
+        "nazov_eng": "Thyroid punctate examination",
+        "cena": 320
+    },
+    {
+        "kodvys_text": "УРГ",
+        "skratka": "П-т УГІ ХлУрМТрГон",
+        "nazovskup": "П-т УГІ ХлУрМТрГон",
+        "nazovskup_eng": "UGI package ChlUrMTrGon",
+        "nazov": "П-т УГІ ХлУрМТрГон",
+        "nazov_eng": "UGI package ChlUrMTrGon",
+        "cena": 700
+    },
+    {
+        "kodvys_text": "Ф",
+        "skratka": "ПЛР Фемофлор",
+        "nazovskup": "ПЛР Фемофлор",
+        "nazovskup_eng": "PCR Femoflor",
+        "nazov": "ПЛР Фемофлор",
+        "nazov_eng": "PCR Femoflor",
+        "cena": 750
+    },
+    {
+        "kodvys_text": "К6",
+        "skratka": "П-т\"К-ль гемостазу\"",
+        "nazovskup": "П-т\"К-ль гемостазу\"",
+        "nazovskup_eng": "Hemostasis control package",
+        "nazov": "П-т\"К-ль гемостазу\"",
+        "nazov_eng": "Hemostasis control package",
+        "cena": 750
+    },
+    {
+        "kodvys_text": "К5",
+        "skratka": "П-т \"К-ль гем-у +ВА\"",
+        "nazovskup": "П-т \"К-ль гем-у +ВА\"",
+        "nazovskup_eng": "Hemostasis control package + LA",
+        "nazov": "П-т \"К-ль гем-у +ВА\"",
+        "nazov_eng": "Hemostasis control package + LA",
+        "cena": 1000
+    },
+    {
+        "kodvys_text": "К",
+        "skratka": "П-к КВР скринінг",
+        "nazovskup": "П-к КВР скринінг",
+        "nazovskup_eng": "CVR screening package",
+        "nazov": "П-к КВР скринінг",
+        "nazov_eng": "CVR screening package",
+        "cena": 770
+    },
+    {
+        "kodvys_text": "ІГ",
+        "skratka": "П-т\"IgG+IgA+IgM)",
+        "nazovskup": "П-т\"IgG+IgA+IgM)",
+        "nazovskup_eng": "Package \"IgG+IgA+IgM\"",
+        "nazov": "П-т\"IgG+IgA+IgM)",
+        "nazov_eng": "Package \"IgG+IgA+IgM\"",
+        "cena": 550
+    },
+    {
+        "kodvys_text": "262",
+        "skratka": "індекс ROMA",
+        "nazovskup": "індекс ROMA",
+        "nazovskup_eng": "ROMA index",
+        "nazov": "індекс ROMA",
+        "nazov_eng": "ROMA index",
+        "cena": 770
+    },
+    {
+        "kodvys_text": "2440",
+        "skratka": "Кальцій іонізований",
+        "nazovskup": "Кальцій іонізований",
+        "nazovskup_eng": "Ionized calcium",
+        "nazov": "Кальцій іонізований",
+        "nazov_eng": "Ionized calcium",
+        "cena": 150
+    },
+    {
+        "kodvys_text": "542",
+        "skratka": "Трихом.-гонорея",
+        "nazovskup": "Трихом.-гонорея",
+        "nazovskup_eng": "Trichomoniasis-gonorrhea",
+        "nazov": "Трихом.-гонорея",
+        "nazov_eng": "Trichomoniasis-gonorrhea",
+        "cena": 360
+    },
+    {
+        "kodvys_text": "300",
+        "skratka": "Білкові фракції  сеч",
+        "nazovskup": "Білкові фракції  сеч",
+        "nazovskup_eng": "Urine protein fractions",
+        "nazov": "Білкові фракції  сеч",
+        "nazov_eng": "Urine protein fractions",
+        "cena": 330
+    },
+    {
+        "kodvys_text": "ПХІР",
+        "skratka": "Пакет \"Хірургічний\"",
+        "nazovskup": "Пакет \"Хірургічний\"",
+        "nazovskup_eng": "Surgical package",
+        "nazov": "Пакет \"Хірургічний\"",
+        "nazov_eng": "Surgical package",
+        "cena": 650
+    },
+    {
+        "kodvys_text": "КОВ",
+        "skratka": "COVID M+G",
+        "nazovskup": "COVID M+G",
+        "nazovskup_eng": "COVID M+G",
+        "nazov": "COVID M+G",
+        "nazov_eng": "COVID M+G",
+        "cena": 570
+    },
+    {
+        "kodvys_text": "УУ",
+        "skratka": "Сеча по Нечепоренко",
+        "nazovskup": "Сеча по Нечепоренко",
+        "nazovskup_eng": "Nechiporenko urine test",
+        "nazov": "Сеча по Нечепоренко",
+        "nazov_eng": "Nechiporenko urine test",
+        "cena": 120
+    },
+    {
+        "kodvys_text": "ГЕП",
+        "skratka": "Гепатити CITO",
+        "nazovskup": "Гепатити CITO",
+        "nazovskup_eng": "Hepatitis CITO",
+        "nazov": "Гепатити CITO",
+        "nazov_eng": "Hepatitis CITO",
+        "cena": 500
+    },
+    {
+        "kodvys_text": "РЦ2",
+        "skratka": "Рідинна цитологія",
+        "nazovskup": "Рідинна цитологія",
+        "nazovskup_eng": "Liquid cytology",
+        "nazov": "Рідинна цитологія",
+        "nazov_eng": "Liquid cytology",
+        "cena": 550
+    }
+]

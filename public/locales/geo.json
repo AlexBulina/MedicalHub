@@ -103,7 +103,7 @@
     "errorSearchingJournal": "ჟურნალში ძებნის შეცდომა",
     "statusLabel": "სტატუსი:",
     "smsLabel": "SMS:",
-    "smsServiceActive": "TurboSMS სერვისი: აქტიური. ბალანსი: {{balance}}",
+    "smsServiceActive": "TurboSMS სერვისი: აქტიური. გამგზავნი: {{sender}}. ბალანსი: {{balance}}",
     "smsServiceDown": "TurboSMS სერვისი: დროებით მიუწვდომელია ან ავტორიზაციის შეცდომა",
     "deliveryStatus_Delivered": "მიწოდებულია",
     "deliveryStatus_Sent": "გაგზავნილია",
