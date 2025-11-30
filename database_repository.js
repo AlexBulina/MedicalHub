@@ -180,19 +180,20 @@ export async function createPatient({ firstName, lastName, dob, phone, gender },
                 )
                 BEGIN
                     INSERT INTO nis.c_pacient (rodcis, titulza, datumnarod, platnostod, platnostdo, meno, priezvisko, rodena, tituly, pohlavie, priznak1, priznak2, priznak3, kodpoist, evidcis, cudzinec, stat, cislo, formular, ehic)
-                    VALUES (@new_rodcis, '', '${dob}', NULL, NULL, '${firstName}', '${lastName}', '', '', '${formattedGender}', NULL, NULL, NULL, '0000', @new_rodcis, NULL, NULL, NULL, NULL, NULL);
+                    VALUES (@new_rodcis, '', '${dob}', NULL, NULL, '${firstName}', '${lastName}', '', '', '${formattedGender}', NULL, NULL, NULL, '0000', @new_rodcis, NULL, NULL, NULL, NULL, NULL)
 
                     INSERT INTO nis.pac_dem (rodcis, ulica, mesto, psc, kodstatu, tel, stav, cop, oscis, kodobec, kodokres, rodisko, poznamka1, email)
-                    VALUES (@new_rodcis, '', '', '', '', '${phone}', '', '', 8, NULL, NULL, '', '', NULL);
+                    VALUES (@new_rodcis, '', '', '', '', '${phone}', '', '', 8, NULL, NULL, '', '', NULL)
                     
-                    SELECT 'Patient created' as status, @new_rodcis as rodcis;
+                    SELECT 'Patient created' as status, @new_rodcis as rodcis
                 END
                 ELSE
                 BEGIN
-                    SELECT 'Patient already exists' AS status;
+                    SELECT 'Patient already exists' AS status
                 END
             `;
         }
+        console.log('Executing createPatient query:', query);
         return executeQuery(query, dbConfig); // Цей виклик для Sybase
     }
 }
@@ -226,6 +227,41 @@ export async function updatePatientPhone({ phone, rodcisActual }, dbConfig) {
     }
 }
 
+/**
+ * @description Отримує список аналізів для реєстрації (тільки для Sybase).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @param {string} [searchTerm] - Необов'язковий термін для пошуку за назвою або кодом аналізу.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getAnalysesForRegistration(dbConfig, searchTerm = '') {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Analysis registration is only supported for Sybase DB.');
+        return [];
+    }
+
+    // Базовий запит
+    let query = `
+        SELECT 
+            V.kodvys, 
+            V.nazov, 
+            P.cena,
+            V.priradenie
+        FROM c_okb_vys V
+        LEFT JOIN c_okb_vykon P ON V.kodvys = P.kodvys AND V.kodlab = P.kodlab 
+        WHERE V.kodlab = '00001' AND P.cena IS NOT NULL`;
+
+    // Якщо є пошуковий термін, додаємо умову WHERE для фільтрації
+    if (searchTerm) {
+        // Додаємо умову пошуку за назвою (nazov) або кодом (kodvys)
+        query += ` AND (LOWER(V.nazov) LIKE LOWER('%${searchTerm}%') OR V.kodvys LIKE '%${searchTerm}%')`;
+    }
+
+    query += ` ORDER BY V.nazov ASC`;
+
+    return executeQuery(query, dbConfig);
+}
 /**
  * @description Пошук пацієнтів з пагінацією.
  * @param {object} params - Параметри пошуку.
@@ -262,10 +298,10 @@ export async function searchPatients({ lastName, firstName, limit, offset }, dbC
         console.log(`[DB] Пошук пацієнтів в MongoDB. Прізвище: ${lastName}, Ім'я: ${firstName}`);
 
         const query = {
-            priezvisko: { $regex: `^${lastName}`, $options: 'i' } // Виправлено поле на `priezvisko`
+            priezvisko: { $regex: `^${lastName}`, $options: 'i' }
         };
         if (firstName) {
-            query.meno = { $regex: `^${firstName}`, $options: 'i' }; // Виправлено поле на `meno`
+            query.meno = { $regex: `^${firstName}`, $options: 'i' };
         }
 
         const total = await runMongoOperation(dbConfig, 'pacients', 'countDocuments', { query });
@@ -274,8 +310,8 @@ export async function searchPatients({ lastName, firstName, limit, offset }, dbC
             options: {
                 limit,
                 skip: offset,
-                sort: { priezvisko: 1, meno: 1 }, // Виправлено поля для сортування
-                projection: { _id: 1, priezvisko: 1, meno: 1, datumnarod: 1, tel: 1, pohlavie: 1 } // Виправлено поля для вибірки
+                sort: { priezvisko: 1, meno: 1 },
+                projection: { _id: 1, priezvisko: 1, meno: 1, datumnarod: 1, tel: 1, pohlavie: 1 }
             }
         });
 
@@ -318,8 +354,16 @@ export async function searchPatients({ lastName, firstName, limit, offset }, dbC
 
         // Ця частина залишається спільною для SQL баз
         const countResult = await executeQuery(countQuery, dbConfig);
+        // Якщо запит на отримання кількості не вдався, генеруємо виняток
+        if (countResult === undefined) {
+            throw new Error(`Timeotut db connection`);
+        }
         const total = countResult?.[0]?.total || 0;
         const results = await executeQuery(dataQuery, dbConfig);
+        // Якщо запит на отримання даних не вдався, також генеруємо виняток
+        if (results === undefined) {
+            throw new Error('Не вдалося виконати запит на отримання даних пацієнтів.');
+        }
         return { results: getUniqueResults(results || []), total };
     }
 }
@@ -638,36 +682,18 @@ export async function getPatientExamDetails({ datodberu, datumnarod }, dbConfig)
 
     // Важливо: datodberu має бути в точному форматі, як в базі, включаючи час.
     const query = `
-        SELECT
-            pa.rodcis AS "ID Пацієнта",
-            CONVERT(DATE, pa.datumnarod) AS "Дата народження",
-            CONVERT(DATE, zop.datodberu) AS "Дата отримання матеріалу",
-            CONVERT(DATE, ok.datpotvrd) AS "Дата видачі результатів",
-            ok.poznamka AS "Примітка",
-            CASE
-                WHEN pa.pohlavie = 'M' THEN 'чоловіча'
-                WHEN pa.pohlavie = 'F' THEN 'жіноча'
-                ELSE 'Невідомо'
-            END AS "Стать",
-            pa.priezvisko AS "Прізвище",
-            pa.meno AS "Ім'я",
-            s.kodvys AS "Код дослідження",
-            s.skratka AS "Артикул",
-            ts.nazovskup AS "Панель",
-            s.nazov AS "Обстеження",
-            MAX(a.vysledoknum) AS "Результат",
-            MAX(a.vysledoktext) AS "Результат текст",
-            dtxt.dlhytext AS "Коментар",
-            s.kodmernjedn AS "Одиниця в.",
-            MAX(a.hranicaod) AS "Референт від",
-            MAX(a.hranicado) AS "Референт до",
-            s.pomtext AS "Опис результату",
-            cz.priezvisko AS "ЛаборантФ",
-            cz.meno AS "ЛаборантМ"
-        FROM ziad_okb_pom a JOIN c_okb_vys s ON a.kodvys = s.kodvys JOIN c_okb_tlac_skup ts ON s.kodotecvys >= ts.kodskupod AND s.kodotecvys <= ts.kodskupdo JOIN c_pacient pa ON pa.rodcis = a.rodcis JOIN ziad_okb_prac zop ON zop.datodberu = a.datodberu JOIN ziad_okb ok ON ok.datodberu = zop.datodberu JOIN c_zam cz ON ok.oscispotvr = cz.oscis LEFT JOIN dlhe_texty dtxt ON dtxt.textid = a.vysetrenieid
-        WHERE ok.datodberu = '${datodberu}' AND pa.datumnarod = '${datumnarod}' AND (s.nazov NOT LIKE '%Забір%' AND (a.vysledoknum IS NOT NULL OR a.vysledoktext <> ''))
-        GROUP BY pa.rodcis, pa.datumnarod, zop.datodberu, ok.datpotvrd, ok.poznamka, pa.pohlavie, pa.priezvisko, pa.meno, s.kodvys, s.skratka, ts.nazovskup, s.nazov, s.kodmernjedn, s.pomtext, dtxt.dlhytext, cz.priezvisko, cz.meno
-        ORDER BY s.kodvys ASC
+        
+        SELECT DISTINCT 
+       s.priradenie AS "Призначення"
+FROM ziad_okb_pom a 
+JOIN c_okb_vys s ON a.kodvys = s.kodvys 
+JOIN c_pacient pa ON pa.rodcis = a.rodcis 
+JOIN ziad_okb_prac zop ON zop.datodberu = a.datodberu 
+JOIN ziad_okb ok ON ok.datodberu = zop.datodberu 
+WHERE ok.datodberu = '${datodberu}' 
+  AND pa.datumnarod = '${datumnarod}' 
+  AND (s.nazov NOT LIKE '%Забір%' AND (a.vysledoknum IS NOT NULL OR a.vysledoktext <> ''))
+ORDER BY s.priradenie ASC;
     `;
     return executeQuery(query, dbConfig);
 }
@@ -751,6 +777,24 @@ export async function getAdministratorCashStats({ dateFrom, dateTo }, dbConfig) 
         GROUP BY cz.priezvisko, cz.meno
         HAVING SUM(d.suma) > 0
         ORDER BY suma_zamovlen DESC;`;
+
+    return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Отримує список отримувачів (відділень) для реєстрації аналізів (тільки для Sybase).
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<Array<object>|undefined>}
+ */
+export async function getRecipients(dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Recipients list is only supported for Sybase DB.');
+        return [];
+    }
+
+    const query = `SELECT NazovOdd + ' ['+RTrim(kododdokb)+']' as nazov, 1, kododdokb FROM C_ZAK_OKB WHERE (aktivny is not NULL) AND (aktivny = 'A') AND kodlab = '00001' ORDER BY nazov`;
 
     return executeQuery(query, dbConfig);
 }
@@ -854,4 +898,195 @@ export async function getAvailableIndicatorsForDynamics({ exams }, dbConfig) {
         ORDER BY s.nazov ASC
     `;
     return executeQuery(query, dbConfig);
+}
+
+/**
+ * @description Реєструє нове замовлення на аналізи в базі даних (тільки для Sybase).
+ * @param {object} payload - Дані з фронтенду.
+ * @param {object} payload.patient - Об'єкт пацієнта.
+ * @param {string} payload.patient.rodcis - ID пацієнта.
+ * @param {object} payload.recipient - Об'єкт отримувача (відділення).
+ * @param {string} payload.recipient.kododdokb - Код відділення.
+ * @param {string[]} payload.analysesCodes - Масив кодів аналізів.
+ * @param {string} payload.notes - Примітки до замовлення.
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<{success: boolean, ziadankaId: string, message?: string}>}
+ */
+export async function registerAnalyses(payload, dbConfig) {
+    const { patient, recipient, analysesCodes, notes, priority } = payload;
+
+    if (dbConfig.type !== 'sybase') {
+        throw new Error('Реєстрація аналізів підтримується тільки для Sybase.');
+    }
+
+    if (!patient || !patient.rodcis) {
+        throw new Error('Не надано коректні дані пацієнта (відсутній rodcis).');
+    }
+
+    if (!analysesCodes || analysesCodes.length === 0) {
+        throw new Error('Список аналізів для реєстрації порожній.');
+    }
+
+    // 1. Генеруємо унікальний ID для `ziadanka`
+    const ziadankaId = `Z${Date.now().toString().slice(-9)}`;
+    const datodberu = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    // Отримуємо рік народження з дати народження пацієнта
+    const roknarod = patient.datumnarod ? new Date(patient.datumnarod).getFullYear() : 1900;
+
+    // 2. Створюємо основний запис в `ziad_okb`
+    const ziadOkbQuery = `
+        INSERT INTO ziad_okb (doverne, rodcis, datodberu, kododdokb, poznamka, stavziad, oscisodber, oscisprijmu, oscispotvr, datumpotvr, koddiagnozy, priorita, externe, platca, kodlab, pracovisko, porcispobyt, kododd, typziad, roknarod, miestzadziad, kodpoist, evidencnecislo)
+        VALUES (
+            '7', -- dôverné (7-стандартне)
+            
+            '${patient.rodcis}', -- rodné číslo pacienta (ID пацієнта)
+            '${datodberu}', -- dátum odberu (дата забору)
+            '${recipient?.kododdokb || '00001'}', -- kód oddelenia na okb (код відділення на ОКБ)
+            '${notes || ''}', -- poznámka (примітка)
+            1, -- stav žiadanky (0-неприйнято, 1-прийнято, 2-в роботі, 3-завершено, 4-відхилено)
+            8, -- kto objednal (хто замовив, ID користувача)
+            8, -- kto prijal (хто прийняв, ID користувача)
+            NULL, -- kto potvrdil (хто підтвердив)
+            NULL, -- dátum potvrdenia (дата підтвердження)
+            'R59', -- kód diagnózy (код діагнозу) - ЗАГЛУШКА
+            '${priority === 's' ? 'S' : 'R'}', -- priorita (пріоритет, R-рутина, S-statim)
+            'N', -- externé vyšetrenie (зовнішнє обстеження)
+            'S', -- platca (платник, S-самооплата)
+            '00001', -- kód laboratória (код лабораторії)
+            1, -- pracovisko, na ktorom sa žiadanka spracuje (робоче місце обробки)
+            1, -- poradové číslo pobytu (порядковий номер перебування)
+            '00001', -- kód oddelenia ktoré zadalo žiadanku (код відділення, що створило заявку)
+            '${priority}', -- typ žiadanky (b-звичайна, c-cito, s-statim)
+            ${roknarod}, -- rok narodenia pacienta (рік народження пацієнта)
+            'o', -- miesto zadania žiadanky (o - на ОКБ, null - в іншому місці)
+            '0000', -- kód poisťovne pacienta (код страхової компанії)
+            '${patient.rodcis}' -- evidenčné číslo poisťovne (реєстраційний номер страхової)
+        )
+    `;
+
+    const mainResult = await executeQuery(ziadOkbQuery, dbConfig);
+    if (mainResult === undefined) {
+        throw new Error('Не вдалося створити основний запис обстеження в ziad_okb.');
+    }
+
+    // 3. Додаємо кожен аналіз в `ziad_okb_pom`
+    for (const kodvys of analysesCodes) {
+        const ziadOkbPomQuery = `
+            INSERT INTO ziad_okb_pom (ziadanka, rodcis, datodberu, kodvys, stavvys, oscispotvr, datumpotvr, vysetrenieid, kodlab, kododd, kododdokb, porcispobyt, pracovisko, opakovane, priznak, priznak2)
+            VALUES (
+                '${ziadankaId}',
+                '${patient.rodcis}',
+                '${datodberu}', -- dátum odberu (дата забору)
+                '${kodvys}', -- kód vyšetrovaného parametra (код аналізу)
+                1, -- stav vyšetrenia (0-неприйнято, 1-прийнято/задано, 2-підтверджено)
+                NULL, -- kto potvrdil vyšetrenie (хто підтвердив)
+                NULL, -- dátum/čas potvrdenia vyšetrenia (дата/час підтвердження)
+                ${Date.now()}, -- vysetrenieid (унікальний ID обстеження)
+                '00001', -- kód laboratória (код лабораторії)
+                '00001', -- kód oddelenia (код відділення)
+                '00001', -- kód oddelenia okb (код відділення ОКБ)
+                1, -- poradové číslo pobytu (порядковий номер перебування)
+                1, -- pracovisko, na ktorom sa vyšetrenia spracujú (робоче місце обробки)
+                1,
+                '0',
+                '1100000000'
+            )
+        `;
+        const pomResult = await executeQuery(ziadOkbPomQuery, dbConfig);
+        if (pomResult === undefined) {
+            // В ідеалі тут має бути логіка відкату транзакції
+            console.warn(`Не вдалося додати аналіз ${kodvys} для запиту ${ziadankaId}.`);
+        }
+    }
+
+    return { success: true, ziadankaId };
+}
+/**
+ * @description Отримує список зареєстрованих досліджень за датою та статусом (тільки для Sybase).
+ * @param {object} params - Параметри запиту.
+ * @param {string} params.date - Дата для фільтрації (YYYY-MM-DD).
+ * @param {string} params.status - Статус для фільтрації.
+ * @param {string} [params.searchTerm] - Рядок для пошуку по ПІБ.
+ * @param {number} params.page - Номер сторінки.
+ * @param {number} params.limit - Кількість записів на сторінці.
+ * @param {object} dbConfig - Конфігурація бази даних.
+ * @returns {Promise<{results: Array<object>, total: number}>}
+ */
+export async function getRegisteredExams({ date, status = '1', searchTerm = '', page = 1, limit = 20 }, dbConfig) {
+    const dbType = dbConfig.type || 'sybase';
+
+    if (dbType !== 'sybase') {
+        console.warn('Registered exams list is only supported for Sybase DB.');
+        return { results: [], total: 0 };
+    }
+    
+    // Формуємо діапазон дат для запиту, щоб охопити весь день
+    const startDate = `${date} 00:00:00`;
+    const endDate = `${date} 23:59:59`;
+    const offset = (page - 1) * limit;
+    const sybaseOffset = offset + 1;
+
+    // Оптимізований запит з LEFT JOIN для підрахунку суми
+    let baseQuery = `
+        FROM 
+            ziad_okb z
+        JOIN 
+            c_pacient p ON z.rodcis = p.rodcis
+        JOIN
+            pac_dem pd ON p.rodcis = pd.rodcis
+        LEFT JOIN (
+            SELECT 
+                zp.datodberu,
+                SUM(vyk.cena) AS suma
+            FROM 
+                ziad_okb_pom zp
+            JOIN 
+                c_okb_vykon vyk ON zp.kodvys = vyk.kodvys
+            WHERE 
+                zp.datodberu >= '${startDate}' AND zp.datodberu <= '${endDate}'
+                AND vyk.cena IS NOT NULL
+            GROUP BY 
+                zp.datodberu
+        ) s ON z.datodberu = s.datodberu
+        WHERE 
+            z.datodberu >= '${startDate}' AND z.datodberu <= '${endDate}' 
+            AND z.kodlab = '00001'
+            AND z.pracovisko = '1'
+            AND z.stavziad = ${parseInt(status, 10)}
+    `;
+
+    // Додаємо умову пошуку, якщо вона є
+    if (searchTerm && searchTerm.trim() !== '') {
+        const escapedSearchTerm = searchTerm.replace(/'/g, "''"); // Екрануємо апострофи
+        baseQuery += ` AND (LOWER(p.priezvisko) LIKE '%${escapedSearchTerm.toLowerCase()}%' OR LOWER(p.meno) LIKE '%${escapedSearchTerm.toLowerCase()}%')`;
+    }
+
+    // Запит для отримання загальної кількості
+    const countQuery = `SELECT COUNT(*) as total ${baseQuery}`;
+    const countResult = await executeQuery(countQuery, dbConfig);
+    const total = countResult?.[0]?.total || 0;
+
+    // Запит для отримання даних для поточної сторінки
+    const dataQuery = `
+        SELECT TOP ${limit} START AT ${sybaseOffset}
+            z.evidcis, /* <-- Змінено: було z.rodcis, тепер z.evidcis */
+            z.datodberu,
+            z.stavziad,
+            z.typziad,
+            p.priezvisko,
+            p.meno,
+            p.datumnarod,
+            pd.tel,
+           
+            COALESCE(s.suma, 0) AS suma
+        ${baseQuery}
+        ORDER BY 
+            
+            z.evidcis ASC
+    `;
+
+    const results = await executeQuery(dataQuery, dbConfig);
+   
+    return { results: results || [], total };
 }

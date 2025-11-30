@@ -6,33 +6,35 @@
  */
 
 const BRANCHES = {
-	ad: {
+    ad: {
         path: '/hmuadmin',
         resultPath: '/ad',
         depId: 'ad',
         hasAdvancedPatientSearch: true,
         hasPartnerLab: false, // Наявність лабораторії партнера
-       // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
+        // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
         publicUrl: 'http://85.159.5.112:1090/ad',
         //labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
         titleKey: "branchTitle_ad",
         clinicNameKey: "branchClinicName_ad",
         smsTextKey: "branchSmsText_ad",
         isEnglishReport: true,
-         "reports": { // <-- НОВИЙ БЛОК
-        "enabled": true,
-        "available": [
-            "clinicRegistrationStats",
-            "examRegistrationStats",
-            "administratorCashStats",
-            "administratorLabCashStats"
-        ]
-    },  channel: 'sms',
+        hasAnalysisRegistration: true,
+        LabCode: '00001', // Код лабораторії для реєстрації аналізів
+        "reports": { // <-- НОВИЙ БЛОК
+            "enabled": true,
+            "available": [
+                "clinicRegistrationStats",
+                "examRegistrationStats",
+                "administratorCashStats",
+                "administratorLabCashStats"
+            ]
+        }, channel: 'sms',
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
         auth: { user: process.env.AUTH_USER_AD, pass: process.env.AUTH_PASS_AD },
         sms: { token: process.env.SMS_TOKEN_MRT, sender: process.env.SMS_SENDER_MRT },
-        
-        db: { dsn: process.env.DB_DSN_SYBASE , type : 'sybase'} ,// DSN для Sybase
+
+        db: { dsn: process.env.DB_DSN_SYBASE, type: 'sybase' },// DSN для Sybase
         // Конфігурація для Oracle
         /*db: {
             type: 'oracle',
@@ -42,8 +44,8 @@ const BRANCHES = {
         },*/
 
         storage: {
-            type: 'ftp', 
-            config: { 
+            type: 'ftp',
+            config: {
                 host: process.env.FTP_HOST,
                 user: process.env.FTP_USER,
                 password: process.env.FTP_PASS
@@ -56,27 +58,27 @@ const BRANCHES = {
         depId: 'rc',
         hasAdvancedPatientSearch: true,
         hasPartnerLab: false, // Наявність лабораторії партнера
-       // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
+        // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
         publicUrl: 'http://85.159.5.112:1090/rc',
         //labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
         titleKey: "branchTitle_mrt",
         clinicNameKey: "branchClinicName_mrt",
         smsTextKey: "branchSmsText_mrt",
         isEnglishReport: true,
-         "reports": { // <-- НОВИЙ БЛОК
-        "enabled": false,
-        "available": [
-            "clinicRegistrationStats",
-            "examRegistrationStats",
-            "administratorCashStats"
-        ]
-    },
+        "reports": { // <-- НОВИЙ БЛОК
+            "enabled": false,
+            "available": [
+                "clinicRegistrationStats",
+                "examRegistrationStats",
+                "administratorCashStats"
+            ]
+        },
         channel: 'sms',
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
         auth: { user: process.env.AUTH_USER_RC, pass: process.env.AUTH_PASS_RC },
         sms: { token: process.env.SMS_TOKEN_MRT, sender: process.env.SMS_SENDER_MRT },
-        
-        db: { dsn: process.env.DB_DSN_SYBASE , type : 'sybase'} ,// DSN для Sybase
+
+        db: { dsn: process.env.DB_DSN_SYBASE, type: 'sybase' },// DSN для Sybase
         // Конфігурація для Oracle
         /*db: {
             type: 'oracle',
@@ -86,8 +88,8 @@ const BRANCHES = {
         },*/
 
         storage: {
-            type: 'ftp', 
-            config: { 
+            type: 'ftp',
+            config: {
                 host: process.env.FTP_HOST,
                 user: process.env.FTP_USER,
                 password: process.env.FTP_PASS
@@ -109,10 +111,11 @@ const BRANCHES = {
         channel: 'sms', // <--- Перемикач каналу
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
         auth: { user: process.env.AUTH_USER_ZDVRD, pass: process.env.AUTH_PASS_ZDVRD },
-        sms: { token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD
- },
+        sms: {
+            token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD
+        },
         viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
-      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
         db: {
             type: 'oracle',
             user: process.env.DB_USER_ORA_RD,
@@ -145,10 +148,11 @@ const BRANCHES = {
         channel: 'sms', // <--- Перемикач каналу
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
         auth: { user: process.env.AUTH_USER_CT, pass: process.env.AUTH_PASS_CT },
-        sms: { token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD
- },
+        sms: {
+            token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD
+        },
         viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
-      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
         db: {
             type: 'oracle',
             user: process.env.DB_USER_ORA_RD,
@@ -181,15 +185,15 @@ const BRANCHES = {
         sms: { token: process.env.SMS_TOKEN_ZDVRD, sender: process.env.SMS_SENDER_ZDVRD },
         db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
         storage: {
-            type: 'ftp', 
-            config: { 
+            type: 'ftp',
+            config: {
                 host: process.env.FTP_HOST,
                 user: process.env.FTP_USER,
                 password: process.env.FTP_PASS
             }
         }
     },
-     ol: {
+    ol: {
         path: '/onelab',
         hasPartnerLab: false, // Наявність лабораторії партнера
         resultPath: '/ol',
@@ -202,6 +206,7 @@ const BRANCHES = {
         clinicNameKey: "branchClinicName_ol",
         smsTextKey: "branchSmsText_ol",
         hasAdvancedPatientSearch: true,
+        
         advancedSearch: {
             url: 'http://195.211.240.20:11998/KDG_SIMPLE_LAB_API/Onelab/', // URL вашого API
             token: 'b25lbGFifG9uZUxhYldlYjpvbmVMYWJXZWIxMjMh' // Токен авторизації
@@ -211,7 +216,7 @@ const BRANCHES = {
         auth: { user: process.env.AUTH_USER_OL, pass: process.env.AUTH_PASS_OL },
         sms: { token: process.env.SMS_TOKEN_OL, sender: process.env.SMS_SENDER_OL },
         viber: { token: process.env.VIBER_TOKEN_RD, sender: process.env.VIBER_SENDER_RD }, // Потрібно додати в .env
-      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
         db: {
             type: 'oracle',
             user: process.env.DB_USER_ORA_OL,
@@ -229,7 +234,7 @@ const BRANCHES = {
             }
         }
     },
-      zd: {
+    zd: {
         path: '/zdorovya',
         hasPartnerLab: true, // Наявність лабораторії партнера
         resultPath: '/zd',
@@ -251,7 +256,7 @@ const BRANCHES = {
         auth: { user: process.env.AUTH_USER_ZD, pass: process.env.AUTH_PASS_ZD },
         sms: { token: process.env.SMS_TOKEN_ZD, sender: process.env.SMS_SENDER_ZD },
         viber: { token: process.env.VIBER_TOKEN_ZD, sender: process.env.VIBER_SENDER_ZD }, // Потрібно додати в .env
-      //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
+        //  db: { dsn: process.env.DB_DSN_SYBASE }, // DSN для Sybase
         db: {
             type: 'oracle',
             user: process.env.DB_USER_ORA_ZD,
@@ -270,7 +275,7 @@ const BRANCHES = {
         }
     },
 
-mongo: {
+    mongo: {
         path: '/mongo',
         resultPath: '/mg',
         depId: 'mg',
@@ -283,13 +288,13 @@ mongo: {
         smsTextKey: "branchSmsText_rd",
         channel: 'sms', // <--- Перемикач каналу 'sms' - 'viber'
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
-         auth: { user: process.env.AUTH_USER_MONGO, pass: process.env.AUTH_PASS_MONGO },
-         sms: { token: process.env.SMS_TOKEN_MONGO, sender: process.env.SMS_SENDER_MONGO },
-         db: {
-             type: 'mongodb',
-             uri: process.env.DB_MONGO_URI, // Напр., "mongodb://localhost:27017"
-             dbName: process.env.DB_MONGO_NAME // Напр., "MedicalHubDb"
-         },
+        auth: { user: process.env.AUTH_USER_MONGO, pass: process.env.AUTH_PASS_MONGO },
+        sms: { token: process.env.SMS_TOKEN_MONGO, sender: process.env.SMS_SENDER_MONGO },
+        db: {
+            type: 'mongodb',
+            uri: process.env.DB_MONGO_URI, // Напр., "mongodb://localhost:27017"
+            dbName: process.env.DB_MONGO_NAME // Напр., "MedicalHubDb"
+        },
         storage: {
             type: 'google-drive',
             config: {

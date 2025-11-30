@@ -738,6 +738,10 @@ video {
   margin-top: 2rem;
 }
 
+.mt-16 {
+  margin-top: 4rem;
+}
+
 .block {
   display: block;
 }
@@ -1756,4 +1760,13 @@ video {
     font-size: 1.875rem;
     line-height: 2.25rem;
   }
+}
+
+@keyframes pulse {
+    50% {
+        opacity: .5;
+    }
+}
+.animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }

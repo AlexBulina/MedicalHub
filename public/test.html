@@ -1,0 +1,86 @@
+<style>
+/* 1. Профіль для наклейки */
+@page sticker-mode {
+    size: 50mm 25mm;
+    margin: 0;
+}
+
+/* 2. Профіль для А4 */
+@page a4-mode {
+    size: A4;
+    margin: 10mm; /* Стандартні поля для документів */
+}
+
+/* Клас для обгортки наклейок */
+.sticker-container {
+    page: sticker-mode; /* <--- ОСЬ МАГІЯ */
+    display: none;      /* Ховаємо на екрані, показуємо при друку */
+}
+
+/* Клас для обгортки документів */
+.invoice-container {
+    page: a4-mode;      /* <--- Перемикаємо на А4 */
+    display: none;
+    background: white;
+}
+
+/* Показуємо потрібне при друку */
+@media print {
+    /* Логіка показу залежить від того, яку кнопку натиснули (див. JS нижче) */
+    body.printing-sticker .sticker-container {
+        display: block;
+    }
+    
+    body.printing-invoice .invoice-container {
+        display: block;
+    }
+    
+    /* Ховаємо все інше */
+    body > :not(.sticker-container):not(.invoice-container) {
+        display: none;
+    }
+}
+</style><!DOCTYPE html>
+<html lang="uk">
+
+
+
+
+
+
+
+
+<button onclick="printSticker()">🖨️ Друк Наклейки</button>
+<button onclick="printInvoice()">📄 Друк А4</button>
+
+<div class="sticker-container">
+    <div class="label">...штрих-код...</div>
+</div>
+
+<div class="invoice-container">
+    <h1>Накладна №123</h1>
+    <p>Товарів: 5 шт...</p>
+</div>
+
+<script>
+    function printSticker() {
+        document.body.classList.add('printing-sticker');
+        document.body.classList.remove('printing-invoice');
+        window.print();
+        // Прибираємо клас після закриття вікна друку (не завжди спрацьовує ідеально, але бажано)
+        // document.body.classList.remove('printing-sticker'); 
+    }
+
+    function printInvoice() {
+        document.body.classList.add('printing-invoice');
+        document.body.classList.remove('printing-sticker');
+        window.print();
+    }
+    
+    // Лайфхак: очистка класів після завершення друку
+    window.onafterprint = function() {
+        document.body.className = '';
+    };
+
+    
+</script>

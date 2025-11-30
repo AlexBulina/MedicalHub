@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="uk">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Друк етикеток 50x25</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <style>
+        /* Базові стилі для екрану */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        /* Контейнер для етикеток */
+        #labels-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        /* Стиль самої етикетки (50x25mm) */
+        .label {
+            width: 50mm;
+            height: 25mm;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            padding: 2px 4px;
+            border: 1px solid #ddd;
+            /* Рамка для екрану */
+            overflow: hidden;
+        }
+
+        /* SVG-штрихкод */
+        .barcode-svg {
+            max-width: 95%;
+            width: 95%;
+            height: auto;
+            display: block;
+        }
+
+        .label-text {
+            font-size: 10px;
+            margin: 2px 0 0 0;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.1;
+            font-weight: 600;
+        }
+
+        .label-symbol {
+            font-size: 11px;
+            margin: 0;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+            white-space: normal;
+            line-height: 1;
+        }
+
+        /* --- НАЛАШТУВАННЯ ДЛЯ ДРУКУ --- */
+        @media print {
+            @page {
+                size: 50mm 25mm;
+                margin: 0;
+            }
+
+            body {
+                background: none;
+                padding: 0;
+                margin: 0;
+                display: block;
+            }
+
+            #no-print {
+                display: none;
+            }
+
+            #labels-container {
+                display: block;
+                gap: 0;
+            }
+
+            .label {
+                border: none;
+                page-break-after: always;
+                /* Розрив сторінки після кожної етикетки */
+                break-inside: avoid;
+                margin: 0 auto;
+                padding: 0;
+            }
+
+            .label:last-child {
+                page-break-after: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="no-print" style="text-align: center;">
+        <h1>Штрих-коди замовлення</h1>
+        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">🖨️
+            Друкувати</button>
+        <button onclick="window.close()"
+            style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;">❌ Закрити</button>
+        <hr>
+    </div>
+
+    <div id="labels-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('labels-container');
+            const storedData = localStorage.getItem('barcodeData');
+
+            if (!storedData) {
+                container.innerHTML = '<p style="text-align:center; width:100%;">Дані не знайдено.</p>';
+                return;
+            }
+
+            let data;
+            try {
+                data = JSON.parse(storedData);
+            } catch (e) {
+                console.error("Error parsing JSON", e);
+                container.innerHTML = '<p style="text-align:center; width:100%;">Помилка читання даних.</p>';
+                return;
+            }
+
+            // Деструктуруємо дані, беремо запасні поля, якщо вони є
+            const { orderId: storedOrderId, patientName, label, patientDob, datodberu, registrationDate, evidcis, typziad } = data;
+
+            // Змінна label містить масив призначень (priradenie)
+            const assignments = Array.isArray(label) ? label : (label ? [label] : []);
+
+            // Функція для обчислення фінального orderId у форматі YYMM{typziad}{NNNN}{labelChar}
+            const computeFinalOrderId = () => {
+                // 1) Розберемо дату замовлення: намагаємося в порядку datodberu, registrationDate, patientDob
+                let dateStr = datodberu;
+                let dt = dateStr ? new Date(dateStr) : new Date();
+                if (isNaN(dt.getTime())) dt = new Date();
+
+                const yearTwo = dt.getFullYear().toString().slice(-2);
+                const monthTwo = String(dt.getMonth() + 1).padStart(2, '0');
+
+                // 2) typziad / label char: беремо в порядку: data.typziad (явний), дані з label масиву, дефолт 'B'
+                let labelChar = 'B';
+                if (typziad) {
+                    labelChar = String(typziad).trim().toUpperCase().charAt(0);
+                } else if (Array.isArray(assignments) && assignments.length > 0 && assignments[0]) {
+                    labelChar = String(assignments[0]).trim().toUpperCase().charAt(0);
+                }
+
+                // 3) Номер замовлення: спробуємо витягти цифри з evidcis або storedOrderId
+                let orderNumber = '';
+                if (evidcis) {
+                    const digits = String(evidcis).replace(/\D/g, '');
+                    if (digits.length > 0) orderNumber = digits.slice(-4);
+                }
+                if (!orderNumber && storedOrderId && typeof storedOrderId === 'string') {
+                    const digits = storedOrderId.replace(/\D/g, '');
+                    if (digits.length > 0) orderNumber = digits.slice(-4);
+                }
+
+                // якщо все ще немає — підставити '0000'
+                if (!orderNumber) orderNumber = '0000';
+                orderNumber = orderNumber.padStart(4, '0');
+
+                return `${yearTwo}${monthTwo}${labelChar}${orderNumber}${labelChar}`;
+            };
+
+            const finalOrderId = computeFinalOrderId();
+            // Записуємо назад, щоб далі використовувати єдиний ID
+            data.orderId = finalOrderId;
+
+            if (!assignments || assignments.length === 0 || (assignments.length === 1 && !assignments[0])) {
+                console.warn("Масив призначень порожній.");
+                // Генеруємо хоча б одну загальну, якщо нічого немає
+                generateLabel(data.orderId, patientName, "Загальний");
+            } else {
+                // Генеруємо етикетку для кожного елемента масиву
+                assignments.forEach((itemName, index) => {
+                    // Унікальний ID: Базовий ID + номер пробірки (наприклад: MH-123456-1)
+                    const uniqueBarcodeValue = `${data.orderId}-${index + 1}`;
+
+                    // Назва на етикетці (наприклад "Фіолетова", "Сироватка" тощо)
+                    const displayLabel = itemName || `Пробірка ${index + 1}`;
+
+                    generateLabel(uniqueBarcodeValue, patientName, displayLabel);
+                });
+            }
+
+            function generateLabel(barcodeValue, patientName, labelName) {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'label';
+
+                // Створюємо SVG елемент
+                const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+
+                // Очищаємо ID від спецсимволів для використання в DOM
+                const safeId = barcodeValue.replace(/[^a-zA-Z0-9]/g, '-');
+                const svgContainerId = `svg-${safeId}`;
+
+                // Формуємо структуру HTML
+                // Спочатку SVG, потім Ім'я, потім Тип аналізу/пробірки
+                labelDiv.innerHTML = `
+                    <div id="wrapper-${safeId}" style="display:flex; justify-content:center; width:100%; margin-top:2px;"></div>
+                    <p class="label-text">${patientName}</p>
+                    <p class="label-symbol">${labelName}</p>
+                `;
+
+                container.appendChild(labelDiv);
+
+                // Знаходимо контейнер для SVG всередині створеного div
+                const svgWrapper = labelDiv.querySelector(`#wrapper-${safeId}`);
+                svg.classList.add('barcode-svg');
+                svgWrapper.appendChild(svg);
+
+                try {
+                    JsBarcode(svg, barcodeValue, {
+                        format: "CODE128",
+                        width: 1.5,        // Трохи ширші лінії для кращого сканування
+                        height: 60,        // Висота штрихів
+                        fontSize: 12,      // Розмір тексту під кодом (ID)
+                        textMargin: 0,
+                        margin: 1,
+                        displayValue: true // Показувати сам номер під штрих-кодом
+                    });
+                } catch (e) {
+                    console.error("Barcode generation error:", e);
+                    svgWrapper.innerText = "Error";
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

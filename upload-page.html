@@ -513,6 +513,7 @@
                     </div>
                 </div>
             </div>
+
         </div>
 
         <!-- File Upload Card -->
@@ -1280,8 +1281,6 @@
                         reportsTabButton.classList.remove('hidden');
                         buildReportsMenu(config.reports.available);
                     }
-
-                    // Примусово оновлюємо текст кнопки після зміни атрибута
                     translatePage();
                 }
                 // Завантажуємо журнал після отримання конфігурації, якщо це не зміна мови
@@ -3036,6 +3035,7 @@
             // Запуск основних функцій при завантаженні сторінки.
             initializePage();
             checkSmsServiceStatus(); // Перша перевірка при завантаженні
+
             setupJournalPolling(); // Запускаємо фонове оновлення
 
             updateSmsButtonState();
