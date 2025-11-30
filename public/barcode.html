@@ -163,7 +163,7 @@
                 const monthTwo = String(dt.getMonth() + 1).padStart(2, '0');
 
                 // 2) typziad / label char: беремо в порядку: data.typziad (явний), дані з label масиву, дефолт 'B'
-                let labelChar = 'B';
+                let labelChar = typziad;
                 if (typziad) {
                     labelChar = String(typziad).trim().toUpperCase().charAt(0);
                 } else if (Array.isArray(assignments) && assignments.length > 0 && assignments[0]) {
@@ -185,7 +185,7 @@
                 if (!orderNumber) orderNumber = '0000';
                 orderNumber = orderNumber.padStart(4, '0');
 
-                return `${yearTwo}${monthTwo}${labelChar}${orderNumber}${labelChar}`;
+                return `${yearTwo}${monthTwo}${typziad}${orderNumber}`;
             };
 
             const finalOrderId = computeFinalOrderId();
@@ -199,11 +199,11 @@
             } else {
                 // Генеруємо етикетку для кожного елемента масиву
                 assignments.forEach((itemName, index) => {
-                    // Унікальний ID: Базовий ID + номер пробірки (наприклад: MH-123456-1)
-                    const uniqueBarcodeValue = `${data.orderId}-${index + 1}`;
+                    // Унікальний ID: Базовий ID  (наприклад: MH-123456-1)
+                    const uniqueBarcodeValue = `${data.orderId}`;
 
                     // Назва на етикетці (наприклад "Фіолетова", "Сироватка" тощо)
-                    const displayLabel = itemName || `Пробірка ${index + 1}`;
+                    const displayLabel = itemName || `Пробірка`;
 
                     generateLabel(uniqueBarcodeValue, patientName, displayLabel);
                 });
@@ -217,13 +217,14 @@
                 const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
 
                 // Очищаємо ID від спецсимволів для використання в DOM
-                const safeId = barcodeValue.replace(/[^a-zA-Z0-9]/g, '-');
+                let safeId = barcodeValue.replace(/[^a-zA-Z0-9]/g);
+                safeId += labelName.replace(/[^a-zA-Z0-9]/g);
                 const svgContainerId = `svg-${safeId}`;
 
                 // Формуємо структуру HTML
                 // Спочатку SVG, потім Ім'я, потім Тип аналізу/пробірки
                 labelDiv.innerHTML = `
-                    <div id="wrapper-${safeId}" style="display:flex; justify-content:center; width:100%; margin-top:2px;"></div>
+                    <div id="wrapper-${safeId}" style="display:flex; justify-content:center; width:100%; margin-top:5px;"></div>
                     <p class="label-text">${patientName}</p>
                     <p class="label-symbol">${labelName}</p>
                 `;
@@ -236,10 +237,10 @@
                 svgWrapper.appendChild(svg);
 
                 try {
-                    JsBarcode(svg, barcodeValue, {
+                    JsBarcode(svg, safeId, {
                         format: "CODE128",
                         width: 1.5,        // Трохи ширші лінії для кращого сканування
-                        height: 60,        // Висота штрихів
+                        height: 50,        // Висота штрихів
                         fontSize: 12,      // Розмір тексту під кодом (ID)
                         textMargin: 0,
                         margin: 1,

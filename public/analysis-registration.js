@@ -876,7 +876,7 @@ document.addEventListener('DOMContentLoaded', () => {
             registrationDate: registrationDateIso, // Дата реєстрації дослідження
             datodberu: patient.datodberu || registrationDateIso, // Якщо немає дати забору — використовуємо дату реєстрації
             evidcis: patient.evidcis || null, // Номер замовлення (якщо є)
-            typziad: patient.typziad || patient.type || null, // Тип замовлення (якщо є)
+            typziad: patient.typziad, // Тип замовлення
             analyses: analyses && analyses.length > 0 ? analyses.map(analysis => ({
                 name: analysis.nazov,
                 code: analysis.kodvys

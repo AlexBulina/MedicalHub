@@ -1238,7 +1238,7 @@
                             // Зберігаємо дані в data-атрибутах для легкого доступу
                             const statusInfo = statusMap[exam.stavziad] || { text: 'Невідомо', class: 'bg-gray-100 text-gray-800' };
                             const row = `
-                                <tr data-datodberu="${exam.datodberu}" data-datumnarod="${exam.datumnarod}">
+                                <tr data-datodberu="${exam.datodberu}" data-datumnarod="${exam.datumnarod}" data-typziad="${exam.typziad}">
                                     <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-800">${exam.evidcis || ''}</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${exam.priezvisko || ''} ${exam.meno || ''}</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${new Date(exam.datodberu).toLocaleString('uk-UA')}</td>
@@ -1381,7 +1381,8 @@
                         meno: modalPatientData.name.split(' ').slice(1).join(' ') || '',
                         datumnarod: modalPatientData.datumnarod,
                         evidcis: modalPatientData.evidcis,
-                        datodberu: modalPatientData.datodberu
+                        datodberu: modalPatientData.datodberu,
+                        typziad: modalPatientData.typziad
                     };
 
                     // Отримаємо деталі обстеження з бекенду, щоб витягти унікальні "Призначення"
@@ -1445,6 +1446,7 @@
                     const row = event.target.closest('tr');
                     const datodberu = row.dataset.datodberu;
                     const datumnarod = row.dataset.datumnarod;
+                    const typziad = row.dataset.typziad;
 
                     // Отримуємо дані пацієнта з рядка таблиці
                     const evidcis = row.cells[0].textContent;
@@ -1455,7 +1457,8 @@
                         evidcis: evidcis,
                         name: name,
                         datumnarod: datumnarod,
-                        datodberu: datodberu
+                        datodberu: datodberu,
+                        typziad: typziad
                     };
 
                     datodberuBarcodes = modalPatientData.datodberu;

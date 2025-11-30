@@ -1020,7 +1020,7 @@ export async function getRegisteredExams({ date, status = '1', searchTerm = '', 
         console.warn('Registered exams list is only supported for Sybase DB.');
         return { results: [], total: 0 };
     }
-    
+
     // Формуємо діапазон дат для запиту, щоб охопити весь день
     const startDate = `${date} 00:00:00`;
     const endDate = `${date} 23:59:59`;
@@ -1087,6 +1087,6 @@ export async function getRegisteredExams({ date, status = '1', searchTerm = '', 
     `;
 
     const results = await executeQuery(dataQuery, dbConfig);
-   
+
     return { results: results || [], total };
 }
