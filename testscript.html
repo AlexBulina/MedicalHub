@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="uk" class=""> <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tailwind Dark Mode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Конфігурація Tailwind для роботи з класом
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+</head>
+<body class="bg-gray-100 dark:bg-slate-900 min-h-screen flex flex-col items-center justify-center p-6 transition-colors duration-500">
+
+    <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl flex flex-col items-center gap-6 transition-colors duration-500">
+        <h1 class="text-xl font-bold text-gray-800 dark:text-white">Налаштування системи</h1>
+
+        <label class="relative inline-flex items-center cursor-pointer select-none group">
+            <input type="checkbox" id="theme-toggle" class="sr-only peer">
+            
+            <div class="w-16 h-8 bg-gray-300 rounded-full transition-all duration-300 
+                        peer-checked:bg-indigo-600 group-hover:bg-gray-400 dark:bg-gray-600 
+                        peer-checked:group-hover:bg-indigo-700">
+            </div>
+            
+            <div class="absolute left-1 top-1 w-6 h-6 bg-white rounded-full shadow-lg transition-all duration-300 transform 
+                        peer-checked:translate-x-8 peer-active:scale-95">
+            </div>
+
+            <span class="ml-4 text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider" id="status-text">
+                Світла
+            </span>
+        </label>
+
+        <p class="text-gray-500 dark:text-gray-400 text-sm text-center">
+            Натисніть, щоб змінити режим фону сторінки
+        </p>
+    </div>
+
+    <script>
+        const toggle = document.getElementById('theme-toggle');
+        const statusText = document.getElementById('status-text');
+        const html = document.documentElement;
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked) {
+                html.classList.add('dark');
+                statusText.innerText = 'Темна';
+                statusText.classList.replace('text-gray-600', 'text-indigo-400');
+            } else {
+                html.classList.remove('dark');
+                statusText.innerText = 'Світла';
+                statusText.classList.replace('text-indigo-400', 'text-gray-600');
+            }
+        });
+    </script>
+</body>
+</html>

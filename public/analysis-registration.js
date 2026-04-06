@@ -248,6 +248,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         currentPage = page;
+        
         patientSearchLoader.classList.remove('hidden');
         patientSearchError.classList.add('hidden');
         patientSearchResults.innerHTML = '';
@@ -473,6 +474,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // BLOCK 2: ANALYSIS SELECTION
     // ============================================
 
+    /**
+     * Визначає назву макроса з коду аналізу.
+     * Якщо код починається з 'М' (кирилиця) і має більше одного символу, повертає частину після 'М'.
+     * В іншому випадку повертає null.
+     * @param {string} code - Код аналізу (kodvys).
+     * @returns {string|null} Назва макроса або null.
+     */
+    function getMacroName(code) {
+        return (typeof code === 'string' && code.startsWith('М') && code.length > 1) ? code.substring(1) : null;
+    }
+
     async function loadAnalyses() { // Завантажує аналізи в пам'ять, але не відображає їх
         if (allAnalyses.length > 0) return; // Не перезавантажуємо, якщо дані вже є
 
@@ -551,9 +563,13 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        const macroName = getMacroName(analysis.kodvys);
+
         // Якщо це пакет (код починається з 'M'), отримуємо його склад
-        if (analysis.kodvys && String(analysis.kodvys).startsWith('М')) {
-            const kodSkup = String(analysis.kodvys).substring(1);
+        const analysisToPush = { ...analysis, macroName }; // Додаємо macroName до об'єкта
+
+        if (analysisToPush.kodvys && String(analysisToPush.kodvys).startsWith('М')) {
+            const kodSkup = String(analysisToPush.kodvys).substring(1); // Використовуємо kodvys з analysisToPush
             try {
                 const response = await fetch('/api/package-contents', {
                     method: 'POST',
@@ -562,18 +578,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (!response.ok) throw new Error('Не вдалося завантажити склад пакету.');
                 const contents = await response.json();
-                analysis.containedAnalyses = contents.map(item => item.KodVys);
+                analysisToPush.containedAnalyses = contents.map(item => item.KodVys); // Оновлюємо containedAnalyses в analysisToPush
 
                 // Виводимо в консоль для тестування, як просили
-                console.log(`Додано пакет: ${analysis.nazov} (Код: ${analysis.kodvys})`);
-                console.log('Склад пакету (коди аналізів):', analysis.containedAnalyses);
+                console.log(`Додано пакет: ${analysisToPush.nazov} (Код: ${analysisToPush.kodvys})`);
+                console.log('Склад пакету (коди аналізів):', analysisToPush.containedAnalyses);
 
             } catch (error) {
                 showInfoModal('error', 'Помилка завантаження пакету', error.message);
             }
         }
 
-        selectedAnalyses.push(analysis);
+        selectedAnalyses.push(analysisToPush); // Додаємо модифікований об'єкт
         // Після додавання перераховуємо масив кодів (враховуємо пакети)
         rebuildSelectedCodes();
         rebuildSelectedPriradenie();
@@ -590,20 +606,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Формуємо унікальний масив кодів аналізів (включно зі складами пакетів)
     function rebuildSelectedCodes() {
-        const codes = [];
+        const codesWithSource = [];
+        const uniqueCodes = new Set();
+
         selectedAnalyses.forEach(a => {
+            // Якщо це пакет (макрос)
             if (a && a.containedAnalyses && Array.isArray(a.containedAnalyses) && a.containedAnalyses.length > 0) {
                 a.containedAnalyses.forEach(c => {
-                    if (c) codes.push(String(c));
+                    const codeStr = String(c);
+                    if (c && !uniqueCodes.has(codeStr)) {
+                        codesWithSource.push({ code: codeStr, macroName: a.macroName });
+                        uniqueCodes.add(codeStr);
+                    }
                 });
-            } else if (a && a.kodvys) {
-                codes.push(String(a.kodvys));
+            } 
+            // Якщо це окремий аналіз
+            else if (a && a.kodvys) {
+                const codeStr = String(a.kodvys);
+                if (!uniqueCodes.has(codeStr)) {
+                    // Якщо аналіз не є макросом, macroName буде null, що відповідає умові
+                    codesWithSource.push({ code: codeStr, macroName: a.macroName });
+                    uniqueCodes.add(codeStr);
+                }
             }
         });
-        // Видаляємо дублікати
-        selectedAnalysisCodes = Array.from(new Set(codes));
+
+        // `selectedAnalysisCodes` залишається простим масивом рядків для сумісності з бекендом
+        selectedAnalysisCodes = Array.from(uniqueCodes);
+
         // Для дебагу в консолі
-        console.log('Поточний масив кодів для реєстрації:', selectedAnalysisCodes);
+        console.log('Поточний масив кодів для реєстрації:', codesWithSource);
+
         // Оновлюємо також масив priradenie, бо коди і priradenie залежать від поточних обраних аналізів
         rebuildSelectedPriradenie();
     }
@@ -652,7 +685,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 div.innerHTML = `
                     <div class="flex-grow">
                         <div class="font-medium text-gray-800">${analysis.nazov}</div>
-                        <div class="text-sm text-gray-600">Код: ${analysis.kodvys}</div>
+                        <div class="text-sm text-gray-600">Код: ${analysis.kodvys}
+                            ${analysis.macroName ? ` <span class="text-xs text-gray-500">(Макрос: ${analysis.macroName})</span>` : ''}</div>
                     </div>
                     <div class="flex items-center gap-6">
                         <span class="font-semibold text-indigo-600">${(analysis.cena || 0).toFixed(2)} грн</span>

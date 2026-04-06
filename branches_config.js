@@ -13,7 +13,7 @@ const BRANCHES = {
         hasAdvancedPatientSearch: true,
         hasPartnerLab: false, // Наявність лабораторії партнера
         // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
-        publicUrl: 'http://85.159.5.112:1090/ad',
+        publicUrl: 'http://85.159.5.112:1050/ad',
         //labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
         titleKey: "branchTitle_ad",
         clinicNameKey: "branchClinicName_ad",
@@ -26,8 +26,12 @@ const BRANCHES = {
             "available": [
                 "clinicRegistrationStats",
                 "examRegistrationStats",
+                "doctorRegistrationStats",
+                "doctorServices",
                 "administratorCashStats",
-                "administratorLabCashStats"
+                "administratorLabCashStats",
+                "combinedRegistrationStats",
+                "combinedCashStats"
             ]
         }, channel: 'sms',
         messagingEnabled: true, // true - відправляти повідомлення, false - імітувати відправку
@@ -59,7 +63,7 @@ const BRANCHES = {
         hasAdvancedPatientSearch: true,
         hasPartnerLab: false, // Наявність лабораторії партнера
         // partnerLabResultUrl: 'http://onelab.com.ua/Home/Result', // URL для результатів партнерської лабораторії
-        publicUrl: 'http://85.159.5.112:1090/rc',
+        publicUrl: 'http://85.159.5.112:1050/rc',
         //labResultUrl: 'http://be.zdorovya.kdg.com.ua:17298/Zdorovya/Zdorovya',
         titleKey: "branchTitle_mrt",
         clinicNameKey: "branchClinicName_mrt",
@@ -70,6 +74,8 @@ const BRANCHES = {
             "available": [
                 "clinicRegistrationStats",
                 "examRegistrationStats",
+                "doctorRegistrationStats",
+                "doctorServices",
                 "administratorCashStats"
             ]
         },

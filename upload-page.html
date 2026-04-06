@@ -6,12 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.png" type="image/x-icon">
 
-    <!--  <script src="https://cdn.tailwindcss.com"></script>  -->
+      <script src="https://cdn.tailwindcss.com"></script>  
     <title>Керування пацієнтами та завантаженням результатів</title>
-    <link href="/output.css" rel="stylesheet">
+   <!-- <link href="/output.css" rel="stylesheet"> -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Додаємо Chart.js -->
     <link rel="stylesheet" href="/upload-page.css">
+    <style>
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+        .blinking-icon {
+            animation: blink 1s linear infinite;
+        }
+    </style>
 </head>
 
 <body id="main-body" class="bg-gray-100 min-h-screen py-10">
@@ -43,7 +51,8 @@
 
     <!-- Journal Toggle Button -->
     <button id="toggle-journal-btn"
-        class="fixed top-1/2 left-0 -translate-y-1/2 bg-indigo-600 text-white p-3 rounded-r-lg shadow-lg z-50 hover:bg-indigo-700 transition-all duration-500 ease-in-out">
+        class="fixed top-1/2 left-0 -translate-y-1/2 bg-indigo-600 text-white p-3 rounded-r-lg shadow-lg z-50 hover:bg-indigo-700 transition-all duration-500 ease-in-out"
+        aria-label="Відкрити/Закрити журнал відправлень" title="Відкрити/Закрити журнал відправлень">
         <!-- Icon for opening/closing -->
         <svg id="journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg">
@@ -81,7 +90,8 @@
 
     <!-- Search Journal Toggle Button (Right) -->
     <button id="toggle-search-journal-btn"
-        class="fixed top-1/2 right-0 -translate-y-1/2 bg-teal-600 text-white p-3 rounded-l-lg shadow-lg z-50 hover:bg-teal-700 transition-colors duration-300 ease-in-out">
+        class="fixed top-1/2 right-0 -translate-y-1/2 bg-teal-600 text-white p-3 rounded-l-lg shadow-lg z-50 hover:bg-teal-700 transition-colors duration-300 ease-in-out"
+        aria-label="Відкрити/Закрити пошук по журналу" title="Відкрити/Закрити пошук по журналу">
         <svg id="search-journal-icon-open" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -405,19 +415,31 @@
             <!-- Advanced Patient Search Tab -->
             <div id="advanced-search-tab-content" class="hidden mt-6">
                 <form id="advancedSearchForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
-                    <div>
-                        <label for="advancedDob" class="block text-sm font-medium text-gray-700"
-                            data-translate="dob">Дата народження</label>
-                        <input type="date" id="advancedDob" name="dob"
+                    <div class="flex flex-col">
+                        <label for="advancedLastName" class="block text-sm font-medium text-gray-700">
+                            <span data-translate="lastName">Прізвище</span> <span class="text-xs text-gray-500">(обов'язково)</span>
+                        </label>
+                        <input type="text" id="advancedLastName" name="lastName"
                             class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" required>
                     </div>
                     <div>
-                        <label for="advancedPhone" class="block text-sm font-medium text-gray-700"
-                            data-translate="phone">Телефон</label>
-                        <input type="tel" id="advancedPhone" name="phone"
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567"
-                            required>
+                        <label for="advancedFirstName" class="block text-sm font-medium text-gray-700"
+                            data-translate="firstName">Ім'я</label>
+                        <input type="text" id="advancedFirstName" name="firstName"
+                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
                     </div>
+                                        <div>
+                                            <label for="advancedDob" class="block text-sm font-medium text-gray-700"
+                                                data-translate="dob">Дата народження</label>
+                                            <input type="date" id="advancedDob" name="dob"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
+                                        </div>
+                                        <div>
+                                            <label for="advancedPhone" class="block text-sm font-medium text-gray-700"
+                                                data-translate="phone">Телефон</label>
+                                            <input type="tel" id="advancedPhone" name="phone"
+                                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2" placeholder="0501234567">
+                                        </div>
                     <div>
                         <label for="advancedDateFrom" class="block text-sm font-medium text-gray-700"
                             data-translate="periodFrom">Період з</label>
@@ -502,9 +524,18 @@
                                     <input type="date" id="reportDateTo" name="dateTo"
                                         class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2">
                                 </div>
-                                <button type="submit"
-                                    class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-600 hover:bg-sky-700"
-                                    data-translate="generateReport">Сформувати</button>
+                                <div id="report-extra-filters" class="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4"></div>
+                                <div class="sm:col-span-3 flex justify-end gap-3">
+                                    <button type="submit"
+                                        class="flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-sky-600 hover:bg-sky-700"
+                                        data-translate="generateReport">Сформувати</button>
+                                    <button type="button" id="download-report-btn" disabled
+                                        class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        data-translate="downloadReport">Завантажити</button>
+                                    <button type="button" id="batch-download-report-btn" disabled
+                                        class="flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        data-translate="batchDownloadReport">Пакетне завантаження</button>
+                                </div>
                             </form>
                         </div>
 
@@ -634,6 +665,28 @@
         </div>
     </div>
 
+    <div id="emailResultModal" class="modal-backdrop hidden">
+        <div class="modal-content !text-left">
+            <h3 class="text-xl font-bold mb-2 text-gray-800">Відправити результат на email</h3>
+            <p id="emailExamPatientInfo" class="text-sm text-gray-600 mb-4"></p>
+            <form id="emailResultForm">
+                <div class="mb-4">
+                    <label for="examEmailInput" class="block text-sm font-medium text-gray-700">Email пацієнта</label>
+                    <input type="email" id="examEmailInput" name="examEmail"
+                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+                        placeholder="name@example.com" required>
+                    <p id="emailSourceHint" class="mt-2 text-sm text-gray-500"></p>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="closeEmailResultModal"
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300">Скасувати</button>
+                    <button type="submit" id="sendExamEmailBtn"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Відправити</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Modal for selecting analysis parameter -->
     <div id="analysisModal" class="modal-backdrop hidden">
         <div class="modal-content !text-left">
@@ -668,6 +721,7 @@
             let lastPartnerSearchResults = [];
             let lastAdvancedSearchResults = [];
             let dynamicsChart = null; // Змінна для зберігання екземпляру графіка
+            let currentExamForEmail = null;
 
             const languageSelectorContainer = document.getElementById('language-selector');
 
@@ -678,6 +732,25 @@
              */
             function getLangHeader(lang) {
                 return lang === 'geo' ? 'ka' : lang;
+            }
+
+            function isValidEmail(email) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
+            }
+
+            function getPatientCardEmail(patientData) {
+                return String(
+                    patientData?.email
+                    ?? patientData?.EMAIL
+                    ?? patientData?.Email
+                    ?? patientData?.e_mail
+                    ?? patientData?.['E-MAIL']
+                    ?? ''
+                ).trim();
+            }
+
+            function hasPatientCardEmail(patientData) {
+                return isValidEmail(getPatientCardEmail(patientData));
             }
 
 
@@ -1554,8 +1627,257 @@
             const reportsMenu = document.getElementById('reports-menu');
             const reportFiltersContainer = document.getElementById('report-filters-container');
             const reportFiltersForm = document.getElementById('report-filters-form');
+            const reportExtraFilters = document.getElementById('report-extra-filters');
             const reportResultsContainer = document.getElementById('report-results-container');
             const reportTitle = document.getElementById('report-title');
+            const downloadReportBtn = document.getElementById('download-report-btn');
+            const batchDownloadReportBtn = document.getElementById('batch-download-report-btn');
+
+            function isDoctorServicesReportActive() {
+                return reportFiltersForm.dataset.currentReport === 'doctorServices';
+            }
+
+            function getActiveReportSelects() {
+                return Array.from(reportExtraFilters.querySelectorAll('select'));
+            }
+
+            function getSelectedFilterLabels() {
+                return getActiveReportSelects()
+                    .map(select => select.options[select.selectedIndex])
+                    .filter(option => option && option.value)
+                    .map(option => option.textContent.replace(/\s*\[[^\]]+\]\s*$/, '').trim())
+                    .filter(Boolean);
+            }
+
+            function updateReportDownloadState() {
+                if (!downloadReportBtn || !batchDownloadReportBtn) return;
+                const hasTable = !!reportResultsContainer.querySelector('table');
+                downloadReportBtn.disabled = !hasTable;
+                const cabinetSelect = reportExtraFilters.querySelector('select[name="cabinetCode"]');
+                const hasBatchOptions = !!(cabinetSelect && Array.from(cabinetSelect.options).some(option => option.value));
+                batchDownloadReportBtn.disabled = !(isDoctorServicesReportActive() && hasBatchOptions);
+            }
+
+            function escapeCsvValue(value) {
+                const stringValue = value == null ? '' : String(value).replace(/\u00A0/g, ' ').trim();
+                return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+
+            function buildCsvFromCurrentReportTable() {
+                const table = reportResultsContainer.querySelector('table');
+                if (!table) {
+                    return '';
+                }
+
+                const rows = Array.from(table.querySelectorAll('tr'));
+                return rows.map(row => {
+                    const cells = Array.from(row.querySelectorAll('th, td'));
+                    return cells.map(cell => escapeCsvValue(cell.textContent)).join(',');
+                }).join('\r\n');
+            }
+
+            function sanitizeReportFilenamePart(value) {
+                return String(value || '')
+                    .trim()
+                    .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
+                    .replace(/\s+/g, '_');
+            }
+
+            function triggerCsvDownload(csvContent, filename) {
+                const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+            }
+
+            function getDownloadFilenameFromResponse(response, fallbackName) {
+                const disposition = response.headers.get('Content-Disposition') || '';
+                const utf8Match = disposition.match(/filename\*\s*=\s*UTF-8''([^;]+)/i);
+                if (utf8Match?.[1]) {
+                    return decodeURIComponent(utf8Match[1]);
+                }
+
+                const filenameMatch = disposition.match(/filename\s*=\s*"([^"]+)"/i) || disposition.match(/filename\s*=\s*([^;]+)/i);
+                if (filenameMatch?.[1]) {
+                    return filenameMatch[1].replace(/"/g, '').trim();
+                }
+
+                return fallbackName;
+            }
+
+            function buildReportFilename() {
+                const currentReportKey = reportFiltersForm.dataset.currentReport || 'report';
+                const dateFrom = document.getElementById('reportDateFrom')?.value || '';
+                const dateTo = document.getElementById('reportDateTo')?.value || '';
+                const title = reportTitle?.textContent || currentReportKey;
+                const filterSuffix = getSelectedFilterLabels().join('_');
+                const nameParts = [
+                    sanitizeReportFilenamePart(title),
+                    sanitizeReportFilenamePart(filterSuffix),
+                    sanitizeReportFilenamePart(dateFrom),
+                    sanitizeReportFilenamePart(dateTo)
+                ].filter(Boolean);
+                return `${nameParts.join('_')}.csv`;
+            }
+
+            function downloadCurrentReport() {
+                const csvContent = buildCsvFromCurrentReportTable();
+                if (!csvContent) {
+                    return;
+                }
+
+                triggerCsvDownload(csvContent, buildReportFilename());
+            }
+
+            function buildDoctorServicesCsvFromData(rows) {
+                const detailRows = rows.filter(row => Number(row.sort_order) === 0);
+                const totalRow = rows.find(row => Number(row.sort_order) === 1);
+                const csvRows = [
+                    [
+                        translations.serviceCode || 'Код послуги',
+                        translations.serviceName || 'Послуга',
+                        translations.quantity || 'Кількість',
+                        translations.totalSum || 'Загальна сума'
+                    ]
+                ];
+
+                detailRows.forEach(row => {
+                    csvRows.push([
+                        row.service_code || '',
+                        row.service_name || '',
+                        Number(row.qty || 0).toFixed(2),
+                        Number(row.total_sum || 0).toFixed(2)
+                    ]);
+                });
+
+                if (totalRow) {
+                    csvRows.push([
+                        '',
+                        totalRow.service_name || 'Загальна сума',
+                        Number(totalRow.qty || 0).toFixed(2),
+                        Number(totalRow.total_sum || 0).toFixed(2)
+                    ]);
+                }
+
+                return csvRows.map(row => row.map(cell => escapeCsvValue(cell)).join(',')).join('\r\n');
+            }
+
+            async function batchDownloadDoctorServicesReports() {
+                if (!isDoctorServicesReportActive()) {
+                    return;
+                }
+
+                const dateFrom = document.getElementById('reportDateFrom')?.value || '';
+                const dateTo = document.getElementById('reportDateTo')?.value || '';
+                const buttonLabel = batchDownloadReportBtn.textContent;
+
+                batchDownloadReportBtn.disabled = true;
+                batchDownloadReportBtn.textContent = translations.downloadingArchive || 'Завантажую...';
+
+                try {
+                    const url = new URL(window.location.origin + '/api/reports/doctor-services-batch-download');
+                    url.search = new URLSearchParams({
+                        branchdb: config.branchKey,
+                        dateFrom,
+                        dateTo
+                    }).toString();
+
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Не вдалося завантажити архів звітів');
+                    }
+
+                    const blob = await response.blob();
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = getDownloadFilenameFromResponse(
+                        response,
+                        [
+                            sanitizeReportFilenamePart(reportTitle?.textContent || 'report'),
+                            sanitizeReportFilenamePart(dateFrom),
+                            sanitizeReportFilenamePart(dateTo)
+                        ].filter(Boolean).join('_') + '.zip'
+                    );
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(link.href);
+                } finally {
+                    batchDownloadReportBtn.textContent = buttonLabel;
+                    updateReportDownloadState();
+                }
+            }
+
+            if (downloadReportBtn) {
+                downloadReportBtn.addEventListener('click', downloadCurrentReport);
+            }
+            if (batchDownloadReportBtn) {
+                batchDownloadReportBtn.addEventListener('click', batchDownloadDoctorServicesReports);
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            async function renderReportExtraFilters(reportKey) {
+                reportExtraFilters.innerHTML = '';
+                const handler = reportHandlers[reportKey];
+                if (!handler?.extraFilters) return;
+
+                for (const filter of handler.extraFilters) {
+                    if (filter.type !== 'select') continue;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = filter.wrapperClassName || '';
+                    const label = document.createElement('label');
+                    const select = document.createElement('select');
+
+                    label.htmlFor = filter.name;
+                    label.className = 'block text-sm font-medium text-gray-700';
+                    label.textContent = translations[filter.labelKey] || filter.label || filter.name;
+
+                    select.id = filter.name;
+                    select.name = filter.name;
+                    select.className = 'mt-1 block w-full rounded-md border-gray-300 shadow-sm p-2';
+                    if (filter.required) {
+                        select.required = true;
+                    }
+
+                    let options = [];
+                    if (typeof filter.getOptions === 'function') {
+                        options = await filter.getOptions();
+                    }
+
+                    const placeholder = translations[filter.placeholderKey] || filter.placeholder || '';
+                    const placeholderOption = document.createElement('option');
+                    placeholderOption.value = '';
+                    placeholderOption.textContent = placeholder;
+                    placeholderOption.disabled = !!filter.required;
+                    placeholderOption.selected = true;
+                    select.appendChild(placeholderOption);
+
+                    options.forEach(option => {
+                        const optionElement = document.createElement('option');
+                        optionElement.value = option.value;
+                        optionElement.textContent = option.label;
+                        select.appendChild(optionElement);
+                    });
+
+                    wrapper.appendChild(label);
+                    wrapper.appendChild(select);
+                    reportExtraFilters.appendChild(wrapper);
+                }
+            }
 
             // Словник звітів, що містить логіку для отримання та відображення даних
             const reportHandlers = {
@@ -1700,6 +2022,229 @@
                         table += `</tbody></table>`;
                         reportResultsContainer.innerHTML = table;
                     }
+                },
+                combinedRegistrationStats: {
+                    titleKey: 'reportCombinedRegistrationStats',
+                    fetch: async (params) => {
+                        params.branchdb = config.branchKey;
+                        const url = new URL(window.location.origin + '/api/reports/combined-registration-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити зведений звіт');
+                        }
+                        return response.json();
+                    },
+                    render: (data) => {
+                        const headers = [
+                            translations.administrator || 'Адміністратор',
+                            translations.totalRegistrations || 'Всього',
+                            translations.clinicRegistrations || 'Клініка',
+                            translations.examRegistrations || 'Аналізи'
+                        ];
+                        let table = `<table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}</tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
+                        data.forEach(row => {
+                            table += `<tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${row.Адміністратор || ''} ${row.Фамілія || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${row.total_count}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.clinic_count}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.exam_count}</td>
+                            </tr>`;
+                        });
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                },
+                combinedCashStats: {
+                    titleKey: 'reportCombinedCashStats',
+                    fetch: async (params) => {
+                        params.branchdb = config.branchKey;
+                        const url = new URL(window.location.origin + '/api/reports/combined-cash-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити зведений звіт по касі');
+                        }
+                        return response.json();
+                    },
+                    render: (response) => {
+                        const { stats: data, totalSumAll } = response;
+                        const totalClinicSum = data?.reduce((acc, row) => acc + (row.clinic_sum || 0), 0) || 0;
+                        const totalLabSum = data?.reduce((acc, row) => acc + (row.lab_sum || 0), 0) || 0;
+                        const headers = [
+                            translations.administrator || 'Адміністратор',
+                            translations.totalSum || 'Загальна сума',
+                            translations.clinicSum || 'Клініка',
+                            translations.labSum || 'Лабораторія',
+                            translations.effectiveness || 'Ефективність'
+                        ];
+                        let table = `<table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${h}</th>`).join('')}</tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
+                        data?.forEach(row => {
+                            const name = row["Ім'я"] || row["First Name"] || '';
+                            const surname = row["Фамілія"] || row["Last Name"] || '';
+                            table += `<tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${name} ${surname}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">${row.total_sum.toFixed(2)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.clinic_sum.toFixed(2)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.lab_sum.toFixed(2)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${row.effectiveness_percentage.toFixed(2)}%</td>
+                            </tr>`;
+                        });
+                        if (data && data.length > 0) {
+                             table += `<tr class="bg-gray-100 font-bold">
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${translations.total || 'Всього'}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${totalSumAll.toFixed(2)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${totalClinicSum.toFixed(2)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${totalLabSum.toFixed(2)}</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">100.00%</td>
+                                      </tr>`;
+                        }
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                },
+                doctorRegistrationStats: {
+                    titleKey: 'reportDoctorRegistrationStats',
+                    extraFilters: [
+                        {
+                            type: 'select',
+                            name: 'doctorName',
+                            labelKey: 'doctorFilterLabel',
+                            placeholderKey: 'doctorFilterPlaceholder',
+                            wrapperClassName: 'sm:col-span-2',
+                            required: true,
+                            getOptions: async () => {
+                                const url = new URL(window.location.origin + '/api/reports/doctors');
+                                url.search = new URLSearchParams({ branchdb: config.branchKey }).toString();
+                                const response = await fetch(url);
+                                if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.message || 'Не вдалося завантажити список лікарів');
+                                }
+                                const data = await response.json();
+                                return data.map(item => ({
+                                    value: item.doctor_name,
+                                    label: item.doctor_name
+                                }));
+                            }
+                        }
+                    ],
+                    fetch: async (params) => {
+                        params.branchdb = config.branchKey;
+                        const url = new URL(window.location.origin + '/api/reports/doctor-registration-stats');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити звіт по лікарю');
+                        }
+                        return response.json();
+                    },
+                    render: (data) => {
+                        const headers = [
+                            translations.recipient || 'Лікар',
+                            translations.administrator || 'Адміністратор',
+                            translations.registrationsCount || 'Кількість реєстрацій'
+                        ];
+                        let table = `<table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${escapeHtml(h)}</th>`).join('')}</tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
+                        data.forEach(row => {
+                            table += `<tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(row.recipient_name)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${escapeHtml(row.registrar_first_name)} ${escapeHtml(row.registrar_last_name)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(row.registration_count)}</td>
+                            </tr>`;
+                        });
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
+                },
+                doctorServices: {
+                    titleKey: 'reportDoctorServices',
+                    extraFilters: [
+                        {
+                            type: 'select',
+                            name: 'cabinetCode',
+                            labelKey: 'cabinetFilterLabel',
+                            placeholderKey: 'cabinetFilterPlaceholder',
+                            wrapperClassName: 'sm:col-span-2',
+                            required: true,
+                            getOptions: async () => {
+                                const url = new URL(window.location.origin + '/api/reports/service-cabinets');
+                                url.search = new URLSearchParams({ branchdb: config.branchKey }).toString();
+                                const response = await fetch(url);
+                                if (!response.ok) {
+                                    const errorData = await response.json();
+                                    throw new Error(errorData.message || 'Не вдалося завантажити список кабінетів');
+                                }
+                                const data = await response.json();
+                                return data.map(item => ({
+                                    value: item.cabinet_code,
+                                    label: `${item.cabinet_name} [${item.cabinet_code}]`
+                                }));
+                            }
+                        }
+                    ],
+                    fetch: async (params) => {
+                        params.branchdb = config.branchKey;
+                        const url = new URL(window.location.origin + '/api/reports/doctor-services');
+                        url.search = new URLSearchParams(params).toString();
+                        const response = await fetch(url);
+                        if (!response.ok) {
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Не вдалося завантажити звіт по послугах лікаря');
+                        }
+                        return response.json();
+                    },
+                    render: (data) => {
+                        const rows = Array.isArray(data) ? data : [];
+                        const detailRows = rows.filter(row => Number(row.sort_order) === 0);
+                        const totalRow = rows.find(row => Number(row.sort_order) === 1);
+                        const headers = [
+                            translations.serviceCode || 'Код послуги',
+                            translations.serviceName || 'Послуга',
+                            translations.quantity || 'Кількість',
+                            translations.totalSum || 'Загальна сума'
+                        ];
+
+                        let table = `<table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50"><tr>${headers.map(h => `<th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${escapeHtml(h)}</th>`).join('')}</tr></thead>
+                            <tbody class="bg-white divide-y divide-gray-200">`;
+
+                        if (detailRows.length === 0) {
+                            table += `<tr>
+                                <td colspan="4" class="px-6 py-4 text-sm text-gray-500">${escapeHtml(translations.noRecordsForPeriod || 'Записів за вибраний період не знайдено.')}</td>
+                            </tr>`;
+                        } else {
+                            detailRows.forEach(row => {
+                                table += `<tr>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${escapeHtml(row.service_code || '')}</td>
+                                    <td class="px-6 py-4 text-sm font-medium text-gray-900">${escapeHtml(row.service_name || '')}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${Number(row.qty || 0).toFixed(2)}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${Number(row.total_sum || 0).toFixed(2)}</td>
+                                </tr>`;
+                            });
+                        }
+
+                        if (totalRow) {
+                            table += `<tr class="bg-gray-100 font-bold">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800"></td>
+                                <td class="px-6 py-4 text-sm text-gray-800">${escapeHtml(totalRow.service_name || 'Загальна сума')}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${Number(totalRow.qty || 0).toFixed(2)}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800">${Number(totalRow.total_sum || 0).toFixed(2)}</td>
+                            </tr>`;
+                        }
+
+                        table += `</tbody></table>`;
+                        reportResultsContainer.innerHTML = table;
+                    }
                 }
             };
 
@@ -1732,12 +2277,22 @@
                     reportFiltersContainer.classList.remove('hidden');
                     reportFiltersForm.dataset.currentReport = reportKey;
                     reportResultsContainer.innerHTML = ''; // Очищуємо результати
+                    updateReportDownloadState();
 
                     // Встановлюємо дати за замовчуванням
                     document.getElementById('reportDateTo').value = new Date().toISOString().split('T')[0];
                     const dateFrom = new Date();
                     dateFrom.setDate(dateFrom.getDate() - 7); // Мінус тиждень
                     document.getElementById('reportDateFrom').value = dateFrom.toISOString().split('T')[0];
+
+                    renderReportExtraFilters(reportKey)
+                        .then(() => {
+                            updateReportDownloadState();
+                        })
+                        .catch(error => {
+                            reportResultsContainer.innerHTML = `<p class="text-red-500">${error.message}</p>`;
+                            updateReportDownloadState();
+                        });
                 }
             });
 
@@ -1756,8 +2311,10 @@
                 try {
                     const data = await handler.fetch(params);
                     handler.render(data);
+                    updateReportDownloadState();
                 } catch (error) {
                     reportResultsContainer.innerHTML = `<p class="text-red-500">${error.message}</p>`;
+                    updateReportDownloadState();
                 }
             });
             // --- Кінець логіки для вкладки "Звіти" ---
@@ -1765,11 +2322,39 @@
             // Обробник відправки форми розширеного пошуку
             advancedSearchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // --- START: ВАЛІДАЦІЯ НА ЗАПОВНЕННЯ ДВОХ ПОЛІВ ---
+                const lastName = document.getElementById('advancedLastName').value.trim();
+                const firstName = document.getElementById('advancedFirstName').value.trim();
+                const dob = document.getElementById('advancedDob').value.trim();
+                const phone = document.getElementById('advancedPhone').value.trim();
+
+                const filledFields = [lastName, firstName, dob, phone].filter(Boolean).length;
+
+                if (filledFields < 2) {
+                    const title = translations.searchError || 'Помилка пошуку';
+                    const message = translations.fillAtLeastTwoFields || 'Для пошуку необхідно заповнити щонайменше два з наступних полів: Прізвище, Ім\'я, Дата народження, Телефон.';
+                    showModal(title, message, false);
+                    return; // Зупиняємо виконання, якщо валідація не пройдена
+                }
+                // --- END: ВАЛІДАЦІЯ ---
+
+                // --- START: ВАЛІДАЦІЯ ДОВЖИНИ ІМЕНІ ---
+                if (firstName && firstName.length < 3) {
+                    const title = translations.searchError || 'Помилка пошуку';
+                    const message = translations.firstNameMinLength || "Поле 'Ім'я' повинно містити щонайменше 3 символи для пошуку.";
+                    showModal(title, message, false);
+                    return; // Зупиняємо виконання
+                }
+                // --- END: ВАЛІДАЦІЯ ДОВЖИНИ ІМЕНІ ---
+
                 const submitBtn = document.getElementById('advancedSearchSubmitBtn');
                 const btnText = document.getElementById('advanced-search-button-text');
                 const spinner = document.getElementById('advanced-search-spinner');
 
                 btnText.textContent = translations.searching || 'Пошук...';
+                           
+
                 spinner.classList.remove('hidden');
                 submitBtn.disabled = true;
 
@@ -1777,6 +2362,14 @@
                 const data = Object.fromEntries(formData.entries());
 
                 try {
+                    // Екранування апострофа для Sybase
+                    if (config.dbType === 'sybase' && data.lastName) {
+                        data.lastName = data.lastName
+                                        .trim()                 // 1. Видаляємо пробіли по краях
+                                        .replace(/\s+/g, ' ')   // 2. Замінюємо декілька пробілів підряд на один
+                                        .replace(/'/g, "''");   // 3. Екрануємо одинарні лапки для SQL
+                                                        }
+
                     // Визначаємо, який API викликати, на основі типу БД
                     const endpoint = config.dbType === 'sybase' ? '/api/patient-history' : '/advanced-search';
 
@@ -1806,6 +2399,8 @@
 
             clearAdvancedSearchBtn.addEventListener('click', () => {
                 // Очищуємо поля вручну, залишаючи дати
+                document.getElementById('advancedLastName').value = '';
+                document.getElementById('advancedFirstName').value = '';
                 document.getElementById('advancedDob').value = '';
                 document.getElementById('advancedPhone').value = '';
                 advancedSearchResultsDiv.classList.add('hidden');
@@ -1856,6 +2451,13 @@
                             const examDate = p.datodberu ? new Date(p.datodberu).toLocaleDateString() : '';
                             console.log(examDate);
                             const fullName = `${p.priezvisko || ''} ${p.meno || ''}`.trim();
+                            const hasEmail = hasPatientCardEmail(p);
+                            const emailButtonClass = hasEmail
+                                ? 'text-green-600 hover:text-green-700'
+                                : 'text-gray-400 hover:text-indigo-600';
+                            const emailButtonTitle = hasEmail
+                                ? 'Відправити на email з картки пацієнта'
+                                : 'Email у картці відсутній, можна ввести вручну';
 
                             row.innerHTML = `
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">${examDate}</td>
@@ -1864,11 +2466,24 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">${fullName}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-semibold">${translations.statusChecked || 'Перевірено'}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                    <button class="download-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Завантажити PDF">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                    </button>
+                                    <div class="flex items-center justify-center space-x-2">
+                                        <button class="download-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Завантажити PDF">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </button>
+                                        <button class="print-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Друкувати PDF">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                                            </svg>
+                                        </button>
+                                        <button class="email-result-btn ${emailButtonClass} transition-colors duration-200" title="${emailButtonTitle}">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <input type="checkbox" class="exam-select-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
@@ -1877,20 +2492,30 @@
                                 
                             `;
 
-                            // Обробник для іконки завантаження PDF
-                            row.querySelector('.download-pdf-btn').addEventListener('click', (event) => {
+                            // Обробники для іконок завантаження та друку PDF
+                            row.querySelector('.download-pdf-btn').addEventListener('click', (event) => {                                
                                 const buttonElement = event.currentTarget;
-                                const rowElement = buttonElement.closest('tr');
-                                const checkbox = rowElement.querySelector('.exam-select-cb');
-                                const isBlankChecked = checkbox ? checkbox.checked : false;
-                                handleGenerateAndPrintPdf(p, isBlankChecked);
+                                const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                                handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement); // isPrinting = false
+                            });
+
+                            row.querySelector('.print-pdf-btn').addEventListener('click', (event) => {
+                                const buttonElement = event.currentTarget;
+                                const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                                handlePdfAction(p, checkbox ? checkbox.checked : false, true, buttonElement); // isPrinting = true
+                            });
+
+                            row.querySelector('.email-result-btn').addEventListener('click', (event) => {
+                                const buttonElement = event.currentTarget;
+                                const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                                openEmailResultModal(p, checkbox ? checkbox.checked : false, buttonElement);
                             });
 
                             // Обробник подвійного кліку на рядок (зберігаємо для зручності)
                             row.addEventListener('dblclick', (event) => {
+                                const buttonElement = event.currentTarget.querySelector('.download-pdf-btn');
                                 const checkbox = event.currentTarget.querySelector('.exam-select-cb');
-                                const isBlankChecked = checkbox ? checkbox.checked : false;
-                                handleGenerateAndPrintPdf(p, isBlankChecked);
+                                handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement); // isPrinting = false (завантаження)
                             });
                             advancedResultsBody.appendChild(row);
                             updateBatchDownloadButton();
@@ -2228,46 +2853,95 @@
             }
 
             /**
-             * @description Обробляє запит на генерацію та завантаження PDF для обстеження.
+             * @description Обробляє запит на генерацію та виконання дії (завантаження або друк) з PDF для обстеження.
              * @param {object} patientData - Дані пацієнта та обстеження (p).
              * @param {boolean} isBlankChecked - Стан прапорця "БЛАНК".
+             * @param {boolean} isPrinting - Визначає дію: true для друку, false для завантаження.
              */
-            async function handleGenerateAndPrintPdf(patientData, isBlankChecked = false) {
+            async function handlePdfAction(patientData, isBlankChecked = false, isPrinting = false, buttonElement = null) {
+                if (buttonElement) {
+                    buttonElement.classList.add('blinking-icon');
+                    buttonElement.disabled = true;
+                }
                 try {
-                    const response = await fetch('/api/patient-exam-details', {
+                    const pdfResponse = await fetch('/api/generate-exam-pdf-blank', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             datodberu: patientData.datodberu,
-                            datumnarod: patientData.datumnarod
+                            datumnarod: patientData.datumnarod,
+                            isBlankChecked: isBlankChecked
                         })
                     });
-                    const details = await response.json();
-                    if (!response.ok) throw new Error(details.message || 'Помилка сервера');
 
-                    const pdfResponse = await fetch('/api/generate-exam-pdf', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ details: details, isBlankChecked: isBlankChecked })
-                    });
-                    if (!pdfResponse.ok) throw new Error((await pdfResponse.json()).message || 'Помилка генерації PDF');
+                    if (!pdfResponse.ok) {
+                        const errorData = await pdfResponse.json();
+                        throw new Error(errorData.message || 'Помилка генерації PDF');
+                    }
 
                     const blob = await pdfResponse.blob();
                     const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
 
-                    // Формуємо ім'я файлу з прізвища та дати
-                    const lastName = patientData.priezvisko || 'Unknown';
-                    const examDate = new Date(patientData.datodberu).toLocaleDateString('uk-UA');
-                    a.download = `Exam_${lastName}_${examDate}.pdf`;
+                    if (isPrinting) {
+                        // Створюємо iframe для друку
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = url;
+                        document.body.appendChild(iframe);
 
-                    a.click();
-                    window.URL.revokeObjectURL(url);
+                        iframe.onload = () => {
+                            setTimeout(() => {
+                                iframe.contentWindow.focus();
+                                iframe.contentWindow.print();
+                                // Видаляємо iframe та URL через 30 секунд, щоб дати користувачеві
+                                // час на взаємодію з діалогом друку.
+                                setTimeout(() => {
+                                    document.body.removeChild(iframe);
+                                    window.URL.revokeObjectURL(url);
+                                }, 30000); // 30 секунд
+                            }, 1);
+                        };
+                    } else {
+                        // Логіка завантаження
+                        const a = document.createElement('a');
+                        a.href = url;
+                        const lastName = patientData.priezvisko || 'Unknown';
+                        const examDate = new Date(patientData.datodberu).toLocaleDateString('uk-UA');
+                        a.download = `Exam_${lastName}_${examDate}.pdf`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    }
                 } catch (error) {
-                    console.error('Не вдалося отримати або згенерувати PDF:', error);
-                    showModal(translations.error || 'Помилка', `Не вдалося завантажити деталі обстеження: ${error.message}`, false);
+                    const actionType = isPrinting ? 'друку' : 'завантаження';
+                    console.error(`Не вдалося отримати або виконати PDF для ${actionType}:`, error);
+                    showModal(translations.error || 'Помилка', `Не вдалося виконати ${actionType} деталей обстеження: ${error.message}`, false);
+                } finally {
+                    if (buttonElement) {
+                        buttonElement.classList.remove('blinking-icon');
+                        buttonElement.disabled = false;
+                    }
                 }
+            }
+
+            function openEmailResultModal(patientData, isBlankChecked = false, buttonElement = null) {
+                currentExamForEmail = { patientData, isBlankChecked, buttonElement };
+
+                const emailModal = document.getElementById('emailResultModal');
+                const emailInput = document.getElementById('examEmailInput');
+                const emailHint = document.getElementById('emailSourceHint');
+                const patientInfo = document.getElementById('emailExamPatientInfo');
+                const fullName = `${patientData.priezvisko || ''} ${patientData.meno || ''}`.trim();
+                const examDate = patientData.datodberu ? new Date(patientData.datodberu).toLocaleDateString('uk-UA') : '';
+                const patientEmail = getPatientCardEmail(patientData);
+
+                patientInfo.textContent = `Пацієнт: ${fullName || 'Невідомо'}, дата обстеження: ${examDate || 'не вказано'}`;
+                emailInput.value = patientEmail;
+                emailHint.textContent = patientEmail
+                    ? 'Email підтягнуто з картки пацієнта. За потреби його можна змінити перед відправкою.'
+                    : 'У картці пацієнта email відсутній. Введіть адресу разово для цієї відправки.';
+
+                emailModal.classList.remove('hidden');
+                emailInput.focus();
             }
 
             // Елементи керування пагінацією (перемикання сторінок).
@@ -2373,6 +3047,9 @@
             // Обробник відправки форми пошуку по документу.
             docSearchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
+
+                // Скидаємо прапорець англійської версії при новому пошуку
+                document.getElementById('isEnglishVersion').value = 'false';
 
                 // --- ВИПРАВЛЕНО: Очищуємо тільки результати основного пошуку ---
                 // Тепер результати пошуку по партнеру не будуть скидатися,
@@ -3031,6 +3708,78 @@
                 }
             });
             // --- Кінець логіки модального вікна для SMS ---
+
+            const emailResultModal = document.getElementById('emailResultModal');
+            const closeEmailResultModalBtn = document.getElementById('closeEmailResultModal');
+            const emailResultForm = document.getElementById('emailResultForm');
+            const examEmailInput = document.getElementById('examEmailInput');
+            const sendExamEmailBtn = document.getElementById('sendExamEmailBtn');
+
+            function closeEmailResultModal() {
+                emailResultModal.classList.add('hidden');
+                emailResultForm.reset();
+                currentExamForEmail = null;
+            }
+
+            closeEmailResultModalBtn.addEventListener('click', closeEmailResultModal);
+
+            emailResultForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                if (!currentExamForEmail) {
+                    showModal(translations.error || 'Помилка', 'Не вибрано результат для відправки.', false);
+                    return;
+                }
+
+                const email = examEmailInput.value.trim();
+                if (!isValidEmail(email)) {
+                    showModal(translations.error || 'Помилка', 'Вкажіть коректний email.', false);
+                    return;
+                }
+
+                const { patientData, isBlankChecked, buttonElement } = currentExamForEmail;
+                const fullName = `${patientData.priezvisko || ''} ${patientData.meno || ''}`.trim();
+
+                sendExamEmailBtn.disabled = true;
+                sendExamEmailBtn.textContent = 'Відправка...';
+
+                if (buttonElement) {
+                    buttonElement.classList.add('blinking-icon');
+                    buttonElement.disabled = true;
+                }
+
+                try {
+                    const response = await fetch('/api/send-exam-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            datodberu: patientData.datodberu,
+                            datumnarod: patientData.datumnarod,
+                            isBlankChecked,
+                            email,
+                            patientName: fullName
+                        })
+                    });
+
+                    const result = await response.json();
+                    if (!response.ok) {
+                        throw new Error(result.message || 'Помилка сервера');
+                    }
+
+                    closeEmailResultModal();
+                    showModal(translations.success || 'Успіх!', result.message || `Результат відправлено на ${email}.`, true);
+                } catch (error) {
+                    showModal(translations.error || 'Помилка', error.message, false);
+                } finally {
+                    sendExamEmailBtn.disabled = false;
+                    sendExamEmailBtn.textContent = 'Відправити';
+
+                    if (buttonElement) {
+                        buttonElement.classList.remove('blinking-icon');
+                        buttonElement.disabled = false;
+                    }
+                }
+            });
 
             // Запуск основних функцій при завантаженні сторінки.
             initializePage();

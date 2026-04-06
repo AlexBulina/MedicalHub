@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="uk" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DaisyUI Learning Playground</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    // Тут можна додати свої кольори
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-base-200 min-h-screen p-8">
+
+    <div class="max-w-4xl mx-auto space-y-8">
+
+        <div class="navbar bg-base-100 rounded-box shadow-lg">
+            <div class="flex-1">
+                <a class="btn btn-ghost text-xl">DaisyUI Demo</a>
+            </div>
+            <div class="flex-none">
+                <select class="select select-bordered w-full max-w-xs theme-controller">
+                    <option value="light">Світла (Light)</option>
+                    <option value="dark">Темна (Dark)</option>
+                    <option value="cupcake">Кексик (Cupcake)</option>
+                    <option value="synthwave">Синтвейв (Synthwave)</option>
+                </select>
+            </div>
+        </div>
+
+        <section class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">1. Кнопки та їх стани</h2>
+                
+                <div class="space-y-4">
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn">Default</button>
+                        <button class="btn btn-primary">Primary</button>
+                        <button class="btn btn-secondary">Secondary</button>
+                        <button class="btn btn-accent">Accent</button>
+                        <button class="btn btn-error">Error</button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <button class="btn btn-primary btn-outline">Outline</button>
+                        <button class="btn btn-ghost">Ghost (прозора)</button>
+                        <button class="btn btn-link">Link</button>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button class="btn btn-xs btn-primary">XS</button>
+                        <button class="btn btn-sm btn-primary">Small</button>
+                        <button class="btn btn-md btn-primary">Medium</button>
+                        <button class="btn btn-lg btn-primary">Large</button>
+                    </div>
+
+                    <div>
+                        <button type="button" class="btn btn-square" aria-label="Завантаження" title="Завантаження">
+                            <span class="loading loading-spinner" aria-hidden="true"></span>
+                        </button>
+                        <button type="button" class="btn btn-primary" aria-label="Завантаження" title="Завантаження">
+                            <span class="loading loading-spinner" aria-hidden="true"></span>
+                            Завантаження...
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">2. Елементи форми</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <label class="form-control w-full">
+                        <div class="label"><span class="label-text">Як вас звати?</span></div>
+                        <input type="text" placeholder="Введіть текст..." class="input input-bordered w-full" />
+                    </label>
+
+                    <label class="form-control w-full">
+                        <div class="label"><span class="label-text">Оберіть опцію</span></div>
+                        <select class="select select-bordered">
+                            <option disabled selected>Виберіть зі списку</option>
+                            <option>Node.js</option>
+                            <option>Python</option>
+                            <option>SQL</option>
+                        </select>
+                    </label>
+
+                    <div class="form-control w-fit">
+                        <div class="label"><span class="label-text mb-2">Кастомний перемикач</span></div>
+                        <label class="label cursor-pointer bg-base-200 rounded-lg p-2 pr-4">
+                            <input type="checkbox" class="toggle toggle-lg bg-gray-300 border-gray-300 hover:bg-gray-400 checked:bg-indigo-600 checked:border-indigo-600 [--tglbg:white]" />
+                            <span class="ml-3 label-text font-bold uppercase text-gray-500">Статус</span>
+                        </label>
+                    </div>
+
+                    <div class="flex flex-col gap-4 mt-8">
+                        <label class="label cursor-pointer justify-start gap-4">
+                            <input type="checkbox" checked="checked" class="checkbox checkbox-primary" />
+                            <span class="label-text">Запам'ятати мене</span>
+                        </label>
+                        <div class="flex gap-4">
+                            <input type="radio" name="radio-1" class="radio radio-primary" checked />
+                            <input type="radio" name="radio-1" class="radio radio-primary" />
+                        </div>
+                    </div>
+
+                    <div class="col-span-1 md:col-span-2">
+                        <label class="label"><span class="label-text">Гучність</span></label>
+                        <input type="range" min="0" max="100" value="40" class="range range-primary" />
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">3. Таблиця з бейджами</h2>
+                
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Ім'я</th>
+                                <th>Роль</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>1</th>
+                                <td>Олександр</td>
+                                <td>Developer</td>
+                                <td><div class="badge badge-success gap-2">Active</div></td>
+                            </tr>
+                            <tr>
+                                <th>2</th>
+                                <td>Бот</td>
+                                <td>AI Support</td>
+                                <td><div class="badge badge-info gap-2">Processing</div></td>
+                            </tr>
+                            <tr>
+                                <th>3</th>
+                                <td>Гість</td>
+                                <td>User</td>
+                                <td><div class="badge badge-ghost gap-2">Offline</div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl mb-4">4. Сповіщення та Модальні вікна</h2>
+                
+                <div class="space-y-4">
+                    <div role="alert" class="alert alert-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Нове оновлення програмного забезпечення доступне.</span>
+                    </div>
+
+                    <div role="alert" class="alert alert-error text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>Помилка! Не вдалося зберегти дані.</span>
+                    </div>
+
+                    <button class="btn btn-neutral w-full mt-4" onclick="my_modal_1.showModal()">Відкрити модальне вікно</button>
+                    
+                    <dialog id="my_modal_1" class="modal">
+                        <div class="modal-box">
+                            <h3 class="font-bold text-lg">Привіт!</h3>
+                            <p class="py-4">Це стандартне модальне вікно DaisyUI. Натисніть ESC або кнопку нижче, щоб закрити.</p>
+                            <div class="modal-action">
+                                <form method="dialog">
+                                    <button class="btn">Закрити</button>
+                                </form>
+                            </div>
+                        </div>
+                    </dialog>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+</html>

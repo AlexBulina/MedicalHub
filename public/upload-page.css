@@ -39,6 +39,10 @@ body {
     z-index: 50;
 }
 
+#statusModal {
+    z-index: 70;
+}
+
 .modal-backdrop.hidden {
     display: none !important;
 }

@@ -10,6 +10,7 @@
 // ===================================================================
 import express from "express";
 import { OAuth2Client } from 'google-auth-library';
+import nodemailer from 'nodemailer';
 import { transliterate } from 'transliteration';
 import fileUpload from "express-fileupload";
 import ftp from "basic-ftp";
@@ -36,6 +37,8 @@ import { logDownload } from './download_logger.js'; // <-- ІМПОРТУЄМО 
 import { downloadPartnerPdf } from './partner_pdf_downloader.js'; // Імпортуємо новий модуль
 import BRANCHES from './branches_config.js'; // <-- ІМПОРТУЄМО КОНФІГУРАЦІЮ
 import createPDF from './pdfMaker.js'; // <-- ІМПОРТУЄМО ГЕНЕРАТОР PDF
+import { createSybaseAnalyzerResultIngester } from './sybase_analyzer_result_ingest.js';
+
 
 // ===================================================================
 // ПОЧАТКОВЕ НАЛАШТУВАННЯ
@@ -253,6 +256,59 @@ async function sendSMS(recipients, code, smsText, branch) {
         logger.error(`[${recipients}] [${code || 'custom'}] - Помилка при відправці SMS: ${errorMessage}`);
         return { error: true, message: errorMessage };
     }
+}
+
+let emailTransporter = null;
+
+function getEmailTransporter() {
+    if (emailTransporter) {
+        return emailTransporter;
+    }
+
+    const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM, SMTP_SECURE } = process.env;
+    if (!SMTP_HOST || !SMTP_PORT || !SMTP_USER || !SMTP_PASS) {
+        return null;
+    }
+
+    emailTransporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: Number(SMTP_PORT),
+        secure: SMTP_SECURE === 'true' || Number(SMTP_PORT) === 465,
+        auth: {
+            user: SMTP_USER,
+            pass: SMTP_PASS
+        },
+        from: SMTP_FROM || SMTP_USER
+    });
+
+    return emailTransporter;
+}
+
+async function generateExamPdfBuffer({ datodberu, datumnarod, isBlankChecked, dbConfig }) {
+    const details = await db.getPatientExamDetailsPdf({ datodberu, datumnarod }, dbConfig);
+    if (!details || details.length === 0) {
+        throw new Error(`Не знайдено деталей для обстеження від ${datodberu}.`);
+    }
+
+    const secData = {
+        headers: ['Обстеження', 'Результат', 'Одиниця в.', 'Еталонні величини']
+    };
+
+    const backgroundImagePath = 'C:\\data\\BLANK_HM.png';
+    const fontPath = 'C:/Windows/Fonts/arial.ttf';
+    const webcode = await db.getWebCode(datodberu, datumnarod, dbConfig);
+    const pdfBuffer = await createPDF(secData, details, backgroundImagePath, fontPath, isBlankChecked, webcode);
+
+    return { pdfBuffer, details, webcode };
+}
+
+function buildExamEmailText({ patientName, examDate }) {
+    const template = process.env.EMAIL_EXAM_MESSAGE_TEMPLATE
+        || 'Надсилаємо результати обстеження для {{patientName}}. Дата обстеження: {{examDate}}. PDF додано у вкладенні.';
+
+    return template
+        .replace(/\{\{patientName\}\}/g, patientName || 'пацієнта')
+        .replace(/\{\{examDate\}\}/g, examDate || '');
 }
 
 /**
@@ -810,12 +866,12 @@ app.post("/advanced-search", async (req, res) => {
 });
 
 app.post("/api/patient-history", async (req, res) => {
-    const { dob, phone, dateFrom, dateTo } = req.body;
+    const { dob, phone, dateFrom, dateTo, firstName, lastName } = req.body;
     logger.info(`[Історія пацієнта] - Запит для dob: ${dob}, phone: ${phone}, період: ${dateFrom} - ${dateTo}`);
 
-    if (!dob || !phone) {
-        return res.status(400).json({ message: "Дата народження та номер телефону є обов'язковими." });
-    }
+    // (!dob || !phone) {
+     // return res.status(400).json({ message: "Дата народження та номер телефону є обов'язковими." });
+   //
 
     const referer = req.get('Referer') || '';
     const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
@@ -828,10 +884,14 @@ app.post("/api/patient-history", async (req, res) => {
     try {
         // Телефон вже має бути у правильному форматі з фронтенду, але для надійності форматуємо ще раз
         const formattedPhone = formatPhoneNumber(phone);
-        const history = await db.getPatientHistory({ dob, phone: formattedPhone, dateFrom, dateTo }, dbConfig);
+        const history = await db.getPatientHistory({ dob, phone: formattedPhone, dateFrom, dateTo, firstName, lastName }, dbConfig);
+        const normalizedHistory = (history || []).map(entry => ({
+            ...entry,
+            email: entry.email ?? entry.EMAIL ?? entry.Email ?? entry.e_mail ?? entry['E-MAIL'] ?? ''
+        }));
 
-        logger.info(`[Історія пацієнта] - Знайдено ${history?.length || 0} записів для dob: ${dob}, phone: ${formattedPhone}`);
-        res.json(history || []);
+        logger.info(`[Історія пацієнта] - Знайдено ${normalizedHistory.length || 0} записів для dob: ${dob}, phone: ${formattedPhone}`);
+        res.json(normalizedHistory);
     } catch (error) {
         logger.error(`[Історія пацієнта] - Помилка отримання історії для dob: ${dob}: ${error.message}`);
         res.status(503).json({ message: `Не вдалося отримати історію пацієнта. ${error.message}` });
@@ -867,6 +927,36 @@ app.post("/api/patient-exam-details", async (req, res) => {
     } catch (error) {
         logger.error(`[Деталі обстеження] - Помилка отримання деталей: ${error.message}`);
         res.status(503).json({ message: `Не вдалося отримати деталі обстеження. ${error.message}` });
+    }
+});
+
+// Новий маршрут: повертає сирі дані, які використовуються для генерації PDF (getPatientExamDetailsPdf)
+app.post("/api/patient-exam-details-pdf-raw", async (req, res) => {
+    const { datodberu, datumnarod } = req.body;
+    logger.info(`[Деталі PDF (raw)] - Запит для datodberu: ${datodberu}, datumnarod: ${datumnarod}`);
+
+    if (!datodberu || !datumnarod) {
+        return res.status(400).json({ message: "Дата обстеження та дата народження є обов'язковими." });
+    }
+
+    const referer = req.get('Referer') || '';
+    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
+    const dbConfig = branch ? branch.db : BRANCHES.defaultSybase.db;
+
+    if (dbConfig.type !== 'sybase') {
+        return res.status(400).json({ message: "Отримання сирих даних для PDF доступне тільки для Sybase конфігурацій." });
+    }
+
+    try {
+        const details = await db.getPatientExamDetailsPdf({ datodberu: datodberu, datumnarod: datumnarod }, dbConfig);
+        if (!details) {
+            logger.info(`[Деталі PDF (raw)] - Не знайдено даних для ${datodberu}`);
+            return res.json([]);
+        }
+        res.json(details);
+    } catch (error) {
+        logger.error(`[Деталі PDF (raw)] - Помилка: ${error.message}`);
+        res.status(503).json({ message: `Не вдалося отримати сирі дані для PDF. ${error.message}` });
     }
 });
 
@@ -911,6 +1001,100 @@ app.post("/api/generate-exam-pdf", async (req, res) => {
     }
 });
 
+
+app.post("/api/generate-exam-pdf-blank", async (req, res) => {
+    // Отримуємо об'єкт, що містить деталі та стан прапорця
+    const { datodberu, datumnarod,isBlankChecked } = req.body;
+    logger.info(`[Batch PDF] - Отримано запит на генерацію PDF.`);
+
+     const referer = req.get('Referer') || '';
+    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
+    const dbConfig = branch ? branch.db : BRANCHES.defaultSybase.db;
+
+    
+    try {
+        const { pdfBuffer, details } = await generateExamPdfBuffer({ datodberu, datumnarod, isBlankChecked, dbConfig });
+
+        // Визначаємо ім'я файлу
+        const patientInfo = details[0];
+        // Формуємо ім'я файлу з прізвища та дати
+        const fileName = `Exam.pdf`;
+
+
+        // Відправляємо PDF клієнту
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `inline; filename="${fileName}"`);
+        res.send(pdfBuffer);
+        logger.info(`[PDF Generation] - PDF для пацієнта ${patientInfo['Прізвище']} успішно згенеровано та відправлено.`);
+    } catch (error) {
+        logger.error(`[PDF Generation] - Помилка генерації PDF: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося згенерувати PDF. ${error.message}` });
+    }
+});
+
+app.post("/api/send-exam-email", async (req, res) => {
+    const { datodberu, datumnarod, isBlankChecked, email, patientName } = req.body;
+
+    if (!datodberu || !datumnarod || !email) {
+        return res.status(400).json({ message: "Дата обстеження, дата народження та email є обов'язковими." });
+    }
+
+    const normalizedEmail = String(email).trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
+        return res.status(400).json({ message: "Вкажіть коректний email." });
+    }
+
+    const transporter = getEmailTransporter();
+    if (!transporter) {
+        return res.status(503).json({
+            message: "Email не налаштований на сервері. Додайте SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS і SMTP_FROM в .env."
+        });
+    }
+
+    const referer = req.get('Referer') || '';
+    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
+    const dbConfig = branch ? branch.db : BRANCHES.defaultSybase.db;
+
+    if (dbConfig.type !== 'sybase') {
+        return res.status(400).json({ message: "Відправка PDF на email доступна тільки для Sybase конфігурацій." });
+    }
+
+    try {
+        const { pdfBuffer, details } = await generateExamPdfBuffer({ datodberu, datumnarod, isBlankChecked, dbConfig });
+        const patientInfo = details[0] || {};
+        const lastName = patientInfo['Прізвище'] || 'Patient';
+        const examDate = new Date(datodberu).toLocaleDateString('uk-UA').replace(/\./g, '-');
+        const fileName = `Exam_${lastName}_${examDate}.pdf`;
+        const resolvedPatientName = patientName || `${patientInfo['Прізвище'] || ''} ${patientInfo["Ім'я"] || ''}`.trim() || 'пацієнта';
+        const sender = process.env.SMTP_FROM || process.env.SMTP_USER;
+        const emailText = buildExamEmailText({ patientName: resolvedPatientName, examDate });
+
+        await transporter.sendMail({
+            from: sender,
+            to: normalizedEmail,
+            subject: `Результати обстеження - ${resolvedPatientName}`,
+            text: emailText,
+            attachments: [
+                {
+                    filename: fileName,
+                    content: pdfBuffer,
+                    contentType: 'application/pdf'
+                }
+            ]
+        });
+
+        logger.info(`[Email] - Результат ${datodberu} для ${resolvedPatientName} відправлено на ${normalizedEmail}.`);
+        res.json({ message: `Результат відправлено на ${normalizedEmail}.` });
+    } catch (error) {
+        logger.error(`[Email] - Помилка відправки результату на ${normalizedEmail}: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося відправити email. ${error.message}` });
+    }
+});
+
+
+
+
 // --- Маршрут для пакетної генерації PDF та створення архіву ---
 app.post("/api/batch-generate-archive", async (req, res) => {
     const { exams } = req.body; // Очікуємо масив об'єктів з даними обстежень
@@ -940,13 +1124,13 @@ app.post("/api/batch-generate-archive", async (req, res) => {
         // Паралельно генеруємо всі PDF
         const pdfGenerationPromises = exams.map(async (exam) => {
             try {
-                const details = await db.getPatientExamDetails({ datodberu: exam.datodberu, datumnarod: exam.datumnarod }, dbConfig);
+                const details = await db.getPatientExamDetailsPdf({ datodberu: exam.datodberu, datumnarod: exam.datumnarod }, dbConfig);
                 if (!details || details.length === 0) {
                     logger.warn(`[Batch PDF] - Не знайдено деталей для обстеження від ${exam.datodberu}.`);
                     return null;
                 }
-
-                const pdfBuffer = await createPDF(secData, details, backgroundImagePath, fontPath, exam.isBlankChecked);
+                const webcode = await db.getWebCode(exam.datodberu, exam.datumnarod, dbConfig);
+                const pdfBuffer = await createPDF(secData, details, backgroundImagePath, fontPath, exam.isBlankChecked,webcode);
 
                 const examDate = new Date(exam.datodberu).toLocaleDateString('uk-UA').replace(/\./g, '-');
                 const pdfFileName = `Exam_${exam.priezvisko}_${examDate}.pdf`;
@@ -1108,6 +1292,73 @@ app.get("/api/registered-exams", async (req, res) => {
     }
 });
 
+
+
+// Перевірка статусу смс для зареєстрованих досліджень
+app.post("/api/exams-sms-bulk-status", async (req, res) => {
+    const { exams } = req.body; // Очікуємо масив [{ datodberu, datumnarod, id }, ...]
+    const lang = req.headers['accept-language']?.startsWith('en') ? 'en' : (req.headers['accept-language']?.startsWith('ka') ? 'geo' : 'uk');
+
+    if (!exams || !Array.isArray(exams) || exams.length === 0) {
+        return res.status(400).json({ message: "Масив обстежень обов'язковий." });
+    }
+
+    // 1. Визначаємо БД (один раз для всього запиту)
+    const referer = req.get('Referer') || '';
+    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
+    const dbConfig = branch ? branch.db : BRANCHES.defaultSybase.db;
+
+    if (dbConfig.type !== 'sybase') {
+        return res.status(400).json({ message: "Перевірка статусів доступна тільки для Sybase." });
+    }
+
+    try {
+        logger.info(`[SMS Status] Bulk request for ${exams.length} exams.`);
+
+        // 2. Отримуємо всі статуси ОДНИМ запитом
+        const allStatuses = await db.getBulkWebCodeAndSmsStatus(exams, dbConfig);
+
+        // Створюємо Map для швидкого пошуку статусу за ключем "datodberu|datumnarod"
+        const statusMap = new Map(allStatuses.map(s => [`${s.datotbery}|${s.datumnarod}`, s]));
+        console.log(statusMap);
+
+        // 3. Зіставляємо результати з вихідним масивом
+        const results = exams.map(exam => {
+            const statusInfo = statusMap.get(`${exam.datodberu}|${exam.datumnarod}`);
+
+            if (statusInfo) {
+                return {
+                    ...statusInfo, // Включає webcode, smsStatusCode, datodberu, datumnarod
+                    id: exam.id,
+                    statusText: getStatusDescription(statusInfo.smsStatusCode, lang),
+                    isSuccess: isSmsSuccess(statusInfo.smsStatusCode),
+                    found: true
+                };
+            }
+            return { id: exam.id, found: false };
+        });
+
+        res.json(results);
+    } catch (error) {
+        logger.error(`[SMS Status Bulk] Global error: ${error.message}`);
+        res.status(503).json({ message: "Помилка при масовій перевірці статусів." });
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // --- Маршрут для отримання списку зареєстрованих досліджень ---
 // --- Заглушка endpoint для реєстрації аналізів (приймає масив кодів) ---
 app.post('/api/register-analyses', express.json(), async (req, res) => {
@@ -1140,86 +1391,77 @@ app.post('/api/register-analyses', express.json(), async (req, res) => {
     }
 });
 
-// --- Маршрут для пакетної генерації PDF та створення архіву ---
-app.post("/api/batch-generate-archive", async (req, res) => {
-    const { exams } = req.body; // Очікуємо масив об'єктів з даними обстежень
-    logger.info(`[Batch PDF] - Отримано запит на пакетну генерацію архіву для ${exams?.length || 0} обстежень.`);
-
-    if (!exams || !Array.isArray(exams) || exams.length === 0) {
-        return res.status(400).json({ message: "Не надано даних для генерації архіву." });
-    }
-
-    const referer = req.get('Referer') || '';
-    const branch = Object.values(BRANCHES).find(b => referer && referer.includes(b.path));
-    const dbConfig = branch ? branch.db : BRANCHES.defaultSybase.db;
-
-    if (dbConfig.type !== 'sybase') {
-        return res.status(400).json({ message: "Пакетна генерація доступна тільки для Sybase." });
-    }
-
-    // Створюємо унікальну тимчасову директорію для цього запиту
-    const tempArchiveDir = path.join(__dirname, 'temp', `archive_${Date.now()}`);
-    await fs.mkdir(tempArchiveDir, { recursive: true });
-
+app.post('/api/analyzer/serial-result', async (req, res) => {
     try {
-        const secData = { headers: ['Обстеження', 'Результат', 'Одиниця в.', 'Еталонні величини'] };
-        const backgroundImagePath = 'C:\\data\\BLANK_HM.png';
-        const fontPath = 'C:/Windows/Fonts/arial.ttf';
+        const expectedToken = process.env.ANALYZER_BRIDGE_TOKEN?.trim();
+        const actualToken = req.get('x-analyzer-token')?.trim();
 
-        // Паралельно генеруємо всі PDF
-        const pdfGenerationPromises = exams.map(async (exam) => {
-            try {
-                const details = await db.getPatientExamDetails({ datodberu: exam.datodberu, datumnarod: exam.datumnarod }, dbConfig);
-                if (!details || details.length === 0) {
-                    logger.warn(`[Batch PDF] - Не знайдено деталей для обстеження від ${exam.datodberu}.`);
-                    return null;
-                }
-
-                const pdfBuffer = await createPDF(secData, details, backgroundImagePath, fontPath, exam.isBlankChecked);
-
-                const examDate = new Date(exam.datodberu).toLocaleDateString('uk-UA').replace(/\./g, '-');
-                const pdfFileName = `Exam_${exam.priezvisko}_${examDate}.pdf`;
-                const pdfFilePath = path.join(tempArchiveDir, pdfFileName);
-
-                await fs.writeFile(pdfFilePath, pdfBuffer);
-                return { path: pdfFilePath, name: pdfFileName };
-            } catch (error) {
-                logger.error(`[Batch PDF] - Помилка генерації PDF для обстеження від ${exam.datodberu}: ${error.message}`);
-                return null; // Повертаємо null у разі помилки, щоб не переривати весь процес
-            }
-        });
-
-        const generatedPdfs = (await Promise.all(pdfGenerationPromises)).filter(Boolean); // Видаляємо null
-
-        if (generatedPdfs.length === 0) {
-            throw new Error("Не вдалося згенерувати жодного PDF файлу.");
+        if (expectedToken && actualToken !== expectedToken) {
+            logger.warn('[Analyzer Serial Result] - Unauthorized bridge request.');
+            return res.status(401).json({ success: false, message: 'Unauthorized analyzer bridge request.' });
         }
 
-        // Створюємо ZIP-архів
-        const archive = archiver('zip', { zlib: { level: 9 } });
-        const patientLastName = exams[0]?.priezvisko || 'Patient';
-        const archiveName = `Exams_${patientLastName}_${new Date().toLocaleDateString('uk-UA').replace(/\./g, '-')}.zip`;
+        const payload = req.body || {};
+        const identifier = String(payload.barcode || payload.sampleId || payload.patientId || '').trim().toUpperCase();
+        const observations = Array.isArray(payload.observations) ? payload.observations : [];
 
-        res.attachment(archiveName); // Встановлюємо заголовок для завантаження файлу
-        archive.pipe(res);
+        if (!identifier) {
+            return res.status(400).json({ success: false, message: 'barcode/sampleId/patientId is required.' });
+        }
 
-        generatedPdfs.forEach(pdf => {
-            archive.file(pdf.path, { name: pdf.name });
+        if (!observations.length) {
+            return res.status(400).json({ success: false, message: 'observations array is required.' });
+        }
+
+        const branchKey = String(payload.branchKey || process.env.SERIAL_URINE_BRANCH || 'ad').trim();
+        const analyzerPraclistId = String(payload.analyzerPraclistId || process.env.SERIAL_URINE_PRACLISTID || '').trim();
+        const analyzerKodzar = String(payload.analyzerKodzar || process.env.SERIAL_URINE_KODZAR || '').trim();
+
+        logger.info(
+            `[Analyzer Serial Result] - Incoming payload: branch=${branchKey}, analyzer=${analyzerPraclistId || analyzerKodzar || 'n/a'}, identifier=${identifier}, observations=${observations.length}`
+        );
+
+        const ingester = createSybaseAnalyzerResultIngester({
+            branchKey,
+            analyzerPraclistId,
+            analyzerKodzar,
+            shortBarcodeWithSampleMode: String(
+                payload.barcodeShortWithSampleMode ||
+                process.env.SERIAL_URINE_SHORT_BARCODE_WITH_SAMPLE_MODE ||
+                ""
+            ).trim(),
+            searchDays: Number(payload.searchDays || process.env.SERIAL_URINE_LOOKBACK_DAYS || 90),
+            resultOscis: Number(payload.resultOscis || process.env.SERIAL_URINE_RESULT_OSCIS || 22),
+            autoConfirmResults: String(
+                payload.autoConfirmResults ?? process.env.SERIAL_URINE_AUTO_CONFIRM_RESULTS ?? 'true'
+            ).toLowerCase() !== 'false',
+            labCode: String(payload.labCode || process.env.SERIAL_URINE_KODLAB || '').trim(),
+            logger: (message, extra = '') => logger.info(`[Analyzer Serial Result] - ${message}${extra ? ` ${extra}` : ''}`),
+            queryLogger: (query) => logger.info(`[Analyzer Serial Result SQL]\n${String(query || '').trim()}`),
         });
 
-        await archive.finalize();
-        logger.info(`[Batch PDF] - Архів ${archiveName} успішно створено та відправлено.`);
+        const result = await ingester.applyResultPayload({
+            ...payload,
+            barcode: payload.barcode || payload.sampleId || payload.patientId,
+            observations,
+        });
 
+        logger.info(
+            `[Analyzer Serial Result] - Applied for ${result.barcode}. Updated=${result.updated.length}, Skipped=${result.skipped.length}`
+        );
+
+        return res.json({
+            success: true,
+            barcode: result.barcode,
+            updated: result.updated,
+            skipped: result.skipped,
+        });
     } catch (error) {
-        logger.error(`[Batch PDF] - Помилка створення архіву: ${error.message}`);
-        res.status(500).json({ message: `Не вдалося створити архів. ${error.message}` });
-    } finally {
-        // Очищуємо тимчасову директорію після завершення
-        setTimeout(() => {
-            fse.remove(tempArchiveDir).catch(err => {
-                logger.error(`[Batch PDF] - Не вдалося видалити тимчасову директорію архіву ${tempArchiveDir}: ${err.message}`);
-            });
-        }, 15000); // Затримка для надійності
+        logger.error(`[Analyzer Serial Result] - Error: ${error.message}`);
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Failed to ingest analyzer serial results.',
+        });
     }
 });
 
@@ -2076,6 +2318,281 @@ app.get("/api/reports/exam-registration-stats", async (req, res) => {
         res.json(stats || []);
     } catch (error) {
         logger.error(`[Reports] - Помилка отримання звіту по реєстраціям досліджень: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося отримати звіт. ${error.message}` });
+    }
+});
+
+app.get("/api/reports/doctors", async (req, res) => {
+    const { branchdb } = req.query;
+    logger.info(`[Reports] - Запит списку лікарів для звітів. Філія: ${branchdb}.`);
+
+    if (!branchdb) {
+        return res.status(400).json({ message: "Необхідно вказати ID філіалу (branchdb)." });
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей список доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    try {
+        const doctors = await db.getReportDoctors(branch.db);
+        res.json(doctors || []);
+    } catch (error) {
+        logger.error(`[Reports] - Помилка отримання списку лікарів: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося отримати список лікарів. ${error.message}` });
+    }
+});
+
+app.get("/api/reports/doctor-registration-stats", async (req, res) => {
+    const { dateFrom, dateTo, branchdb, doctorName } = req.query;
+    logger.info(`[Reports] - Запит звіту по реєстраціях до лікаря "${doctorName}" за період: ${dateFrom} - ${dateTo}.`);
+
+    if (!dateFrom || !dateTo || !branchdb || !doctorName) {
+        return res.status(400).json({ message: "Необхідно вказати початкову та кінцеву дати, ID філіалу (branchdb) та лікаря." });
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей звіт доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    try {
+        const stats = await db.getDoctorRegistrationStats({ dateFrom, dateTo, doctorName }, branch.db);
+        res.json(stats || []);
+    } catch (error) {
+        logger.error(`[Reports] - Помилка отримання звіту по лікарю: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося отримати звіт. ${error.message}` });
+    }
+});
+
+app.get("/api/reports/service-cabinets", async (req, res) => {
+    const { branchdb } = req.query;
+    logger.info(`[Reports] - Запит списку кабінетів для звіту "Послуги лікаря". Філія: ${branchdb}.`);
+
+    if (!branchdb) {
+        return res.status(400).json({ message: "Необхідно вказати ID філіалу (branchdb)." });
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей список доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    try {
+        const cabinets = await db.getDoctorServiceCabinets(branch.db);
+        res.json(cabinets || []);
+    } catch (error) {
+        logger.error(`[Reports] - Помилка отримання списку кабінетів: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося отримати список кабінетів. ${error.message}` });
+    }
+});
+
+app.get("/api/reports/doctor-services", async (req, res) => {
+    const { dateFrom, dateTo, branchdb, cabinetCode, cabinetName } = req.query;
+    logger.info(`[Reports] - Запит звіту "Послуги лікаря" для кабінету "${cabinetCode || cabinetName}" за період: ${dateFrom} - ${dateTo}.`);
+
+    if (!dateFrom || !dateTo || !branchdb || (!cabinetCode && !cabinetName)) {
+        return res.status(400).json({ message: "Необхідно вказати початкову та кінцеву дати, ID філіалу (branchdb) та кабінет." });
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей звіт доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    try {
+        const stats = await db.getDoctorServicesReport({ dateFrom, dateTo, cabinetCode, cabinetName }, branch.db);
+        res.json(stats || []);
+    } catch (error) {
+        logger.error(`[Reports] - Помилка отримання звіту "Послуги лікаря": ${error.message}`);
+        res.status(500).json({ message: `Не вдалося отримати звіт. ${error.message}` });
+    }
+});
+
+app.get("/api/reports/doctor-services-batch-download", async (req, res) => {
+    const { dateFrom, dateTo, branchdb } = req.query;
+    logger.info(`[Reports] - Запит пакетного завантаження звіту "Послуги лікаря" за період: ${dateFrom} - ${dateTo}. Філія: ${branchdb}.`);
+
+    if (!dateFrom || !dateTo || !branchdb) {
+        return res.status(400).json({ message: "Необхідно вказати початкову та кінцеву дати, а також ID філіалу (branchdb)." });
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей архів доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    const escapeCsvValue = (value) => {
+        const stringValue = value == null ? '' : String(value).replace(/\u00A0/g, ' ').trim();
+        return `"${stringValue.replace(/"/g, '""')}"`;
+    };
+
+    const sanitizeFilenamePart = (value) => String(value || '')
+        .trim()
+        .replace(/[<>:"/\\|?*\x00-\x1F]/g, '')
+        .replace(/\s+/g, '_');
+
+    const buildDoctorServicesCsv = (rows) => {
+        const detailRows = rows.filter(row => Number(row.sort_order) === 0);
+        const totalRow = rows.find(row => Number(row.sort_order) === 1);
+        const csvRows = [
+            ['Код послуги', 'Послуга', 'Кількість', 'Загальна сума']
+        ];
+
+        detailRows.forEach(row => {
+            csvRows.push([
+                row.service_code || '',
+                row.service_name || '',
+                Number(row.qty || 0).toFixed(2),
+                Number(row.total_sum || 0).toFixed(2)
+            ]);
+        });
+
+        if (totalRow) {
+            csvRows.push([
+                '',
+                totalRow.service_name || 'Загальна сума',
+                Number(totalRow.qty || 0).toFixed(2),
+                Number(totalRow.total_sum || 0).toFixed(2)
+            ]);
+        }
+
+        return csvRows.map(row => row.map(cell => escapeCsvValue(cell)).join(',')).join('\r\n');
+    };
+
+    try {
+        const cabinets = await db.getDoctorServiceCabinets(branch.db);
+        if (!cabinets || cabinets.length === 0) {
+            return res.status(404).json({ message: "Не знайдено жодного кабінету для пакетного завантаження." });
+        }
+
+        const archive = archiver('zip', { zlib: { level: 9 } });
+        const archiveName = [
+            'Poslugy_likarya',
+            sanitizeFilenamePart(dateFrom),
+            sanitizeFilenamePart(dateTo)
+        ].filter(Boolean).join('_') + '.zip';
+
+        archive.on('error', (error) => {
+            logger.error(`[Reports] - Помилка створення ZIP-архіву "Послуги лікаря": ${error.message}`);
+            if (!res.headersSent) {
+                res.status(500).json({ message: `Не вдалося створити архів. ${error.message}` });
+            } else {
+                res.end();
+            }
+        });
+
+        res.attachment(archiveName);
+        archive.pipe(res);
+
+        for (const cabinet of cabinets) {
+            const reportRows = await db.getDoctorServicesReport({
+                dateFrom,
+                dateTo,
+                cabinetCode: cabinet.cabinet_code
+            }, branch.db);
+
+            const csvContent = buildDoctorServicesCsv(Array.isArray(reportRows) ? reportRows : []);
+            const cabinetFileName = [
+                'Poslugy_likarya',
+                sanitizeFilenamePart(cabinet.cabinet_name || cabinet.cabinet_code),
+                sanitizeFilenamePart(cabinet.cabinet_code),
+                sanitizeFilenamePart(dateFrom),
+                sanitizeFilenamePart(dateTo)
+            ].filter(Boolean).join('_') + '.csv';
+
+            archive.append(Buffer.from('\uFEFF' + csvContent, 'utf8'), { name: cabinetFileName });
+        }
+
+        await archive.finalize();
+    } catch (error) {
+        logger.error(`[Reports] - Помилка пакетного завантаження звіту "Послуги лікаря": ${error.message}`);
+        if (!res.headersSent) {
+            res.status(500).json({ message: `Не вдалося сформувати архів. ${error.message}` });
+        }
+    }
+});
+
+app.get("/api/reports/combined-registration-stats", async (req, res) => {
+    let { dateFrom, dateTo, branchdb } = req.query;
+    logger.info(`[Reports] - Запит зведеного звіту по реєстраціям за період: ${dateFrom} - ${dateTo}.`);
+
+    if (!dateFrom || !dateTo || !branchdb) {
+        return res.status(400).json({ message: "Необхідно вказати початкову та кінцеву дати, а також ID філіалу (branchdb)." });
+    }
+
+    if (dateFrom === dateTo) {
+        dateTo = `${dateTo} 23:59:59`;
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей звіт доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    try {
+        const stats = await db.getCombinedRegistrationStats({ dateFrom, dateTo }, branch.db);
+        res.json(stats || []);
+    } catch (error) {
+        logger.error(`[Reports] - Помилка отримання зведеного звіту по реєстраціям: ${error.message}`);
+        res.status(500).json({ message: `Не вдалося отримати звіт. ${error.message}` });
+    }
+});
+
+app.get("/api/reports/combined-cash-stats", async (req, res) => {
+    let { dateFrom, dateTo, branchdb } = req.query;
+    const lang = req.headers['accept-language']?.startsWith('en') ? 'en' : 'uk';
+    logger.info(`[Reports] - Запит зведеного звіту по касі за період: ${dateFrom} - ${dateTo}.`);
+
+    if (!dateFrom || !dateTo || !branchdb) {
+        return res.status(400).json({ message: "Необхідно вказати початкову та кінцеву дати, а також ID філіалу (branchdb)." });
+    }
+
+    if (dateFrom === dateTo) {
+        dateTo = `${dateTo} 23:59:59`;
+    }
+
+    const branch = BRANCHES[branchdb];
+
+    if (!branch || branch.db?.type !== 'sybase') {
+        return res.status(400).json({ message: "Цей звіт доступний тільки для філіалів з базою даних Sybase." });
+    }
+
+    try {
+        const stats = await db.getCombinedCashStats({ dateFrom, dateTo }, branch.db);
+
+        if (stats && stats.length > 0) {
+            const totalSumAll = stats.reduce((acc, row) => acc + row.total_sum, 0);
+
+            let statsWithPercentage = stats.map(row => ({
+                ...row,
+                effectiveness_percentage: totalSumAll > 0 ? (row.total_sum / totalSumAll) * 100 : 0
+            }));
+
+            if (lang === 'en') {
+                statsWithPercentage = statsWithPercentage.map(row => ({
+                    "Last Name": row["Фамілія"],
+                    "First Name": row["Ім'я"],
+                    "total_sum": row.total_sum,
+                    "clinic_sum": row.clinic_sum,
+                    "lab_sum": row.lab_sum,
+                    "effectiveness_percentage": row.effectiveness_percentage
+                }));
+            }
+
+            res.json({ stats: statsWithPercentage, totalSumAll });
+        } else {
+            res.json({ stats: [], totalSumAll: 0 });
+        }
+    } catch (error) {
+        logger.error(`[Reports] - Помилка отримання зведеного звіту по касі: ${error.message}`);
         res.status(500).json({ message: `Не вдалося отримати звіт. ${error.message}` });
     }
 });

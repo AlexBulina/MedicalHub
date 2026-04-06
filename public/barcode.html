@@ -118,8 +118,11 @@
 
     <div id="no-print" style="text-align: center;">
         <h1>Штрих-коди замовлення</h1>
-        <button onclick="window.print()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">🖨️
-            Друкувати</button>
+        <button onclick="printElement()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">🖨️
+            Друкувати на етикетці</button>
+        <button onclick="window.print()"
+            style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;">🖨️
+            Звичайний друк</button>
         <button onclick="window.close()"
             style="padding: 10px 20px; font-size: 16px; cursor: pointer; margin-left: 10px;">❌ Закрити</button>
         <hr>
@@ -128,6 +131,125 @@
     <div id="labels-container"></div>
 
     <script>
+        // Функція для друку етикеток через print server
+        async function printElement() {
+            const labeldiv = document.getElementById('labels-container');
+
+            if (!labeldiv || !labeldiv.innerHTML.trim()) {
+                alert('Немає даних для друку');
+                return;
+            }
+
+            try {
+                // Отримуємо повний HTML з стилями
+                const htmlContent = `
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        @page {
+            size: 50mm 25mm;
+            margin: 0;
+        }
+        
+        body {
+            background: none;
+            padding: 0;
+            margin: 0;
+            display: block;
+        }
+        
+        #labels-container {
+            display: block;
+            gap: 0;
+        }
+        
+        .label {
+            width: 50mm;
+            height: 25mm;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-sizing: border-box;
+            padding: 2px 4px;
+            overflow: hidden;
+            border: none;
+            page-break-after: always;
+            break-inside: avoid;
+            margin: 0 auto;
+        }
+        
+        .label:last-child {
+            page-break-after: auto;
+        }
+        
+        .barcode-svg {
+            max-width: 95%;
+            width: 95%;
+            height: auto;
+            display: block;
+        }
+        
+        .label-text {
+            font-size: 10px;
+            margin: 2px 0 0 0;
+            text-align: center;
+            width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.1;
+            font-weight: 600;
+        }
+        
+        .label-symbol {
+            font-size: 11px;
+            margin: 0;
+            text-align: center;
+            width: 100%;
+            font-weight: bold;
+            white-space: normal;
+            line-height: 1;
+        }
+    </style>
+</head>
+<body>
+    <div id="labels-container">
+        ${labeldiv.innerHTML}
+    </div>
+</body>
+</html>`;
+
+                // Надсилаємо на print server з типом LABEL
+                const response = await fetch('http://localhost:4000/print-html', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        type: 'LABEL',
+                        htmlContent: htmlContent,
+                        width: '50mm',
+                        height: '25mm'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                   
+                } else {
+                    alert('Помилка друку: ' + (result.error || 'Невідома помилка'));
+                }
+            } catch (error) {
+                console.error('Print error:', error);
+                alert('Помилка з\'єднання з сервером друку: ' + error.message);
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const container = document.getElementById('labels-container');
             const storedData = localStorage.getItem('barcodeData');
@@ -150,7 +272,9 @@
             const { orderId: storedOrderId, patientName, label, patientDob, datodberu, registrationDate, evidcis, typziad } = data;
 
             // Змінна label містить масив призначень (priradenie)
-            const assignments = Array.isArray(label) ? label : (label ? [label] : []);
+            // Фільтруємо порожні значення ""
+            const assignments = (Array.isArray(label) ? label : (label ? [label] : []))
+                .filter(item => item !== "");
 
             // Функція для обчислення фінального orderId у форматі YYMM{typziad}{NNNN}{labelChar}
             const computeFinalOrderId = () => {

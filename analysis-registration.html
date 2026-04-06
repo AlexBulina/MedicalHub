@@ -6,7 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.png" type="image/x-icon">
     <title>Реєстрація аналізів</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <link href="/output.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Додаємо Chart.js для графіків -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -45,6 +49,11 @@
 
         .step.completed .step-number {
             background-color: #10b981;
+        }
+
+        .dark .step.completed .step-number {
+            /* Яскравіший зелений для кращого контрасту на темному фоні (Tailwind green-500) */
+            background-color: #131038;
         }
 
         .step-label {
@@ -173,35 +182,83 @@
                 display: none;
             }
         }
+
+        @keyframes blink {
+            50% { opacity: 0.3; }
+        }
+        .blinking-icon {
+            animation: blink 1s linear infinite;
+        }
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen py-8 px-4">
+<body class="bg-gray-100 min-h-screen flex flex-col items-center p-6 transition-colors duration-500" id="body-bg">
     <!-- Header -->
-    <div class="w-full max-w-4xl mx-auto mb-8">
-        <div class="bg-white rounded-xl shadow-lg p-6">
+    <div class="w-full max-w-full mx-auto mb-8" >
+        <div class="bg-white  dark:bg-slate-800  rounded-xl shadow-lg p-6" id="bg-header">
             <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-3xl font-bold text-gray-800 mb-2">Реєстрація аналізів</h1>
-                    <p id="header-subtitle" class="text-gray-600">Пошук пацієнта та реєстрація лабораторних досліджень
-                    </p>
+                <div class="flex items-center gap-4">
+                   
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">Реєстрація аналізів</h1>
+                        <p id="header-subtitle" class="text-gray-600 dark:text-white">
+                            <span class="hidden lg:inline">Пошук пацієнта та реєстрація лабораторних досліджень</span>
+                            <span class="lg:hidden">AMBIS WEB 1.0</span>
+                        </p> 
+                        <!-- <img src="/hemo.png" alt="Логотип" class="h-12 w-auto"> -->
+                    
+                    </div>
                 </div>
-                <div class="flex gap-3">
+                <div class="flex gap-3">  
                     <button id="back-btn"
-                        class="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
+                        class=" hidden flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                         </svg>
                         <span>Назад</span>
                     </button>
+                    <button id="open-history-modal-btn"
+                        class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Історія</span>
+                    </button>
+                  
+                    
+                      <label class="label cursor-pointer">
+    
+    <input 
+      type="checkbox" 
+      id="theme-toggle" 
+      class="toggle toggle-md
+             /* --- ВИМКНЕНИЙ СТАН (сірий) --- */
+             bg-gray-100 border-gray-300 
+             hover:bg-gray-100 hover:border-gray-400
+             
+             /* --- УВІМКНЕНИЙ СТАН (індиго) --- */
+             checked:bg-indigo-600 checked:border-indigo-600
+             checked:hover:bg-indigo-700 checked:hover:border-indigo-700
+             
+             /* --- КОЛІР КРУЖЕЧКА (завжди білий) --- */
+             [--tglbg:white]"
+    />
+    
+    <span class="ml-4 text-sm font-semibold text-gray-600 uppercase tracking-wider" id="status-text">
+      Темна
+    </span>
+    
+  </label>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Main Content -->
-    <div class="w-full max-w-4xl mx-auto">
+    <div class="w-full max-w-full mx-auto">
         <!-- Step Indicator -->
         <div class="step-indicator mb-8">
             <div class="step active" id="step-1">
@@ -226,7 +283,7 @@
         </div>
 
         <!-- BLOCK 1: Patient Search -->
-        <div id="block-1-patient-search" class="block-section active bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div id="block-1-patient-search" class="block-section active bg-white  dark:bg-slate-800 rounded-xl shadow-lg p-8 mb-8">
             <div class="block-header">
                 <div class="block-icon">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -235,8 +292,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Крок 1: Пошук пацієнта</h2>
-                    <p class="text-gray-600 text-sm">Знайдіть пацієнта за прізвищем та ім'ям</p>
+                    <h2 class="text-2xl font-bold dark:text-white text-gray-800">Крок 1: Пошук пацієнта</h2>
+                    <p class="dark:text-white text-gray-600 text-sm">Знайдіть пацієнта за прізвищем та ім'ям</p>
                 </div>
             </div>
 
@@ -262,7 +319,7 @@
                 <!-- Search Buttons -->
                 <div class="flex gap-4">
                     <button id="search-patient-btn"
-                        class="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -275,7 +332,7 @@
                     </button>
                     <!-- Forward Button (appears after patient is selected) -->
                     <button id="forward-btn" type="button"
-                        class="hidden flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                        class="hidden  px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
@@ -308,55 +365,55 @@
                 </div>
 
                 <!-- Selected Patient Info -->
-                <div id="selected-patient-info" class="hidden p-4 bg-green-50 border border-green-200 rounded-lg">
-                    <div class="flex items-start gap-3">
+                <div id="selected-patient-info" class="hidden max-w-lg  p-4 dark:bg-slate-600 bg-green-50 border dark:border-white border-green-200 rounded-lg">
+                    <div class=" items-start gap-3">
                         <svg class="w-6 h-6 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd"
                                 d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
                                 clip-rule="evenodd"></path>
                         </svg>
                         <div>
-                            <h4 class="font-semibold text-green-800 mb-1">Пацієнт обраний</h4>
-                            <p id="patient-details" class="text-sm text-green-700"></p>
+                            <h4 class="font-semibold dark:text-white text-green-800 mb-1">Пацієнт обраний</h4>
+                            <p id="patient-details" class="text-sm  dark:text-white text-green-700"></p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Create New Patient Form (hidden by default) -->
                 <div id="create-patient-container" class="hidden mt-6 pt-6 border-t border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Створення нового пацієнта</h3>
+                    <h3 class="text-lg font-semibold dark:text-white text-gray-800 mb-4">Створення нового пацієнта</h3>
                     <form id="create-patient-form" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label for="new-patient-lastName"
-                                    class="block text-sm font-medium text-gray-700 mb-2">Прізвище</label>
+                                    class="block text-sm font-medium dark:text-white text-gray-700 mb-2">Прізвище</label>
                                 <input type="text" id="new-patient-lastName" readonly
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
                             </div>
                             <div>
                                 <label for="new-patient-firstName"
-                                    class="block text-sm font-medium text-gray-700 mb-2">Ім'я</label>
+                                    class="block text-sm font-medium  dark:text-white text-gray-700 mb-2">Ім'я</label>
                                 <input type="text" id="new-patient-firstName" readonly
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
-                                <label for="new-patient-dob" class="block text-sm font-medium text-gray-700 mb-2">Дата
+                                <label for="new-patient-dob" class="block text-sm font-medium  dark:text-white text-gray-700 mb-2">Дата
                                     народження <span class="text-red-500">*</span></label>
                                 <input type="date" id="new-patient-dob" required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label for="new-patient-phone"
-                                    class="block text-sm font-medium text-gray-700 mb-2">Телефон <span
+                                    class="block text-sm font-medium  dark:text-white text-gray-700 mb-2">Телефон <span
                                         class="text-red-500">*</span></label>
                                 <input type="tel" id="new-patient-phone" placeholder="0991234567" required
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                             </div>
                             <div>
                                 <label for="new-patient-gender"
-                                    class="block text-sm font-medium text-gray-700 mb-2">Стать</label>
+                                    class="block text-sm font-medium  dark:text-white text-gray-700 mb-2">Стать</label>
                                 <select id="new-patient-gender"
                                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                                     <option value="M">Чоловік</option>
@@ -389,24 +446,29 @@
                         </svg>
                     </div>
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Зареєстровані дослідження</h2>
-                        <p class="text-gray-600 text-sm">Перегляд зареєстрованих замовлень за обраний період</p>
+                        <h2 class="text-2xl font-bold  dark:text-white  text-gray-800">Зареєстровані дослідження</h2>
+                        <p class=" dark:text-white text-gray-600 text-sm">Перегляд зареєстрованих замовлень за обраний період</p>
                     </div>
                 </div>
 
                 <!-- Фільтри -->
                 <div class="flex items-end gap-4 mb-4">
+                    <div id="refresh-registered-exams-btn" class="block-icon cursor-pointer" title="Оновити список">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    </div>
                     <div>
                         <label for="registered-analyses-date"
-                            class="block text-sm font-medium text-gray-700 mb-2">Дата</label>
+                            class="block text-sm font-medium  dark:text-white  text-gray-700 mb-2">Дата</label>
                         <input type="date" id="registered-analyses-date"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="flex px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
                     <div>
                         <label for="registered-analyses-status"
-                            class="block text-sm font-medium text-gray-700 mb-2">Статус</label>
+                            class="block text-sm font-medium hidden lg:table-cell dark:text-white  text-gray-700 mb-2">Статус</label>
                         <select id="registered-analyses-status"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            class="flex px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
 
                             <option value="1" selected>Прийнято</option>
                             <option value="2">Підтверджено</option>
@@ -416,7 +478,7 @@
                     </div>
                     <div class="flex-grow">
                         <label for="registered-analyses-search"
-                            class="block text-sm font-medium text-gray-700 mb-2">Пошук за пацієнтом</label>
+                            class="block text-sm font-medium  dark:text-white text-gray-700 mb-2">Пошук за пацієнтом</label>
                         <input type="search" id="registered-analyses-search" placeholder="Введіть ПІБ..."
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </div>
@@ -437,7 +499,7 @@
                                     class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Дата реєстрації</th>
                                 <th
-                                    class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    class=" hidden lg:table-cell px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Статус</th>
                                 <th
                                     class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -508,10 +570,13 @@
                     </button>
                 </div>
             </div>
+
+            <!-- Контейнер для історії пацієнта тепер порожній, оскільки функціонал перенесено в модальне вікно -->
+
         </div>
 
         <!-- BLOCK 2: Analysis Selection -->
-        <div id="block-2-analysis-selection" class="block-section bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div id="block-2-analysis-selection" class="block-section  dark:bg-slate-600 bg-white rounded-xl shadow-lg p-8 mb-8">
             <div class="block-header">
                 <div class="block-icon">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -521,19 +586,23 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Крок 2: Вибір аналізів</h2>
-                    <p class="text-gray-600 text-sm">Оберіть необхідні лабораторні дослідження</p>
+                    <h2 class="text-2xl font-bold  dark:text-white text-gray-800">Крок 2: Вибір аналізів</h2>
+                    <p class=" dark:text-white text-gray-600 text-sm">Оберіть необхідні лабораторні дослідження</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Analysis Search -->
                 <div class="md:col-span-2">
-                    <label for="analysis-search-input" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="analysis-search-input" class="block text-sm font-medium dark:text-white text-gray-700 mb-2">
                         Пошук аналізу
                     </label>
-                    <input type="text" id="analysis-search-input" placeholder="Введіть назву або код аналізу..."
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent mb-4">
+                    <input type="text" 
+                    id="analysis-search-input" 
+                    placeholder="Введіть назву або код аналізу..."
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 
+                            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white 
+                            focus:border-transparent mb-4 transition-colors duration-200">
 
                     <!-- Analyses List -->
                     <div id="analysis-list-loader" class="hidden py-8">
@@ -553,7 +622,7 @@
 
                 <!-- Selected Analyses -->
                 <div>
-                    <h3 class="text-sm font-medium text-gray-700 mb-2">Обрані аналізи</h3>
+                    <h3 class="text-sm font-medium  dark:text-white text-gray-700 mb-2">Обрані аналізи</h3>
                     <div id="selected-analyses-list"
                         class="max-h-80 overflow-y-auto border border-gray-200 rounded-lg bg-indigo-50 divide-y">
                         <div id="no-analyses-selected"
@@ -598,11 +667,11 @@
             <!-- Navigation Buttons -->
             <div class="flex gap-4 mt-6 pt-6 border-t">
                 <button id="back-from-analyses-btn"
-                    class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                    class="px-6 py-2 border border-gray-300 dark:text-white  text-gray-700 rounded-lg font-medium dark:hover:bg-gray-800 hover:bg-gray-50 transition-colors">
                     ← Назад
                 </button>
                 <button id="next-to-additional-info-btn"
-                    class="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                    class=" px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
                     <span>Далі</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -614,7 +683,7 @@
         </div>
 
         <!-- BLOCK 3: Additional Info -->
-        <div id="block-3-additional-info" class="block-section bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div id="block-3-additional-info" class="block-section dark:bg-slate-600 bg-white rounded-xl shadow-lg p-8 mb-8">
             <div class="block-header">
                 <div class="block-icon">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -623,18 +692,18 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Крок 3: Додаткова інформація</h2>
-                    <p class="text-gray-600 text-sm">Додайте примітки до реєстрації, якщо необхідно</p>
+                    <h2 class="text-2xl font-bold dark:text-white text-gray-800">Крок 3: Додаткова інформація</h2>
+                    <p class=" dark:text-white text-gray-600 text-sm">Додайте примітки до реєстрації, якщо необхідно</p>
                 </div>
             </div>
             <div>
                 <!-- Recipient Selection -->
                 <div class="mb-6">
-                    <label for="recipient-search-input" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="recipient-search-input" class="block text-sm font-medium dark:text-white text-gray-700 mb-1">
                         Категорія Отримувач (відділення)
                     </label>
                     <div id="selected-recipient-container"
-                        class="hidden items-center justify-between p-3 bg-indigo-100 border border-indigo-300 rounded-md mb-2">
+                        class="hidden items-center justify-between  p-3 bg-indigo-100 border border-indigo-300 rounded-md mb-2">
                         <p id="selected-recipient-name" class="text-sm font-medium text-indigo-800"></p>
                         <button id="clear-recipient-btn" type="button"
                             class="text-indigo-600 hover:text-indigo-800 font-bold text-lg">&times;</button>
@@ -642,11 +711,11 @@
                     <div id="recipient-search-wrapper">
                         <input type="text" id="recipient-search-input"
                             placeholder="Пошук відділення за назвою або кодом..."
-                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            class="mt-1 block max-w-3xl rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm px-4 py-3">
                         <div id="recipient-list-container"
-                            class="mt-2 hidden max-h-60 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg z-10 relative">
+                            class="mt-2 hidden max-w-3xl max-h-60 overflow-y-auto rounded-md border border-gray-200 bg-white shadow-lg z-10 relative">
                             <!-- Recipient list will be populated here -->
-                            <div id="recipient-list-loader" class="p-4 text-center text-gray-500 hidden">Завантаження
+                            <div id="recipient-list-loader" class="p-4 text-center dark:text-white text-gray-500 hidden">Завантаження
                                 списку отримувачів...</div>
                             <div id="recipient-list-error" class="p-4 text-center text-red-500 hidden"></div>
                         </div>
@@ -654,7 +723,7 @@
                 </div>
 
                 <div class="mb-6 max-w-sm">
-                    <label for="priority-select" class="mb-2 block text-sm font-semibold text-gray-700">
+                    <label for="priority-select" class="mb-2 block text-sm font-semibold dark:text-white text-gray-700">
                         Пріоритет виконання
                     </label>
 
@@ -724,7 +793,7 @@
                     ← Назад
                 </button>
                 <button id="next-to-confirmation-btn"
-                    class="flex-1 px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                    class=" px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
                     <span>Перейти до підтвердження</span>
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -735,7 +804,7 @@
         </div>
 
         <!-- BLOCK 4: Registration Confirmation -->
-        <div id="block-4-confirmation" class="block-section bg-white rounded-xl shadow-lg p-8 mb-8">
+        <div id="block-4-confirmation" class="block-section dark:bg-slate-600 bg-white rounded-xl shadow-lg p-8 mb-8">
             <div class="block-header">
                 <div class="block-icon">
                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -744,8 +813,8 @@
                     </svg>
                 </div>
                 <div>
-                    <h2 class="text-2xl font-bold text-gray-800">Крок 4: Підтвердження</h2>
-                    <p class="text-gray-600 text-sm">Перевірте інформацію та зареєструйте аналізи</p>
+                    <h2 class="text-2xl font-bold dark:text-white text-gray-800">Крок 4: Підтвердження</h2>
+                    <p class="dark:text-white text-gray-600 text-sm">Перевірте інформацію та зареєструйте аналізи</p>
                 </div>
             </div>
 
@@ -872,8 +941,7 @@
 
     <!-- Info Modal (для замовлень) -->
     <div id="info-modal" class="fixed inset-0  items-center justify-center z-50 hidden">
-        <div
-            class="bg-white rounded-xl shadow-2xl p-8 w-1/3 transform transition-all flex flex-col max-h-[90vh] overflow-hidden">
+        <div class="bg-white rounded-xl shadow-2xl p-8 max-w-5xl w-11/12 md:w-3/4 lg:w-2/3 transform transition-all flex flex-col max-h-[90vh] overflow-hidden border border-gray-400">
             <div class="text-center flex flex-col h-full overflow-hidden">
                 <div id="info-modal-icon-container"
                     class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 shrink-0">
@@ -885,33 +953,33 @@
                 <div id="info-modal-message" class="text-gray-600 mb-6 overflow-y-auto flex-1 min-h-0 px-1">
                     Повідомлення
                 </div>
-                <div class="modal-buttons flex gap-4 shrink-0">
-                    <button id="print-barcodes-from-modal-btn"
-                        class="hidden flex-1 px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors flex items-center justify-center gap-2">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"></path>
-                        </svg>
-                        <span>Штрих-коди</span>
-                    </button>
-                    <button id="print-details-btn"
-                        class="hidden flex-1 px-6 py-3 bg-sky-600 text-white rounded-lg font-medium hover:bg-sky-700 transition-colors">
-                        Друк
-                    </button>
-                    <button id="close-info-modal-btn"
-                        class="flex-1 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
-                        Закрити
-                    </button>
-                </div>
+               <div class="modal-buttons flex justify-between items-center w-full">
+    <div class="flex gap-4">
+        <button id="print-barcodes-from-modal-btn"
+            class="hidden px-6 py-3 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700 transition-colors flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5v14M8 5v14M12 5v14M17 5v14M21 5v14"></path>
+            </svg>
+            <span>Штрих-коди</span>
+        </button>
+        <button id="print-details-btn"
+            class="hidden px-6 py-3 bg-sky-600 text-white rounded-lg font-medium hover:bg-sky-700 transition-colors">
+            Друк
+        </button>
+    </div>
+
+    <button id="close-info-modal-btn"
+        class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+        Закрити
+    </button>
+</div>
             </div>
         </div>
     </div>
 
     <div id="info-modal-details" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex justify-center z-50 hidden py-8">
         <div
-            class="bg-white rounded-xl shadow-2xl p-8 w-1/3 transform transition-all flex flex-col max-h-[90vh] overflow-hidden">
-
+            class="bg-white rounded-xl shadow-2xl p-8 max-w-5xl w-11/12 md:w-3/4 lg:w-2/3 transform transition-all flex flex-col max-h-[90vh] overflow-hidden border border-gray-200">
             <div class="text-center flex flex-col h-full overflow-hidden">
 
                 <div id="info-modal-details-icon-container"
@@ -938,7 +1006,7 @@
 
     <!-- Order Form Modal -->
     <div id="order-modal" class="fixed inset-0 bg-gray-800 bg-opacity-75 z-50 hidden overflow-y-auto">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl mx-auto my-8 flex flex-col">
+        <div class="bg-white w-full min-h-full flex flex-col">
             <!-- Modal Header -->
             <div class="p-4 border-b flex justify-between items-center sticky top-0 bg-white z-10 modal-header">
                 <h3 class="text-xl font-semibold text-gray-800">Бланк замовлення</h3>
@@ -1155,18 +1223,173 @@
         </div>
     </div>
 
+    <!-- Modal for selecting analysis parameter -->
+    <div id="analysisModal" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="modal-content !text-left bg-white rounded-lg p-6 max-w-lg w-full">
+            <h3 class="text-xl font-bold mb-4 text-gray-800" data-translate="selectIndicatorForAnalysis">Виберіть
+                показник для аналізу</h3>
+            <form id="analysisForm">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700" data-translate="indicator">Показники</label>
+                    <div id="indicatorList"
+                        class="mt-2 max-h-60 overflow-y-auto border border-gray-300 rounded-md p-2 space-y-2"></div>
+                </div>
+                <div class="flex justify-end gap-4">
+                    <button type="button" id="closeAnalysisModal"
+                        class="px-6 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300"
+                        data-translate="cancel">Скасувати</button>
+                    <button type="submit" id="showChartBtn"
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                        data-translate="showChart">Показати графік</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Patient History Modal -->
+    <div id="history-modal" class="fixed inset-0 bg-gray-800  bg-opacity-75 z-50 hidden overflow-y-auto">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-2xl w-full max-w-6xl mx-auto my-8 flex flex-col">
+            <!-- Modal Header -->
+            <div
+                class="p-4 border-b flex justify-between rounded-md items-center sticky top-0 bg-white dark:bg-slate-700 z-10 modal-header">
+                <h3 class="text-xl font-semibold text-gray-800 dark:text-white">Історія пацієнта</h3>
+                <button id="close-history-modal-btn"
+                    class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors font-medium">
+                    Закрити
+                </button>
+            </div>
+            <!-- Modal Content -->
+            <div class="p-8 overflow-y-auto">
+                <!-- Історія пацієнта (перенесено з основного контенту) -->
+                <div id="patient-history-container">
+                    <form id="advancedSearchForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-end">
+    
+    <div class="flex flex-col">
+        <label for="advancedLastName" class="block text-sm font-medium dark:text-gray-300 text-gray-700">
+            <span data-translate="lastName">Прізвище</span> 
+            <span class="text-xs dark:text-gray-400 text-gray-500">(обов'язково)</span>
+        </label>
+        <input type="text" id="advancedLastName" name="lastName" required
+            class="mt-1 block w-full rounded-md bg-white border-gray-900 shadow-sm p-2 dark:bg-slate-700 dark:border-gray-500 dark:text-white">
+    </div>
+
+    <div>
+        <label for="advancedFirstName" class="block text-sm font-medium dark:text-gray-300 text-gray-700" data-translate="firstName">Ім'я</label>
+        <input type="text" id="advancedFirstName" name="firstName"
+            class="mt-1 block w-full rounded-md bg-white border-gray-900 shadow-sm p-2 dark:bg-slate-700 dark:border-gray-500 dark:text-white">
+    </div>
+
+    <div>
+        <label for="advancedDob" class="block text-sm font-medium dark:text-gray-300 text-gray-700" data-translate="dob">Дата народження</label>
+        <input type="date" id="advancedDob" name="dob"
+            class="mt-1 block w-full rounded-md bg-white border-gray-900 shadow-sm p-2 dark:bg-slate-700 dark:border-gray-500 dark:text-white">
+    </div>
+
+    <div>
+        <label for="advancedPhone" class="block text-sm font-medium dark:text-gray-300 text-gray-700" data-translate="phone">Телефон</label>
+        <input type="tel" id="advancedPhone" name="phone" placeholder="0501234567"
+            class="mt-1 block w-full rounded-md bg-white border-gray-900 shadow-sm p-2 dark:bg-slate-700 dark:border-gray-500 dark:text-white">
+    </div>
+
+    <div>
+        <label for="advancedDateFrom" class="block text-sm font-medium dark:text-gray-300 text-gray-700" data-translate="periodFrom">Період з</label>
+        <input type="date" id="advancedDateFrom" name="dateFrom"
+            class="mt-1 block w-full rounded-md bg-white border-gray-900 shadow-sm p-2 dark:bg-slate-700 dark:border-gray-500 dark:text-white">
+    </div>
+
+    <div>
+        <label for="advancedDateTo" class="block text-sm font-medium dark:text-gray-300 text-gray-700" data-translate="periodTo">Період по</label>
+        <input type="date" id="advancedDateTo" name="dateTo"
+            class="mt-1 block w-full rounded-md bg-white border-gray-900 shadow-sm p-2 dark:bg-slate-700 dark:border-gray-500 dark:text-white">
+    </div>
+
+    <div class="md:col-span-2 lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-2">
+        <button type="submit" id="advancedSearchSubmitBtn"
+            class="w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+            <span id="advanced-search-button-text" data-translate="search">Пошук</span>
+            <div id="advanced-search-spinner" class="hidden w-5 h-5 border-2 border-white rounded-full ml-3" style="border-top-color: transparent;"></div>
+        </button>
+        
+        <button type="button" id="clearAdvancedSearchBtn"
+            class="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 dark:bg-slate-600 dark:text-gray-200 dark:border-gray-500 dark:hover:bg-slate-500">
+            <span data-translate="clear">Очистити</span>
+        </button>
+
+        <button type="button" id="batchDownloadBtn"
+            class="hidden w-full justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-teal-600 hover:bg-teal-700">
+            <span data-translate="downloadArchive">Завантажити архів</span>
+        </button>
+
+        <button type="button" id="analyzeDynamicsBtn"
+            class="hidden w-full flex justify-center items-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700">
+            <span data-translate="analyzeDynamics">Аналізувати динаміку</span>
+        </button>
+    </div>
+</form>
+                    <div id="advancedSearchResults" class="hidden mt-6">
+                        <h3 class="text-lg font-medium text-gray-900" data-translate="searchResults">Результати пошуку
+                        </h3>
+                        <div class="overflow-x-auto mt-4 border rounded-lg">
+                            <table id="advancedResultsTable" class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr id="advanced-results-header">
+                                        <!-- Заголовки будуть додані динамічно -->
+                                    </tr>
+                                </thead>
+                                <tbody id="advancedResultsBody" class="bg-white divide-y divide-gray-200"></tbody>
+                            </table>
+                        </div>
+                        <!-- Контейнер для графіка -->
+                        <div id="chartContainer" class="hidden mt-8 p-4 bg-gray-100 rounded-lg shadow-inner">
+                            <canvas id="dynamicsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
     <script src="/analysis-registration.js"></script>
     <script>
         // Оголошуємо глобальні змінні для зберігання стану
         window.selectedPatient = null;
         window.selectedAnalyses = [];
-
+        let lastAdvancedSearchResults = []; // Для історії пацієнта
+        let dynamicsChart = null; // Для графіка динаміки
+         tailwind.config = {
+            darkMode: 'class',
+        }
         document.addEventListener('DOMContentLoaded', () => {
+             const toggle = document.getElementById('theme-toggle');
+        const statusText = document.getElementById('status-text');
+        const body = document.getElementById('body-bg');
+        const bodyHeader = document.getElementById('bg-header');
+         const html = document.documentElement;
+
+        toggle.addEventListener('change', () => {
+            if (toggle.checked) {
+                html.classList.add('dark');
+                statusText.innerText = 'Темна';
+                statusText.classList.replace('text-gray-600', 'text-indigo-600');
+                body.classList.replace('bg-gray-100', 'bg-slate-900');
+               // bodyHeader.classList.replace('bg-white', 'bg-slate-900');    
+            } else {
+                 html.classList.remove('dark');
+                statusText.innerText = 'Світла';
+                statusText.classList.replace('text-indigo-600', 'text-gray-600');
+                body.classList.replace('bg-slate-900', 'bg-gray-100');
+             //   bodyHeader.classList.replace('bg-slate-900', 'bg-white');
+            }
+        });
             const dateInput = document.getElementById('registered-analyses-date');
             const statusSelect = document.getElementById('registered-analyses-status');
             const tableBody = document.querySelector('#block-1-patient-search table tbody');
+            const refreshBtn = document.getElementById('refresh-registered-exams-btn');
             const searchInput = document.getElementById('registered-analyses-search');
+
+            const lastNameInput = document.getElementById('lastName');
+            const firstNameInput = document.getElementById('firstName');
 
             const paginationContainer = document.getElementById('registered-exams-pagination');
             const prevBtn = document.getElementById('registered-exams-prev-btn');
@@ -1209,12 +1432,16 @@
                 paginationContainer.classList.add('hidden');
 
                 try {
+
+                    
+
                     const params = new URLSearchParams({
                         date,
                         status,
                         page: currentPage,
                         limit,
-                        searchTerm
+                        searchTerm,
+                        
                     });
                     const response = await fetch(`/api/registered-exams?${params.toString()}`);
                     if (!response.ok) {
@@ -1225,8 +1452,7 @@
 
                     tableBody.innerHTML = ''; // Очищуємо скелетон перед додаванням даних
                     if (total === 0) {
-                        tableBody.innerHTML = '<tr><td colspan="5" class="text-center p-4 text-gray-500">Записів не знайдено.</td></tr>';
-                        paginationContainer.classList.add('hidden');
+                        tableBody.innerHTML = '<tr><td colspan="6" class="text-center p-4 text-gray-500">Записів не знайдено.</td></tr>';
                     } else {
                         const totalPages = Math.ceil(total / limit);
                         pageInfo.textContent = `Сторінка ${currentPage} з ${totalPages}`;
@@ -1235,19 +1461,25 @@
                         paginationContainer.classList.remove('hidden');
 
                         exams.forEach(exam => {
-                            // Зберігаємо дані в data-атрибутах для легкого доступу
                             const statusInfo = statusMap[exam.stavziad] || { text: 'Невідомо', class: 'bg-gray-100 text-gray-800' };
+                            const rowId = `exam-row-${exam.datodberu.replace(/[^a-zA-Z0-9]/g, '')}`;
+
                             const row = `
-                                <tr data-datodberu="${exam.datodberu}" data-datumnarod="${exam.datumnarod}" data-typziad="${exam.typziad}">
-                                    <td class="px-2 py-3 whitespace-nowrap text-sm text-gray-800">${exam.evidcis || ''}</td>
+                                <tr id="${rowId}" data-datodberu="${exam.datodberu}" data-datumnarod="${exam.datumnarod}" data-typziad="${exam.typziad}" data-kododdokb="${exam.kododdokb}">
+                                    <td class="py-3 whitespace-nowrap text-sm text-gray-800">
+                                        <div class="flex items-center justify-between w-full px-4">
+                                            <span>${exam.evidcis || ''}</span>
+                                            <span class="sms-status-icon-placeholder"></span>
+                                        </div>
+                                    </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800">${exam.priezvisko || ''} ${exam.meno || ''}</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-500">${new Date(exam.datodberu).toLocaleString('uk-UA')}</td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}">
+                                    <td class="hidden lg:table-cell px-4 py-3 whitespace-nowrap text-sm">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusInfo.class}" title="${exam.typziad}">
                                             ${statusInfo.text}
                                         </span>
                                     </td>
-                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 font-medium">${exam.suma} грн</td>
+                                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-800 font-medium">${exam.suma || '0.00'} грн</td>
                                     <td class="px-4 py-3 whitespace-nowrap text-sm">
                                         <a href="#" class="details-link text-indigo-600 hover:text-indigo-900">Деталі</a>
                                     </td>
@@ -1255,9 +1487,218 @@
                             `;
                             tableBody.insertAdjacentHTML('beforeend', row);
                         });
+
+                        // --- Масовий запит статусів SMS (виконується один раз після рендерингу всіх рядків) ---
+                        (async () => {
+                            // 1. Фільтрація: беремо записи зі статусами 'Прийнято' (1), 'Перевірено' (2) та 'Частково підтверджено' (4)
+                            const examsToCheck = exams
+                                .filter(e => [1, 2, 4].includes(Number(e.stavziad)))
+                                .map(e => ({
+                                    id: e.evidcis, // Використовуємо evidcis як унікальний ідентифікатор рядка
+                                    datodberu: e.datodberu,
+                                    datumnarod: e.datumnarod
+                                }));
+
+                            if (examsToCheck.length === 0) return;
+
+                            try {
+                                // 2. Масовий запит до API
+                                const response = await fetch('/api/exams-sms-bulk-status', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ exams: examsToCheck })
+                                });
+
+                                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+                                const statuses = await response.json();
+
+                                // 3. Оновлення інтерфейсу для кожного результату
+                                // Проходимо по кожному отриманому статусу з масиву
+                                statuses.forEach(statusInfo => {
+                                    // Шукаємо відповідний рядок у таблиці за датою взяття та датою народження
+                                    const rowElement = document.querySelector(`tr[data-datodberu="${statusInfo.datotbery}"][data-datumnarod="${statusInfo.datumnarod}"]`);
+                                    const iconPlaceholder = rowElement?.querySelector('.sms-status-icon-placeholder');
+
+                                    // Якщо рядок або місце для іконки не знайдено, переходимо до наступного статусу
+                                    if (!iconPlaceholder) return;
+
+                                    let iconsHtml = '';
+
+                                    // 1. Іконка статусу SMS (якщо успішно)
+                                    if (statusInfo.isSuccess && statusInfo.webcode) {
+                                        iconsHtml += `
+                                            <span class="transition-transform duration-200 hover:scale-125 block cursor-help" 
+                                                  title="Статус SMS: ${statusInfo.statusText}. Webcode: ${statusInfo.webcode}">
+                                                <svg class="w-5 h-5 text-gray-500" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                                                    <path d="M11 19h-6a2 2 0 0 1 -2 -2v-10a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v6"></path>
+                                                    <path d="M3 7l9 6l9 -6"></path>
+                                                    <path d="M15 19l2 2l4 -4"></path>
+                                                </svg>
+                                            </span>
+                                        `;
+                                    }
+
+                                    // 2. Іконка завантаження (якщо є webcode)
+                                    if (statusInfo.webcode) {
+                                        const downloadUrl = `http://lab.hemomedika.ua:1025/${statusInfo.webcode}`;
+                                        iconsHtml += `
+                                            <a href="${downloadUrl}" target="_blank" class="transition-transform duration-200 hover:scale-125 block" title="Завантажити результат по веб-коду">
+                                                <svg class="w-5 h-5 text-blue-600" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+                                                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2" />
+                                                    <path d="M7 11l5 5l5 -5" />
+                                                    <path d="M12 4l0 12" />
+                                                </svg>
+                                            </a>
+                                        `;
+                                    }
+
+
+                                    // 3. Іконка "Показати результати" (заглушка через showInfoModal)
+                                    const resultsMessageHtml = '<div class="text-left">Заглушка: тут буде список досліджень з результатами.</div>';
+                                    const resultsMessageEsc = encodeURIComponent(resultsMessageHtml);
+                                    iconsHtml += `
+                                        <button type="button" class="show-results-btn transition-transform duration-200 hover:scale-125 block text-gray-600" title="Показати список досліджень" data-title="Список досліджень" data-message="${resultsMessageEsc}">
+                                            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M8 6h13" />
+                                                <path d="M8 12h13" />
+                                                <path d="M8 18h13" />
+                                                <path d="M3 6h.01" />
+                                                <path d="M3 12h.01" />
+                                                <path d="M3 18h.01" />
+                                            </svg>
+                                        </button>
+                                    `;
+
+                                    // Вставляємо згенеровані іконки в контейнер
+                                    iconPlaceholder.innerHTML = `<div class="flex items-center gap-2">${iconsHtml}</div>`;
+
+                                    // Після вставки — підключаємо обробник для кнопки показу результатів,
+                                    // щоб уникнути проблем з кавичками у inline-атрибуті onclick.
+                                    const showBtn = iconPlaceholder.querySelector('.show-results-btn');
+                                    if (showBtn) {
+                                        showBtn.addEventListener('click', async (e) => {
+                                            const title = showBtn.dataset.title || 'Список досліджень';
+                                            const msg = showBtn.dataset.message ? decodeURIComponent(showBtn.dataset.message) : '';
+
+                                            // Спроба отримати сирі дані (для PDF) з бекенду і показати в модальному вікні
+                                            try {
+                                                // Отримаємо context рядка
+                                                const tr = showBtn.closest('tr');
+                                                const datodberu = tr?.dataset.datodberu;
+                                                const datumnarod = tr?.dataset.datumnarod;
+
+                                                let rawDetails = null;
+
+                                                if (datodberu && datumnarod) {
+                                                    const resp = await fetch('/api/patient-exam-details-pdf-raw', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ datodberu, datumnarod })
+                                                    });
+
+                                                    if (resp.ok) {
+                                                        rawDetails = await resp.json();
+                                                    } else {
+                                                        // не критично — залишимо rawDetails = null і покажемо заглушку
+                                                        console.warn('Не вдалося отримати сирі дані для PDF:', await resp.text());
+                                                    }
+                                                }
+
+                                                // Якщо отримали сирі дані — покажемо їх у модальному вікні у вигляді відформатованого JSON
+                                                if (rawDetails && Array.isArray(rawDetails) && rawDetails.length > 0) {
+                                                    const tableHtml = renderRawDetailsTable(rawDetails);
+                                                    if (window.showInfoModal) {
+                                                        window.showInfoModal('info', `${title} — дані показників`, tableHtml, true);
+                                                    } else {
+                                                        alert(JSON.stringify(rawDetails, null, 2));
+                                                    }
+                                                    return;
+                                                }
+                                            } catch (err) {
+                                                console.error('Помилка при отриманні сирих даних для PDF:', err);
+                                            }
+
+                                            // Якщо сирі дані відсутні або сталася помилка — показуємо стандартну заглушку
+                                            if (window.showInfoModal) {
+                                                window.showInfoModal('info', title, msg, true);
+                                            } else {
+                                                alert(msg);
+                                            }
+                                        });
+                                    }
+
+                                    // Невелика допоміжна функція для екранізації HTML у <pre>
+                                    function escapeHtml(unsafe) {
+                                        return String(unsafe)
+                                            .replace(/&/g, '&amp;')
+                                            .replace(/</g, '&lt;')
+                                            .replace(/>/g, '&gt;')
+                                            .replace(/"/g, '&quot;')
+                                            .replace(/'/g, '&#039;');
+                                    }
+
+                                    // Рендер таблиці для сирих даних деталей (масив об'єктів)
+                                    function renderRawDetailsTable(details) {
+                                        if (!Array.isArray(details) || details.length === 0) {
+                                            return '<div class="text-left">Немає даних для відображення.</div>';
+                                        }
+
+                                        // Зберігаємо порядок ключів за першим елементом, додаємо інші ключі, якщо є
+                                        // Виключаємо поля, які не потрібно показувати в таблиці (налаштовуваний список)
+                                        const excludedKeys = [
+                                            'ID Пацієнта', // приклад: поле, яке не треба показувати
+                                            'patient_id',
+                                            'id',
+                                            'Дата народження',
+                                            'Стать',
+                                            'Дата отримання матеріалу',
+                                            'Дата видачі результатів',
+                                            'Прізвище',
+                                            'Ім\'я',
+                                            'Код дослідження',
+                                            'Артикул',
+                                            'Примітка'
+                                        ];
+                                        const excludedLower = excludedKeys.map(k => String(k).toLowerCase());
+
+                                        const keys = Array.from(new Set([].concat(...details.map(d => Object.keys(d)))))
+                                            .filter(k => !excludedLower.includes(String(k).toLowerCase()));
+
+                                        let html = '<div class="max-h-72 overflow-auto border rounded bg-white p-2">';
+                                        html += '<div class="mb-2 text-sm text-gray-600">Сирі дані — рядків: ' + escapeHtml(details.length) + '</div>';
+                                        html += '<table class="min-w-full table-auto text-sm text-left">';
+                                        html += '<thead class="bg-gray-100 sticky top-0"><tr>';
+                                        keys.forEach(k => {
+                                            html += `<th class="px-3 py-2 text-xs font-medium text-gray-700 border">${escapeHtml(k)}</th>`;
+                                        });
+                                        html += '</tr></thead><tbody>';
+
+                                        details.forEach((row, idx) => {
+                                            html += `<tr class="align-top ${idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}">`;
+                                            keys.forEach(k => {
+                                                let v = row[k];
+                                                if (v === null || v === undefined) v = '';
+                                                else if (typeof v === 'object') v = JSON.stringify(v);
+                                                else v = String(v);
+                                                html += `<td class="px-3 py-2 align-top text-gray-800 break-words border">${escapeHtml(v)}</td>`;
+                                            });
+                                            html += '</tr>';
+                                        });
+
+                                        html += '</tbody></table></div>';
+                                        return html;
+                                    }
+                                });
+                            } catch (error) {
+                                console.error('[SMS Status Bulk Error]:', error);
+                            }
+                        })();
                     }
                 } catch (error) {
-                    tableBody.innerHTML = `<tr><td colspan="5" class="text-center p-4 text-red-500">Помилка: ${error.message}</td></tr>`;
+                    tableBody.innerHTML = `<tr><td colspan="6" class="text-center p-4 text-red-500">Помилка: ${error.message}</td></tr>`;
                     paginationContainer.classList.add('hidden');
                 }
             }
@@ -1277,7 +1718,9 @@
 
             // Додаємо обробники подій
             dateInput.addEventListener('keydown', handleEnterSearch);
+            dateInput.addEventListener('change', resetAndFetch); // <-- ДОДАНО: Оновлюємо при зміні дати
             statusSelect.addEventListener('change', resetAndFetch);
+            refreshBtn.addEventListener('click', resetAndFetch);
 
             let searchTimeout;
             searchInput.addEventListener('input', () => {
@@ -1440,6 +1883,9 @@
             let modalAnalysesData = [];
             let datodberuBarcodes = null;
 
+
+                // Деталі замовлення
+
             tableBody.addEventListener('click', async (event) => {
                 if (event.target.classList.contains('details-link')) {
                     event.preventDefault();
@@ -1447,6 +1893,8 @@
                     const datodberu = row.dataset.datodberu;
                     const datumnarod = row.dataset.datumnarod;
                     const typziad = row.dataset.typziad;
+                    const kododdokb = row.dataset.kododdokb;
+
 
                     // Отримуємо дані пацієнта з рядка таблиці
                     const evidcis = row.cells[0].textContent;
@@ -1458,7 +1906,8 @@
                         name: name,
                         datumnarod: datumnarod,
                         datodberu: datodberu,
-                        typziad: typziad
+                        typziad: typziad,
+                        kododdokb: kododdokb
                     };
 
                     datodberuBarcodes = modalPatientData.datodberu;
@@ -1466,7 +1915,9 @@
                     // Показуємо модальне вікно з деталями
                     window.showInfoModal('info', 'Деталі замовлення', `
                         <div class="text-left">
+                           
                             <p><strong>Пацієнт:</strong> ${name}</p>
+                            <p><strong>Отримувач:</strong> ${kododdokb}</p>
                             <p><strong>Дата прийому:</strong> ${new Date(datodberu).toLocaleString('uk-UA')}</p>
                             <p><strong>Дата народження:</strong> ${new Date(datumnarod).toLocaleString('uk-UA', { year: 'numeric', month: '2-digit', day: '2-digit' })}</p>
                         </div>
@@ -1770,9 +2221,414 @@
             consentModal.addEventListener('click', (event) => {
                 if (event.target === consentModal) hideConsentModal();
             });
+
+            // --- Логіка для модального вікна історії ---
+            const historyModal = document.getElementById('history-modal');
+            const openHistoryModalBtn = document.getElementById('open-history-modal-btn');
+            const closeHistoryModalBtn = document.getElementById('close-history-modal-btn');
+
+            const showHistoryModal = () => {
+                historyModal.classList.remove('hidden');
+                historyModal.classList.add('flex');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const hideHistoryModal = () => {
+                historyModal.classList.add('hidden');
+                historyModal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
+            };
+
+            openHistoryModalBtn.addEventListener('click', showHistoryModal);
+            closeHistoryModalBtn.addEventListener('click', hideHistoryModal);
+            historyModal.addEventListener('click', (e) => { if (e.target === historyModal) hideHistoryModal(); });
+
+            // --- ЛОГІКА, ПЕРЕНЕСЕНА З UPLOAD-PAGE.HTML ДЛЯ ІСТОРІЇ ПАЦІЄНТА ---
+
+            const advancedSearchForm = document.getElementById('advancedSearchForm');
+            const advancedSearchResultsDiv = document.getElementById('advancedSearchResults');
+            const advancedResultsBody = document.getElementById('advancedResultsBody');
+            const clearAdvancedSearchBtn = document.getElementById('clearAdvancedSearchBtn');
+
+            // Встановлюємо дати за замовчуванням для полів періоду
+            document.getElementById('advancedDateTo').value = new Date().toISOString().split('T')[0];
+            const dateFrom = new Date();
+            dateFrom.setFullYear(dateFrom.getFullYear() - 5);
+            document.getElementById('advancedDateFrom').value = dateFrom.toISOString().split('T')[0];
+
+            function setAdvancedSearchHeaders() {
+                const headerRow = document.getElementById('advanced-results-header');
+                headerRow.innerHTML = ''; // Очищуємо поточні заголовки
+
+                // Для analysis-registration.html завжди використовуємо Sybase-конфігурацію
+                const headersConfig = [
+                    { key: 'tableHeaderExamDate', text: 'Дата обстеження' },
+                    { key: 'tableHeaderExamNum', text: '№ обстеження' },
+                    { key: 'tableHeaderFullName', text: 'ПІБ' },
+                    { key: 'status', text: 'Статус' },
+                    { key: 'tableHeaderExamPDF', text: 'Дія', align: 'center' },
+                    { key: 'tableHeaderSelect', text: 'БЛАНК', align: 'center' }
+                ];
+
+                headersConfig.forEach(header => {
+                    const th = document.createElement('th');
+                    th.className = `px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${header.align ? `text-${header.align}` : ''}`;
+                    th.textContent = header.text;
+                    headerRow.appendChild(th);
+                });
+            }
+
+            advancedSearchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const lastName = document.getElementById('advancedLastName').value.trim();
+                const firstName = document.getElementById('advancedFirstName').value.trim();
+                const dob = document.getElementById('advancedDob').value.trim();
+                const phone = document.getElementById('advancedPhone').value.trim();
+
+                const filledFields = [lastName, firstName, dob, phone].filter(Boolean).length;
+
+                if (filledFields < 2) {
+                    window.showInfoModal('error', 'Помилка пошуку', 'Для пошуку необхідно заповнити щонайменше два з наступних полів: Прізвище, Ім\'я, Дата народження, Телефон.');
+                    return;
+                }
+
+                if (firstName && firstName.length < 3) {
+                    window.showInfoModal('error', 'Помилка пошуку', "Поле 'Ім'я' повинно містити щонайменше 3 символи для пошуку.");
+                    return;
+                }
+
+                const submitBtn = document.getElementById('advancedSearchSubmitBtn');
+                const btnText = document.getElementById('advanced-search-button-text');
+                const spinner = document.getElementById('advanced-search-spinner');
+
+                btnText.textContent = 'Пошук...';
+                spinner.classList.remove('hidden');
+                submitBtn.disabled = true;
+
+                const formData = new FormData(advancedSearchForm);
+                const data = Object.fromEntries(formData.entries());
+
+                try {
+                    if (data.lastName) {
+                        data.lastName = data.lastName.trim().replace(/\s+/g, ' ').replace(/'/g, "''");
+                    }
+
+                    const response = await fetch('/api/patient-history', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const results = await response.json();
+                    if (!response.ok) {
+                        throw new Error(results.message || 'Помилка сервера');
+                    }
+
+                    lastAdvancedSearchResults = results;
+                    displayAdvancedSearchResults(results);
+
+                } catch (error) {
+                    window.showInfoModal('error', 'Помилка пошуку', `😭 ${error.message}`);
+                } finally {
+                    btnText.textContent = 'Пошук';
+                    spinner.classList.add('hidden');
+                    submitBtn.disabled = false;
+                }
+            });
+
+            clearAdvancedSearchBtn.addEventListener('click', () => {
+                document.getElementById('advancedLastName').value = '';
+                document.getElementById('advancedFirstName').value = '';
+                document.getElementById('advancedDob').value = '';
+                document.getElementById('advancedPhone').value = '';
+                advancedSearchResultsDiv.classList.add('hidden');
+                advancedResultsBody.innerHTML = '';
+                document.getElementById('batchDownloadBtn').classList.add('hidden');
+                document.getElementById('analyzeDynamicsBtn').classList.add('hidden');
+                document.getElementById('chartContainer').classList.add('hidden');
+            });
+
+            function updateBatchDownloadButton() {
+                const selectedCheckboxes = advancedResultsBody.querySelectorAll('.exam-select-cb:checked');
+                const batchDownloadBtn = document.getElementById('batchDownloadBtn');
+                const analyzeDynamicsBtn = document.getElementById('analyzeDynamicsBtn');
+                if (selectedCheckboxes.length >= 2) {
+                    batchDownloadBtn.classList.remove('hidden');
+                    batchDownloadBtn.textContent = `Завантажити архів (${selectedCheckboxes.length})`;
+                    analyzeDynamicsBtn.classList.remove('hidden');
+                    analyzeDynamicsBtn.textContent = `Аналізувати динаміку (${selectedCheckboxes.length})`;
+                } else {
+                    batchDownloadBtn.classList.add('hidden');
+                    analyzeDynamicsBtn.classList.add('hidden');
+                }
+            }
+
+            advancedResultsBody.addEventListener('change', (event) => {
+                if (event.target.classList.contains('exam-select-cb')) {
+                    updateBatchDownloadButton();
+                }
+            });
+
+            function displayAdvancedSearchResults(results) {
+                advancedResultsBody.innerHTML = '';
+                if (results && results.length > 0) {
+                    results.sort((a, b) => new Date(b.datodberu) - new Date(a.datodberu));
+
+                    results.forEach((p, rowIndex) => {
+                        const row = document.createElement('tr');
+                        row.className = rowIndex % 2 === 0 ? 'bg-white hover:bg-indigo-50' : 'bg-gray-50 hover:bg-indigo-50';
+                        const examDate = p.datodberu ? new Date(p.datodberu).toLocaleDateString() : '';
+                        const fullName = `${p.priezvisko || ''} ${p.meno || ''}`.trim();
+
+                        row.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${examDate}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${p.evidcis || ''}</td>
+                            <td class="hidden">${p.datodberu || ''}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${fullName}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-semibold">Перевірено</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                <div class="flex items-center justify-center space-x-2">
+                                    <button class="download-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Завантажити PDF">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                                    </button>
+                                    <button class="print-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Друкувати PDF">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" /></svg>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <input type="checkbox" class="exam-select-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
+                            </td>
+                        `;
+
+                        row.querySelector('.download-pdf-btn').addEventListener('click', (event) => {
+                            const buttonElement = event.currentTarget;
+                            const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                            handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement);
+                        });
+
+                        row.querySelector('.print-pdf-btn').addEventListener('click', (event) => {
+                            const buttonElement = event.currentTarget;
+                            const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                            handlePdfAction(p, checkbox ? checkbox.checked : false, true, buttonElement);
+                        });
+
+                        row.addEventListener('dblclick', (event) => {
+                            const buttonElement = event.currentTarget.querySelector('.download-pdf-btn');
+                            const checkbox = event.currentTarget.querySelector('.exam-select-cb');
+                            handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement);
+                        });
+                        advancedResultsBody.appendChild(row);
+                    });
+                    advancedSearchResultsDiv.classList.remove('hidden');
+                    updateBatchDownloadButton();
+                } else {
+                    advancedSearchResultsDiv.classList.add('hidden');
+                    window.showInfoModal('info', 'Результати пошуку', 'Пацієнтів не знайдено.');
+                }
+            }
+
+            async function handlePdfAction(patientData, isBlankChecked = false, isPrinting = false, buttonElement = null) {
+                if (buttonElement) {
+                    buttonElement.classList.add('blinking-icon');
+                    buttonElement.disabled = true;
+                }
+                try {
+                    const pdfResponse = await fetch('/api/generate-exam-pdf-blank', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            datodberu: patientData.datodberu,
+                            datumnarod: patientData.datumnarod, // Беремо з поля вводу
+                            isBlankChecked: isBlankChecked
+                        })
+                    });
+
+                    if (!pdfResponse.ok) {
+                        const errorData = await pdfResponse.json();
+                        throw new Error(errorData.message || 'Помилка генерації PDF');
+                    }
+
+                    const blob = await pdfResponse.blob();
+                    const url = window.URL.createObjectURL(blob);
+
+                    if (isPrinting) {
+                        const iframe = document.createElement('iframe');
+                        iframe.style.display = 'none';
+                        iframe.src = url;
+                        document.body.appendChild(iframe);
+                        iframe.onload = () => {
+                            setTimeout(() => {
+                                iframe.contentWindow.focus();
+                                iframe.contentWindow.print();
+                                setTimeout(() => {
+                                    document.body.removeChild(iframe);
+                                    window.URL.revokeObjectURL(url);
+                                }, 30000);
+                            }, 1);
+                        };
+                    } else {
+                        const a = document.createElement('a');
+                        a.href = url;
+                        const lastName = patientData.priezvisko || 'Unknown';
+                        const examDate = new Date(patientData.datodberu).toLocaleDateString('uk-UA');
+                        a.download = `Exam_${lastName}_${examDate}.pdf`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                    }
+                } catch (error) {
+                    const actionType = isPrinting ? 'друку' : 'завантаження';
+                    window.showInfoModal('error', 'Помилка', `Не вдалося виконати ${actionType} деталей обстеження: ${error.message}`);
+                } finally {
+                    if (buttonElement) {
+                        buttonElement.classList.remove('blinking-icon');
+                        buttonElement.disabled = false;
+                    }
+                }
+            }
+
+            // Логіка для аналізу динаміки
+            const analyzeDynamicsBtn = document.getElementById('analyzeDynamicsBtn');
+            const analysisModal = document.getElementById('analysisModal');
+            const closeAnalysisModalBtn = document.getElementById('closeAnalysisModal');
+            const analysisForm = document.getElementById('analysisForm');
+
+            analyzeDynamicsBtn.addEventListener('click', async () => {
+                const selectedRows = Array.from(advancedResultsBody.querySelectorAll('tr')).filter(row => row.querySelector('.exam-select-cb:checked'));
+                const exams = selectedRows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return {
+                        datodberu: cells[2].textContent,
+                        datumnarod: document.getElementById('advancedDob').value
+                    };
+                });
+
+                if (exams.length < 2) {
+                    window.showInfoModal('error', 'Помилка', 'Для аналізу динаміки потрібно вибрати щонайменше два обстеження.');
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/available-indicators-for-dynamics', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ exams })
+                    });
+                    if (!response.ok) throw new Error((await response.json()).message || 'Помилка сервера');
+
+                    const indicators = await response.json();
+                    const indicatorList = document.getElementById('indicatorList');
+                    indicatorList.innerHTML = '';
+
+                    if (indicators.length === 0) {
+                        window.showInfoModal('info', 'Показники не знайдені', 'У вибраних обстеженнях немає показників, що повторюються, для аналізу динаміки.');
+                        return;
+                    }
+
+                    indicators.forEach(indicator => {
+                        const label = document.createElement('label');
+                        label.className = 'flex items-center space-x-2 cursor-pointer';
+                        label.innerHTML = `<input type="checkbox" value="${indicator.skratka}" data-name="${indicator.nazov} (${indicator.skratka})" class="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"><span>${indicator.nazov} (${indicator.skratka})</span>`;
+                        indicatorList.appendChild(label);
+                    });
+                    analysisModal.classList.remove('hidden');
+                } catch (error) {
+                    window.showInfoModal('error', 'Помилка', `Не вдалося отримати список показників: ${error.message}`);
+                }
+            });
+
+            closeAnalysisModalBtn.addEventListener('click', () => analysisModal.classList.add('hidden'));
+
+            analysisForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const selectedIndicators = Array.from(document.querySelectorAll('#indicatorList input[type="checkbox"]:checked'));
+                const indicatorCodes = selectedIndicators.map(cb => cb.value);
+                const indicatorNames = selectedIndicators.map(cb => cb.dataset.name);
+
+                if (indicatorCodes.length === 0) {
+                    window.showInfoModal('error', 'Помилка', 'Будь ласка, виберіть хоча б один показник для аналізу.');
+                    return;
+                }
+
+                const selectedRows = Array.from(advancedResultsBody.querySelectorAll('tr')).filter(row => row.querySelector('.exam-select-cb:checked'));
+                const examIds = selectedRows.map(row => {
+                    const cells = row.querySelectorAll('td');
+                    return { datodberu: cells[2].textContent, datumnarod: document.getElementById('advancedDob').value };
+                });
+
+                try {
+                    const response = await fetch('/api/patient-exam-dynamics', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ exams: examIds, indicatorCodes: indicatorCodes })
+                    });
+                    if (!response.ok) throw new Error((await response.json()).message || 'Помилка на сервері');
+
+                    const dynamicsData = await response.json();
+                    analysisModal.classList.add('hidden');
+                    const patientName = selectedRows[0].querySelectorAll('td')[3].textContent;
+                    displayChart(dynamicsData, indicatorNames, patientName);
+                } catch (error) {
+                    window.showInfoModal('error', 'Помилка', `Не вдалося отримати дані для графіка: ${error.message}`);
+                }
+            });
+
+            function displayChart(groupedData, indicatorNames, patientName) {
+                const chartContainer = document.getElementById('chartContainer');
+                const ctx = document.getElementById('dynamicsChart').getContext('2d');
+
+                if (dynamicsChart) dynamicsChart.destroy();
+
+                if (!groupedData || Object.keys(groupedData).length === 0) {
+                    chartContainer.classList.add('hidden');
+                    window.showInfoModal('info', 'Дані відсутні', `Не знайдено значень для обраних показників у вибраних обстеженнях.`);
+                    return;
+                }
+
+                const allDates = new Set();
+                Object.values(groupedData).forEach(dataArray => dataArray.forEach(d => allDates.add(d.datodberu)));
+                const sortedDates = Array.from(allDates).sort((a, b) => new Date(a) - new Date(b));
+                const labels = sortedDates.map(d => new Date(d).toLocaleDateString('uk-UA'));
+
+                const colors = ['rgb(75, 192, 192)', 'rgb(255, 99, 132)', 'rgb(54, 162, 235)', 'rgb(255, 205, 86)', 'rgb(153, 102, 255)'];
+
+                const datasets = Object.entries(groupedData).map(([code, dataArray], index) => {
+                    const dataMap = new Map(dataArray.map(d => [d.datodberu, d.vysledoknum]));
+                    const data = sortedDates.map(date => dataMap.get(date) || null);
+                    return {
+                        label: indicatorNames[index] || code,
+                        data: data,
+                        borderColor: colors[index % colors.length],
+                        tension: 0.1,
+                        fill: false,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        spanGaps: true
+                    };
+                });
+
+                chartContainer.classList.remove('hidden');
+
+                dynamicsChart = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'top' },
+                            title: { display: true, text: `Динаміка показників для: ${patientName}` }
+                        }
+                    }
+                });
+            }
+
+            // Ініціалізація заголовків таблиці історії
+            setAdvancedSearchHeaders();
+
         });
     </script>
 
 </body>
 
-</html>
+</html
