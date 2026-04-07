@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "licenseId": "mh-2026-0001",
+  "customer": {
+    "name": "Clinic Demo LLC",
+    "contactEmail": "it@example.com"
+  },
+  "issuedAt": "2026-04-07T09:00:00Z",
+  "validFrom": "2026-04-07T09:00:00Z",
+  "expiresAt": "2027-04-07T08:59:59Z",
+  "graceUntil": "2027-04-21T08:59:59Z",
+  "instance": {
+    "instanceId": "clinic-prod-01"
+  },
+  "features": {
+    "writeAccess": true,
+    "customSms": true,
+    "resultDownloads": true,
+    "analysisRegistration": true,
+    "branchAdmin": true
+  },
+  "limits": {
+    "branches": 10
+  },
+  "notes": "Приклад payload. Після підпису цей об'єкт має опинитися в license.json у полі license."
+}

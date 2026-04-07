@@ -992,6 +992,28 @@
                 config = await response.json();
             }
 
+            function isLicenseFeatureEnabled(featureName) {
+                return config?.licenseFeatures?.[featureName] !== false;
+            }
+
+            function applyLicenseFeatureVisibility() {
+                const customSmsButton = document.getElementById('open-custom-sms-modal-btn');
+                const phoneHintElement = document.getElementById('phone-hint');
+                const batchDownloadButton = document.getElementById('batchDownloadBtn');
+
+                if (customSmsButton) {
+                    customSmsButton.classList.toggle('hidden', !isLicenseFeatureEnabled('customSms'));
+                }
+
+                if (phoneHintElement && !isLicenseFeatureEnabled('customSms')) {
+                    phoneHintElement.classList.add('hidden');
+                }
+
+                if (batchDownloadButton && !isLicenseFeatureEnabled('resultDownloads')) {
+                    batchDownloadButton.classList.add('hidden');
+                }
+            }
+
             // Елементи для лівої висувної панелі "Журнал".
             const journalForm = document.getElementById('journal-form');
             const toggleJournalBtn = document.getElementById('toggle-journal-btn');
@@ -1340,6 +1362,11 @@
                         partnerSearchTabButton.classList.add('hidden');
                     }
 
+                    if (!isLicenseFeatureEnabled('resultDownloads')) {
+                        docSearchTabButton.classList.add('hidden');
+                        partnerSearchTabButton.classList.add('hidden');
+                    }
+
                     // Показуємо вкладку "Розширений пошук" тільки якщо є відповідний прапорець
                     const advancedSearchTabButton = document.getElementById('advanced-search-tab-button');
                     if (config.hasAdvancedPatientSearch) {
@@ -1354,6 +1381,7 @@
                         reportsTabButton.classList.remove('hidden');
                         buildReportsMenu(config.reports.available);
                     }
+                    applyLicenseFeatureVisibility();
                     translatePage();
                 }
                 // Завантажуємо журнал після отримання конфігурації, якщо це не зміна мови
@@ -2414,10 +2442,16 @@
                 const selectedCheckboxes = advancedResultsBody.querySelectorAll('.exam-select-cb:checked');
                 const batchDownloadBtn = document.getElementById('batchDownloadBtn');
                 const analyzeDynamicsBtn = document.getElementById('analyzeDynamicsBtn');
+                const resultDownloadsEnabled = isLicenseFeatureEnabled('resultDownloads');
+
                 // Кнопки з'являються, коли вибрано 2 або більше обстежень
                 if (selectedCheckboxes.length >= 2) {
-                    batchDownloadBtn.classList.remove('hidden');
-                    batchDownloadBtn.textContent = `${translations.downloadArchive || 'Завантажити архів'} (${selectedCheckboxes.length})`;
+                    if (resultDownloadsEnabled) {
+                        batchDownloadBtn.classList.remove('hidden');
+                        batchDownloadBtn.textContent = `${translations.downloadArchive || 'Завантажити архів'} (${selectedCheckboxes.length})`;
+                    } else {
+                        batchDownloadBtn.classList.add('hidden');
+                    }
                     analyzeDynamicsBtn.classList.remove('hidden');
                     analyzeDynamicsBtn.textContent = `${translations.analyzeDynamics || 'Аналізувати динаміку'} (${selectedCheckboxes.length})`;
                 } else {
@@ -2434,6 +2468,7 @@
 
             function displayAdvancedSearchResults(results, isSybase) {
                 const batchDownloadBtn = document.getElementById('batchDownloadBtn');
+                const resultDownloadsEnabled = isLicenseFeatureEnabled('resultDownloads');
                 advancedResultsBody.innerHTML = '';
                 if (results && results.length > 0) {
                     if (isSybase) {
@@ -2458,14 +2493,8 @@
                             const emailButtonTitle = hasEmail
                                 ? 'Відправити на email з картки пацієнта'
                                 : 'Email у картці відсутній, можна ввести вручну';
-
-                            row.innerHTML = `
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${examDate}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.evidcis || ''}</td>
-                                <td class="hidden">${p.datodberu || ''}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm">${fullName}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-semibold">${translations.statusChecked || 'Перевірено'}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                            const resultActionButtons = resultDownloadsEnabled
+                                ? `
                                     <div class="flex items-center justify-center space-x-2">
                                         <button class="download-pdf-btn text-gray-400 hover:text-indigo-600 transition-colors duration-200" title="Завантажити PDF">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -2484,6 +2513,17 @@
                                             </svg>
                                         </button>
                                     </div>
+                                `
+                                : '<span class="text-xs text-gray-400">Недоступно</span>';
+
+                            row.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${examDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${p.evidcis || ''}</td>
+                                <td class="hidden">${p.datodberu || ''}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">${fullName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-700 font-semibold">${translations.statusChecked || 'Перевірено'}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
+                                    ${resultActionButtons}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-center">
                                     <input type="checkbox" class="exam-select-cb h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500 cursor-pointer">
@@ -2493,29 +2533,34 @@
                             `;
 
                             // Обробники для іконок завантаження та друку PDF
-                            row.querySelector('.download-pdf-btn').addEventListener('click', (event) => {                                
-                                const buttonElement = event.currentTarget;
-                                const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
-                                handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement); // isPrinting = false
-                            });
+                            if (resultDownloadsEnabled) {
+                                row.querySelector('.download-pdf-btn').addEventListener('click', (event) => {
+                                    const buttonElement = event.currentTarget;
+                                    const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                                    handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement);
+                                });
 
-                            row.querySelector('.print-pdf-btn').addEventListener('click', (event) => {
-                                const buttonElement = event.currentTarget;
-                                const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
-                                handlePdfAction(p, checkbox ? checkbox.checked : false, true, buttonElement); // isPrinting = true
-                            });
+                                row.querySelector('.print-pdf-btn').addEventListener('click', (event) => {
+                                    const buttonElement = event.currentTarget;
+                                    const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                                    handlePdfAction(p, checkbox ? checkbox.checked : false, true, buttonElement);
+                                });
 
-                            row.querySelector('.email-result-btn').addEventListener('click', (event) => {
-                                const buttonElement = event.currentTarget;
-                                const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
-                                openEmailResultModal(p, checkbox ? checkbox.checked : false, buttonElement);
-                            });
+                                row.querySelector('.email-result-btn').addEventListener('click', (event) => {
+                                    const buttonElement = event.currentTarget;
+                                    const checkbox = buttonElement.closest('tr').querySelector('.exam-select-cb');
+                                    openEmailResultModal(p, checkbox ? checkbox.checked : false, buttonElement);
+                                });
+                            }
 
                             // Обробник подвійного кліку на рядок (зберігаємо для зручності)
                             row.addEventListener('dblclick', (event) => {
+                                if (!resultDownloadsEnabled) {
+                                    return;
+                                }
                                 const buttonElement = event.currentTarget.querySelector('.download-pdf-btn');
                                 const checkbox = event.currentTarget.querySelector('.exam-select-cb');
-                                handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement); // isPrinting = false (завантаження)
+                                handlePdfAction(p, checkbox ? checkbox.checked : false, false, buttonElement);
                             });
                             advancedResultsBody.appendChild(row);
                             updateBatchDownloadButton();
@@ -2544,7 +2589,7 @@
                             }
 
                             const isCancelled = status === 'відмінено';
-                            const webCodeLinkHtml = p.WebCode && config.labResultUrl && !isCancelled
+                            const webCodeLinkHtml = p.WebCode && config.labResultUrl && !isCancelled && resultDownloadsEnabled
                                 ? `<a href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.WebCode}</a>`
                                 : (p.WebCode || '');
 
@@ -2556,7 +2601,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm ${isCancelled ? 'text-red-700 font-semibold' : ''}">${p.Docstatus || ''}</td>
                             `;
                             row.addEventListener('dblclick', (event) => {
-                                if (event.target.tagName !== 'A' && p.WebCode && config.labResultUrl && !isCancelled) {
+                                if (resultDownloadsEnabled && event.target.tagName !== 'A' && p.WebCode && config.labResultUrl && !isCancelled) {
                                     window.open(`${config.labResultUrl}/BackEnd/TestResult?oid=${p.WebCode}&HideNotReadyGroups=true`, '_blank');
                                 }
                             });
@@ -2575,6 +2620,11 @@
             const closeAnalysisModalBtn = document.getElementById('closeAnalysisModal');
             const analysisForm = document.getElementById('analysisForm');
             batchDownloadBtn.addEventListener('click', async () => {
+                if (!isLicenseFeatureEnabled('resultDownloads')) {
+                    showModal(translations.error || 'Помилка', 'Пакетне завантаження результатів вимкнено поточною ліцензією.', false);
+                    return;
+                }
+
                 const selectedRows = Array.from(advancedResultsBody.querySelectorAll('tr')).filter(row => row.querySelector('.exam-select-cb:checked'));
 
                 const examsToProcess = selectedRows.map(row => {
@@ -2859,6 +2909,11 @@
              * @param {boolean} isPrinting - Визначає дію: true для друку, false для завантаження.
              */
             async function handlePdfAction(patientData, isBlankChecked = false, isPrinting = false, buttonElement = null) {
+                if (!isLicenseFeatureEnabled('resultDownloads')) {
+                    showModal(translations.error || 'Помилка', 'Завантаження результатів вимкнено поточною ліцензією.', false);
+                    return;
+                }
+
                 if (buttonElement) {
                     buttonElement.classList.add('blinking-icon');
                     buttonElement.disabled = true;
@@ -2924,6 +2979,11 @@
             }
 
             function openEmailResultModal(patientData, isBlankChecked = false, buttonElement = null) {
+                if (!isLicenseFeatureEnabled('resultDownloads')) {
+                    showModal(translations.error || 'Помилка', 'Відправка результатів вимкнена поточною ліцензією.', false);
+                    return;
+                }
+
                 currentExamForEmail = { patientData, isBlankChecked, buttonElement };
 
                 const emailModal = document.getElementById('emailResultModal');
@@ -3096,6 +3156,7 @@
             });
 
             function displayDocSearchResults(results) {
+                const resultDownloadsEnabled = isLicenseFeatureEnabled('resultDownloads');
                 docResultsBody.innerHTML = '';
                 if (results && results.length > 0) {
                     results.forEach((p, index) => {
@@ -3105,7 +3166,7 @@
                         // Форматуємо дату для кращого переносу на мобільних
                         const formattedConfirmationDate = p.confirmationDatetime ? p.confirmationDatetime.replace(' ', '<br>') : '';
 
-                        const webCodeLinkHtml = p.webCode && config.labResultUrl ? `<a id="doc-webcode-link-${index}" href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` : (p.webCode || '');
+                        const webCodeLinkHtml = p.webCode && config.labResultUrl && resultDownloadsEnabled ? `<a id="doc-webcode-link-${index}" href="${config.labResultUrl}/BackEnd/TestResult?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` : (p.webCode || '');
 
                         row.innerHTML = `
                                 <td class="px-2 md:px-4 py-4 whitespace-normal break-words text-sm">${patientFullName}</td>
@@ -3232,6 +3293,7 @@
             });
 
             function displayPartnerSearchResults(results) {
+                const resultDownloadsEnabled = isLicenseFeatureEnabled('resultDownloads');
                 partnerResultsBody.innerHTML = '';
                 if (results && results.length > 0) {
                     results.forEach(p => {
@@ -3242,7 +3304,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">${patientFullName}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">${p.tel || (translations.phoneNotSpecified || 'Не вказано')}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                    ${p.webCode && config.partnerLabResultUrl ?
+                                    ${p.webCode && config.partnerLabResultUrl && resultDownloadsEnabled ?
                                 `<a href="${config.partnerLabResultUrl}?oid=${p.webCode}&HideNotReadyGroups=true" target="_blank" class="text-indigo-600 hover:text-indigo-800 hover:underline">${p.webCode}</a>` :
                                 (p.webCode || '')}
                                 </td>
@@ -3619,6 +3681,13 @@
              * @description Оновлює стан кнопки відправки довільного SMS (іконка конверта) залежно від валідності номера телефону.
              */
             function updateSmsButtonState() {
+                if (!isLicenseFeatureEnabled('customSms')) {
+                    openCustomSmsModalBtn.disabled = true;
+                    openCustomSmsModalBtn.classList.add('hidden');
+                    phoneHint.classList.add('hidden');
+                    return;
+                }
+
                 const isPhoneValid = phoneNumberInput.value.replace(/\D/g, '').length === 10;
 
                 if (isPhoneValid) {
