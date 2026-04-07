@@ -4,6 +4,7 @@ import { config as loadEnvFile } from "dotenv";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createAnalyzerAccessClient } from "./analyzer_access_client.js";
 import { createSybaseAnalyzerResultIngester } from "./sybase_analyzer_result_ingest.js";
 import { createAstmE1381Link } from "./astm_e1381_link.js";
 import { createLineFileLogger } from "./line_file_logger.js";
@@ -132,7 +133,7 @@ function validateBindingConfig() {
     }
 }
 
-async function postPayload(payload) {
+async function postPayload(payload, accessClient) {
     const serverUrl = process.env.CENTAUR_SERVER_URL?.trim();
     if (!serverUrl) {
         throw new Error("CENTAUR_SERVER_URL is not configured.");
@@ -148,12 +149,36 @@ async function postPayload(payload) {
         headers["x-analyzer-token"] = process.env.ANALYZER_BRIDGE_TOKEN.trim();
     }
 
+    const access = await accessClient.getAccess();
+    if (!access.allowed) {
+        log(
+            "Analyzer ingest skipped by license",
+            `${payload.barcode || payload.sampleId || ""} ${access.message}`.trim()
+        );
+        return {
+            success: false,
+            skippedByLicense: true,
+            message: access.message,
+        };
+    }
+
     try {
         const response = await axios.post(serverUrl, payload, { headers, timeout: 30000 });
         log("Server response", JSON.stringify(response.data));
         return response.data;
     } catch (error) {
         const serverMessage = String(error?.response?.data?.message || "").trim();
+        const serverStatus = Number(error?.response?.status || 0);
+        if (serverMessage && (serverStatus === 403 || serverStatus === 423)) {
+            accessClient.clearCache();
+            log("Analyzer ingest blocked by server license check", `${payload.barcode || payload.sampleId || ""} ${serverMessage}`.trim());
+            return {
+                success: false,
+                skippedByLicense: true,
+                message: serverMessage,
+            };
+        }
+
         const normalized = serverMessage.toLowerCase();
         const ignoreMissingSqlRecord =
             normalized.includes("resolved to 0 orders") ||
@@ -196,7 +221,7 @@ function buildResultPayload(parsedMessage, codeMapping) {
     };
 }
 
-function createQueryOrderBuilder() {
+function createQueryOrderBuilder(accessClient) {
     if (normalizeBoolean(process.env.CENTAUR_DISABLE_QUERY_RESPONSE, false)) {
         return async () => null;
     }
@@ -239,6 +264,12 @@ function createQueryOrderBuilder() {
 
         if (!sampleId) {
             log("Query without sample ID", JSON.stringify(query));
+            return buildAdviaCentaurNoInformationMessage(common);
+        }
+
+        const access = await accessClient.getAccess();
+        if (!access.allowed) {
+            log("Query worklist blocked by license", `${sampleId} ${access.message}`.trim());
             return buildAdviaCentaurNoInformationMessage(common);
         }
 
@@ -333,7 +364,12 @@ export async function startAdviaCentaurAgent() {
 
     const { SerialPort } = serialportModule;
     const codeMapping = loadCodeMapping();
-    const buildQueryReply = createQueryOrderBuilder();
+    const accessClient = createAnalyzerAccessClient({
+        serverUrl: process.env.CENTAUR_SERVER_URL?.trim(),
+        token: process.env.ANALYZER_BRIDGE_TOKEN?.trim(),
+        logger: log,
+    });
+    const buildQueryReply = createQueryOrderBuilder(accessClient);
 
     const port = new SerialPort({
         path: portPath,
@@ -363,7 +399,7 @@ export async function startAdviaCentaurAgent() {
                         comments: payload.comments.length,
                         manufacturerRecords: payload.manufacturerRecords.length,
                     }));
-                    await postPayload(payload);
+                    await postPayload(payload, accessClient);
                     return;
                 }
 

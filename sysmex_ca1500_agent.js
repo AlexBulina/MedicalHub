@@ -4,6 +4,7 @@ import { config as loadEnvFile } from "dotenv";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createAnalyzerAccessClient } from "./analyzer_access_client.js";
 import { createSybaseAnalyzerResultIngester } from "./sybase_analyzer_result_ingest.js";
 import { createCa1500AstmLink } from "./sysmex_ca1500_astm.js";
 import {
@@ -126,7 +127,7 @@ function validateBindingConfig() {
     }
 }
 
-async function postPayload(payload) {
+async function postPayload(payload, accessClient) {
     const serverUrl = process.env.CA1500_SERVER_URL?.trim();
     if (!serverUrl) {
         throw new Error("CA1500_SERVER_URL is not configured.");
@@ -142,11 +143,35 @@ async function postPayload(payload) {
         headers["x-analyzer-token"] = process.env.ANALYZER_BRIDGE_TOKEN.trim();
     }
 
+    const access = await accessClient.getAccess();
+    if (!access.allowed) {
+        log(
+            "Analyzer ingest skipped by license",
+            `${payload.barcode || payload.sampleId || ""} ${access.message}`.trim()
+        );
+        return {
+            success: false,
+            skippedByLicense: true,
+            message: access.message,
+        };
+    }
+
     let response;
     try {
         response = await axios.post(serverUrl, payload, { headers, timeout: 30000 });
     } catch (error) {
         const serverMessage = String(error?.response?.data?.message || "").trim();
+        const serverStatus = Number(error?.response?.status || 0);
+        if (serverMessage && (serverStatus === 403 || serverStatus === 423)) {
+            accessClient.clearCache();
+            log("Analyzer ingest blocked by server license check", `${payload.barcode || payload.sampleId || ""} ${serverMessage}`.trim());
+            return {
+                success: false,
+                skippedByLicense: true,
+                message: serverMessage,
+            };
+        }
+
         const normalized = serverMessage.toLowerCase();
 
         const ignoreMissingSqlRecord =
@@ -194,7 +219,7 @@ function buildResultPayload(parsedMessage, codeMapping) {
     };
 }
 
-function createQueryOrderBuilder() {
+function createQueryOrderBuilder(accessClient) {
     if (normalizeBoolean(process.env.CA1500_DISABLE_QUERY_RESPONSE, false)) {
         return async () => null;
     }
@@ -240,6 +265,12 @@ function createQueryOrderBuilder() {
             requestedAt: parsedMessage.query.requestStartAt || "",
             actionCode: sampleNo.startsWith("QC") ? "Q" : "N",
         };
+
+        const access = await accessClient.getAccess();
+        if (!access.allowed) {
+            log("Query worklist blocked by license", `${sampleNo} ${access.message}`.trim());
+            return buildCa1500EmptyOrderMessage(common);
+        }
 
         let fetched;
         try {
@@ -338,7 +369,12 @@ export async function startSysmexCa1500Agent() {
 
     const { SerialPort } = serialportModule;
     const codeMapping = loadCodeMapping();
-    const buildOrderMessage = createQueryOrderBuilder();
+    const accessClient = createAnalyzerAccessClient({
+        serverUrl: process.env.CA1500_SERVER_URL?.trim(),
+        token: process.env.ANALYZER_BRIDGE_TOKEN?.trim(),
+        logger: log,
+    });
+    const buildOrderMessage = createQueryOrderBuilder(accessClient);
 
     const port = new SerialPort({
         path: portPath,
@@ -366,7 +402,7 @@ export async function startSysmexCa1500Agent() {
                         patientName: payload.patientName,
                         observations: payload.observations.length,
                     }));
-                    await postPayload(payload);
+                    await postPayload(payload, accessClient);
                     return;
                 }
 

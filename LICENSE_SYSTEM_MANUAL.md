@@ -35,6 +35,7 @@
       "customSms": true,
       "resultDownloads": true,
       "analysisRegistration": true,
+      "analyzerIntegration": true,
       "branchAdmin": true
     },
     "limits": {
@@ -78,6 +79,8 @@ LICENSE_PUBLIC_KEY_PATH=license/license.public.pem
 - `LICENSE_PUBLIC_KEY_PATH` вказує на публічний ключ для перевірки підпису.
 
 Якщо `LICENSE_INSTANCE_ID` і `instance.instanceId` не збігаються, статус буде `instance_mismatch`.
+
+Окремі сервіси з папки `C:\Hemomed Backend` теж можуть використовувати цю саму ліцензію. Для цього вони мають читати той самий `C:\MedicalHub\.env` або принаймні ті самі значення `LICENSE_INSTANCE_ID`, `LICENSE_FILE_PATH` і `LICENSE_PUBLIC_KEY_PATH`.
 
 ## 4. Як згенерувати ключі
 
@@ -201,6 +204,7 @@ Invoke-RestMethod http://localhost:3090/api/license/status | ConvertTo-Json -Dep
 
 - відправку довільних SMS через `/send-custom-sms`
 - кнопку довільного SMS у веб-інтерфейсі
+- cron-розсилки та SMS-нагадування в `C:\Hemomed Backend\index.mjs`
 
 ### `resultDownloads`
 
@@ -211,6 +215,7 @@ Invoke-RestMethod http://localhost:3090/api/license/status | ConvertTo-Json -Dep
 - відправку результатів на email
 - пакетне завантаження архівів
 - публічні лінки на результати
+- видачу PDF-результатів у `C:\Hemomed Backend\backend.js`
 
 ### `analysisRegistration`
 
@@ -219,6 +224,15 @@ Invoke-RestMethod http://localhost:3090/api/license/status | ConvertTo-Json -Dep
 - веб-реєстрацію аналізів
 - маршрут `/register`
 - API реєстрації аналізів
+
+### `analyzerIntegration`
+
+Блокує:
+
+- `POST /api/analyzer/serial-result`
+- `GET /api/analyzer/access`
+- прийом результатів від лабораторних аналізаторів через analyzer bridge
+- query/worklist сценарії в `serial_urine_analyzer_agent.js`, `sysmex_ca1500_agent.js` і `advia_centaur_agent.js`
 
 ## 9. Типові проблеми і як їх виправити
 
@@ -258,6 +272,28 @@ Invoke-RestMethod http://localhost:3090/api/license/status | ConvertTo-Json -Dep
 - або змінити `.env`
 - або змінити `instance.instanceId` у payload
 - потім знову підписати ліцензію, якщо змінювався payload
+
+## 10. Інтеграція з `C:\Hemomed Backend`
+
+У зовнішній папці `C:\Hemomed Backend` є два окремі сервіси:
+
+- `index.mjs` - cron-сервіс SMS-інформування
+- `backend.js` - сервіс публічної видачі результатів аналізів
+
+Вони підключаються до тієї ж системи ліцензування з `C:\MedicalHub` і не використовують окрему ліцензію.
+
+Логіка роботи:
+
+- `index.mjs` перевіряє ліцензію перед cron-циклами і перед фактичною відправкою SMS
+- якщо ліцензія неопераційна або `customSms=false`, SMS не відправляються, але сам процес лишається запущеним
+- `backend.js` перевіряє ліцензію перед маршрутом видачі PDF-результату
+- якщо ліцензія неопераційна або `resultDownloads=false`, результат не віддається і клієнт отримує повідомлення про блокування
+
+Для цієї інтеграції важливо:
+
+- `C:\MedicalHub\license\license.json` має бути чинним
+- `C:\MedicalHub\license\license.public.pem` має відповідати підпису
+- `LICENSE_INSTANCE_ID` має збігатися з `instance.instanceId` у ліцензії
 
 ### `status: "expired"`
 

@@ -3,6 +3,7 @@ import axios from "axios";
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { createAnalyzerAccessClient } from "./analyzer_access_client.js";
 import { parseUrineClinicalResultString } from "./serial_urine_analyzer_parser.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -84,7 +85,7 @@ function buildPayload(parsedResult, codeMapping) {
     };
 }
 
-async function postPayload(payload) {
+async function postPayload(payload, accessClient) {
     const serverUrl = process.env.SERIAL_URINE_SERVER_URL?.trim();
     if (!serverUrl) {
         throw new Error("SERIAL_URINE_SERVER_URL is not configured.");
@@ -101,11 +102,38 @@ async function postPayload(payload) {
         headers["x-analyzer-token"] = process.env.ANALYZER_BRIDGE_TOKEN.trim();
     }
 
+    const access = await accessClient.getAccess();
+    if (!access.allowed) {
+        log(
+            "Analyzer ingest skipped by license",
+            `${payload.barcode || payload.sampleId || payload.patientId || ""} ${access.message}`.trim()
+        );
+        return {
+            success: false,
+            skippedByLicense: true,
+            message: access.message,
+        };
+    }
+
     let response;
     try {
         response = await axios.post(serverUrl, payload, { headers, timeout: 30000 });
     } catch (error) {
         const responseMessage = error?.response?.data?.message;
+        const responseStatus = Number(error?.response?.status || 0);
+        if (responseMessage && (responseStatus === 403 || responseStatus === 423)) {
+            accessClient.clearCache();
+            log(
+                "Analyzer ingest blocked by server license check",
+                `${payload.barcode || payload.sampleId || payload.patientId || ""} ${responseMessage}`.trim()
+            );
+            return {
+                success: false,
+                skippedByLicense: true,
+                message: responseMessage,
+            };
+        }
+
         if (responseMessage) {
             throw new Error(`Server returned ${error.response.status}: ${responseMessage}`);
         }
@@ -123,7 +151,7 @@ async function postPayload(payload) {
     log("Server response", JSON.stringify(response.data));
 }
 
-function processRawLine(rawLine, codeMapping) {
+function processRawLine(rawLine, codeMapping, accessClient) {
     const parsed = parseUrineClinicalResultString(rawLine);
     log("Parsed COM result", JSON.stringify({
         patientId: parsed.patientId,
@@ -137,7 +165,7 @@ function processRawLine(rawLine, codeMapping) {
         log("No barcode resolved from patientId. Set SERIAL_URINE_USE_PATIENT_ID_AS_BARCODE=true or adapt payload mapping.");
     }
 
-    return postPayload(payload);
+    return postPayload(payload, accessClient);
 }
 
 export async function startSerialUrineAnalyzerAgent() {
@@ -155,6 +183,11 @@ export async function startSerialUrineAnalyzerAgent() {
 
     const { SerialPort } = serialportModule;
     const codeMapping = loadCodeMapping();
+    const accessClient = createAnalyzerAccessClient({
+        serverUrl: process.env.SERIAL_URINE_SERVER_URL?.trim(),
+        token: process.env.ANALYZER_BRIDGE_TOKEN?.trim(),
+        logger: log,
+    });
     const baudRate = Number(process.env.SERIAL_URINE_BAUD_RATE || 9600);
     const dataBits = Number(process.env.SERIAL_URINE_DATA_BITS || 8);
     const stopBits = Number(process.env.SERIAL_URINE_STOP_BITS || 1);
@@ -197,7 +230,7 @@ export async function startSerialUrineAnalyzerAgent() {
             }
 
             log("IN COM", rawLine);
-            processRawLine(rawLine, codeMapping).catch((error) => {
+            processRawLine(rawLine, codeMapping, accessClient).catch((error) => {
                 log("COM payload processing error", error instanceof Error ? error.message : String(error));
             });
         }

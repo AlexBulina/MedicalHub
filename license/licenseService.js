@@ -14,7 +14,8 @@ const WRITE_BLOCKED_STATUSES = new Set([
 const DEFAULT_FEATURE_FLAGS = {
     customSms: true,
     resultDownloads: true,
-    analysisRegistration: true
+    analysisRegistration: true,
+    analyzerIntegration: true
 };
 
 function stableStringify(value) {
@@ -113,6 +114,15 @@ function createBlockedResponse(statusSnapshot) {
         message: statusSnapshot.message,
         expiresAt: statusSnapshot.license?.expiresAt || null,
         graceUntil: statusSnapshot.license?.graceUntil || null,
+        checkedAt: statusSnapshot.checkedAt
+    };
+}
+
+function createOperationalBlockedResponse(statusSnapshot, message) {
+    return {
+        ok: false,
+        licenseStatus: statusSnapshot.status,
+        message: message || statusSnapshot.message,
         checkedAt: statusSnapshot.checkedAt
     };
 }
@@ -249,6 +259,7 @@ export function createLicenseManager({ baseDir, logger, cacheTtlMs = 30_000 } = 
         return {
             status: snapshot.status,
             message: snapshot.message,
+            isOperational: isLicenseOperational(snapshot),
             checkedAt: snapshot.checkedAt,
             licenseId: snapshot.license?.licenseId || null,
             customerName: snapshot.license?.customer?.name || null,
@@ -332,6 +343,29 @@ export function createLicenseManager({ baseDir, logger, cacheTtlMs = 30_000 } = 
         return next();
     }
 
+    function enforceOperationalAccess(message) {
+        return async (req, res, next) => {
+            const snapshot = await evaluateLicense();
+            req.license = snapshot;
+            res.setHeader("X-License-Status", snapshot.status);
+
+            if (!isLicenseOperational(snapshot)) {
+                const responseBody = createOperationalBlockedResponse(
+                    snapshot,
+                    message || "Ліцензія не дозволяє доступ до цього розділу."
+                );
+
+                if (logger?.warn) {
+                    logger.warn(`Заблоковано доступ ${req.method} ${req.originalUrl}: ${responseBody.message}`);
+                }
+
+                return res.status(423).json(responseBody);
+            }
+
+            return next();
+        };
+    }
+
     function enforceFeature(featureName, options = {}) {
         return async (req, res, next) => {
             const access = await evaluateFeatureAccess(featureName, options);
@@ -358,6 +392,7 @@ export function createLicenseManager({ baseDir, logger, cacheTtlMs = 30_000 } = 
         getFeatureFlags,
         evaluateFeatureAccess,
         enforceWriteAccess,
+        enforceOperationalAccess,
         enforceFeature
     };
 }

@@ -68,6 +68,10 @@ const requireAnalysisRegistrationFeature = licenseManager.enforceFeature('analys
     requireWriteAccess: true,
     disabledMessage: 'Ліцензія не дозволяє реєстрацію аналізів через веб-форму.'
 });
+const ANALYZER_INTEGRATION_DISABLED_MESSAGE = 'Ліцензія не дозволяє роботу лабораторних аналізаторів.';
+const requireOperationalLicense = licenseManager.enforceOperationalAccess(
+    'Ліцензія завершилась або недійсна. Розділ "Звіти" недоступний.'
+);
 
 // Налаштування для роздачі статичних файлів (CSS, JS, зображення) з папки 'public'.
 app.use(express.static(path.join(__dirname, 'public')));
@@ -415,6 +419,48 @@ const auth = (validUsername, validPassword) => (req, res, next) => {
     next();
 };
 
+function applyLicenseHeaders(res, snapshot) {
+    if (!snapshot) {
+        return;
+    }
+
+    res.setHeader('X-License-Status', snapshot.status);
+    if (snapshot.status === 'grace') {
+        res.setHeader('X-License-Warning', snapshot.message);
+    }
+}
+
+function requireAnalyzerBridgeToken(req, res, next) {
+    const expectedToken = process.env.ANALYZER_BRIDGE_TOKEN?.trim();
+    const actualToken = req.get('x-analyzer-token')?.trim();
+
+    if (expectedToken && actualToken !== expectedToken) {
+        logger.warn(`[Analyzer Bridge] - Unauthorized analyzer bridge request for ${req.method} ${req.originalUrl}.`);
+        return res.status(401).json({ success: false, message: 'Unauthorized analyzer bridge request.' });
+    }
+
+    next();
+}
+
+async function requireAnalyzerIntegrationFeature(req, res, next) {
+    const access = await licenseManager.evaluateFeatureAccess('analyzerIntegration', {
+        requireWriteAccess: true,
+        disabledMessage: ANALYZER_INTEGRATION_DISABLED_MESSAGE
+    });
+
+    req.license = access.snapshot;
+    applyLicenseHeaders(res, access.snapshot);
+
+    if (!access.allowed) {
+        logger.warn(
+            `[Analyzer Bridge] - License-blocked analyzer access for ${req.method} ${req.originalUrl}: ${access.body.message}`
+        );
+        return res.status(access.statusCode).json(access.body);
+    }
+
+    next();
+}
+
 /**
  * @description Функції для роботи з токенами, що зберігаються у файлі.
  * У реальному застосунку це має бути безпечна база даних.
@@ -604,6 +650,7 @@ app.get('/config', async (req, res) => {
 
         try {
             const licenseFeatures = await licenseManager.getFeatureFlags();
+            const licenseStatus = await licenseManager.getPublicStatus();
             const translationsPath = path.join(__dirname, 'public', 'locales', `${lang}.json`);
             const translationsFile = await fs.readFile(translationsPath, 'utf-8');
             const translations = JSON.parse(translationsFile);
@@ -627,6 +674,8 @@ app.get('/config', async (req, res) => {
                 dbType: branch.db?.type || 'sybase', // Додаємо тип БД
                 reports: branch.reports || { enabled: false, available: [] }, // <-- ДОДАНО: Передаємо конфігурацію звітів
                 hasAnalysisRegistration: branch.hasAnalysisRegistration && licenseFeatures.analysisRegistration,
+                licenseStatus: licenseStatus.status,
+                licenseIsOperational: licenseStatus.isOperational,
                 licenseFeatures
             });
         } catch (error) {
@@ -1426,16 +1475,43 @@ app.post('/api/register-analyses', express.json(), requireActiveWriteLicense, re
     }
 });
 
-app.post('/api/analyzer/serial-result', async (req, res) => {
-    try {
-        const expectedToken = process.env.ANALYZER_BRIDGE_TOKEN?.trim();
-        const actualToken = req.get('x-analyzer-token')?.trim();
+app.get('/api/analyzer/access', requireAnalyzerBridgeToken, async (req, res) => {
+    const access = await licenseManager.evaluateFeatureAccess('analyzerIntegration', {
+        requireWriteAccess: true,
+        disabledMessage: ANALYZER_INTEGRATION_DISABLED_MESSAGE
+    });
 
-        if (expectedToken && actualToken !== expectedToken) {
-            logger.warn('[Analyzer Serial Result] - Unauthorized bridge request.');
-            return res.status(401).json({ success: false, message: 'Unauthorized analyzer bridge request.' });
+    applyLicenseHeaders(res, access.snapshot);
+
+    if (!access.allowed) {
+        logger.warn(
+            `[Analyzer Access] - License-blocked analyzer access for ${req.method} ${req.originalUrl}: ${access.body.message}`
+        );
+        return res.status(access.statusCode).json({
+            ...access.body,
+            allowed: false,
+            capabilities: {
+                ingest: false,
+                query: false
+            }
+        });
+    }
+
+    return res.status(200).json({
+        ok: true,
+        allowed: true,
+        feature: 'analyzerIntegration',
+        licenseStatus: access.snapshot.status,
+        checkedAt: access.snapshot.checkedAt,
+        capabilities: {
+            ingest: true,
+            query: true
         }
+    });
+});
 
+app.post('/api/analyzer/serial-result', requireAnalyzerBridgeToken, requireAnalyzerIntegrationFeature, async (req, res) => {
+    try {
         const payload = req.body || {};
         const identifier = String(payload.barcode || payload.sampleId || payload.patientId || '').trim().toUpperCase();
         const observations = Array.isArray(payload.observations) ? payload.observations : [];
@@ -2298,6 +2374,7 @@ app.get("/pdf-data/:key", requireResultDownloadsFeature, async (req, res) => {
 });
 
 // --- Маршрути для звітів ---
+app.use("/api/reports", requireOperationalLicense);
 
 /**
 
